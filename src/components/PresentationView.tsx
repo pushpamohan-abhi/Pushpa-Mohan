@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { PresentationDeck, Slide } from '../types';
 import { DfaAnimatorWidget } from './DfaAnimatorWidget';
+import { SubsetConstructionWidget } from './SubsetConstructionWidget';
+import { HopcroftFiguresWidget } from './HopcroftFiguresWidget';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronLeft,
@@ -395,6 +397,14 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                     <div className="w-full">
                       <DfaAnimatorWidget dfa={currentSlide.dfaExample} onAskAI={handleAskAI} />
                     </div>
+                  ) : currentSlide.interactiveType === 'subset-construction' ? (
+                    <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
+                      <SubsetConstructionWidget initialPreset="decimal_numbers" />
+                    </div>
+                  ) : currentSlide.interactiveType === 'hopcroft-figures' ? (
+                    <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
+                      <HopcroftFiguresWidget initialFigure={currentSlide.figureKey || '2.18'} />
+                    </div>
                   ) : (
                     <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
                       {(currentSlide.bullets || []).map((bullet, idx) => (
@@ -677,6 +687,20 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                     {currentSlide.dfaExample && (
                       <div className="md:col-span-12">
                         <DfaAnimatorWidget dfa={currentSlide.dfaExample} onAskAI={handleAskAI} />
+                      </div>
+                    )}
+
+                    {/* Subset Construction Interactive Widget */}
+                    {currentSlide.interactiveType === 'subset-construction' && (
+                      <div className="md:col-span-12 text-slate-900 mt-4">
+                        <SubsetConstructionWidget initialPreset="decimal_numbers" />
+                      </div>
+                    )}
+
+                    {/* Hopcroft Figures Interactive Widget */}
+                    {currentSlide.interactiveType === 'hopcroft-figures' && (
+                      <div className="md:col-span-12 text-slate-900 mt-4">
+                        <HopcroftFiguresWidget initialFigure={currentSlide.figureKey || '2.18'} />
                       </div>
                     )}
                   </div>

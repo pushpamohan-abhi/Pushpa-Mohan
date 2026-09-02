@@ -345,6 +345,111 @@ export const module1Deck: PresentationDeck = {
       interactiveType: "none"
     },
     {
+      id: "enfa-to-dfa-worked-example",
+      title: "Step-by-Step Worked Example: ε-NFA to DFA Conversion",
+      subtitle: "Section 2.5.5 - Decimal Numbers Automaton (Hopcroft Fig 2.18 to Fig 2.22)",
+      bullets: [
+        "Problem: Convert decimal numbers ε-NFA E = ({q0, q1, q2, q3, q4, q5}, {+/-, digit, .}, δ, q0, {q5}) to DFA D.",
+        "Step 1: Compute DFA Start State A = ECLOSE(q0) = {q0, q1}.",
+        "Step 2: Calculate Transitions δ_D(S, a) = ECLOSE( ⋃_{q ∈ S} δ_N(q, a) ):",
+        "• State A = {q0, q1}:",
+        "  - On '+/-': ECLOSE(δ(q0, +/-) ∪ δ(q1, +/-)) = ECLOSE({q1}) = {q1}  ⇒  State B",
+        "  - On 'digit': ECLOSE(δ(q0, d) ∪ δ(q1, d)) = ECLOSE({q1, q4}) = {q1, q4}  ⇒  State C",
+        "  - On '.': ECLOSE(δ(q0, .) ∪ δ(q1, .)) = ECLOSE({q2}) = {q2}  ⇒  State D",
+        "• State B = {q1}: On 'digit' → State C ({q1, q4}); On '.' → State D ({q2})",
+        "• State C = {q1, q4}: On 'digit' → State C; On '.' → ECLOSE({q2} ∪ {q3}) = {q2, q3, q5}  ⇒  State E (*Accepting)",
+        "• State D = {q2}: On 'digit' → ECLOSE({q3}) = {q3, q5}  ⇒  State F (*Accepting)",
+        "• State E = {q2, q3, q5} (*Accepting): On 'digit' → {q3, q5}  ⇒  State F",
+        "• State F = {q3, q5} (*Accepting): On 'digit' → {q3, q5}  ⇒  State F",
+        "Step 3: String Evaluation Example for w = '5.6':",
+        "• δ̂(q0, ε) = ECLOSE(q0) = {q0, q1}",
+        "• δ̂(q0, '5') = ECLOSE(δ(q0, 5) ∪ δ(q1, 5)) = ECLOSE({q1, q4}) = {q1, q4}",
+        "• δ̂(q0, '5.') = ECLOSE(δ(q1, .) ∪ δ(q4, .)) = ECLOSE({q2, q3}) = {q2, q3, q5}",
+        "• δ̂(q0, '5.6') = ECLOSE(δ(q2, 6) ∪ δ(q3, 6) ∪ δ(q5, 6)) = ECLOSE({q3}) = {q3, q5} ∈ F_D  ⇒  ACCEPTED!"
+      ],
+      explanation: "Each symbol processing step computes direct NFA transitions first, followed immediately by taking the ECLOSE of all reached states.",
+      codeSnippet: "δ̂(q0, 5.6): {q0,q1} --'5'--> {q1,q4} --'.'--> {q2,q3,q5} --'6'--> {q3,q5} ∈ F_D",
+      interactiveType: "subset-construction"
+    },
+    {
+      id: "hopcroft-fig-2-18",
+      title: "Figure 2.18: The ε-NFA for Decimal Numbers",
+      subtitle: "Hopcroft, Motwani & Ullman - Section 2.5.5 Automaton Diagram",
+      bullets: [
+        "Structure: 6 states {q₀, q₁, q₂, q₃, q₄, q₅} accepting valid signed or unsigned floating-point decimal numbers.",
+        "Optional Sign Branch: State q₀ transitions on '+', '-', or ε to state q₁.",
+        "Integer Part: Loop on q₁ for digits 0..9, with non-deterministic fork to q₄ for integer numbers.",
+        "Fractional Part: Transitions on decimal point '.' to q₂ or q₃, requiring trailing digits.",
+        "Acceptance: Instantaneous completion from q₃ to final state q₅ via ε-transition."
+      ],
+      explanation: "Figure 2.18 demonstrates how ε-transitions simplify specifying optional components like signs and decimal points.",
+      codeSnippet: "Hopcroft Fig 2.18: q0 --(ε,+,-)--> q1 --(digit)--> {q1,q4} --(.)--> {q2,q3} --(ε)--> q5*",
+      interactiveType: "hopcroft-figures",
+      figureKey: "2.18"
+    },
+    {
+      id: "hopcroft-fig-2-19",
+      title: "Figure 2.19: Using ε-Transitions to Recognize Keywords",
+      subtitle: "Hopcroft, Motwani & Ullman - Section 2.5.1 Keyword Searching Automaton",
+      bullets: [
+        "Keyword Recognition Concept: ε-transitions allow branching to multiple word-matching pathways simultaneously without consuming characters.",
+        "Start Loop: State 0 loops on all alphabet symbols Σ to scan continuous unformatted text stream.",
+        "Pathway 1 ('web'): Branches on ε to state 1, matching 'w' → 'e' → 'b' to reach accepting state 4.",
+        "Pathway 2 ('ebay'): Branches on ε to state 5, matching 'e' → 'b' → 'a' → 'y' to reach accepting state 9.",
+        "Simultaneous Search: The ε-NFA stays in all active prefix states concurrently!"
+      ],
+      explanation: "Figure 2.19 illustrates the foundation of fast multi-pattern text searching algorithms like Aho-Corasick.",
+      codeSnippet: "Hopcroft Fig 2.19: State 0 --(ε)--> Pathway 'web' (State 4*) & Pathway 'ebay' (State 9*)",
+      interactiveType: "hopcroft-figures",
+      figureKey: "2.19"
+    },
+    {
+      id: "hopcroft-fig-2-20",
+      title: "Figure 2.20: Transition Table for Fig 2.18 ε-NFA",
+      subtitle: "Hopcroft, Motwani & Ullman - Section 2.5.5 δ Representation",
+      bullets: [
+        "Tabular Representation: Explicitly lists target state sets for every state across ε, +/-, '.', and digits 0..9.",
+        "Column ε: δ(q₀, ε) = {q₁} and δ(q₃, ε) = {q₅}. All other states have δ(q, ε) = ∅.",
+        "Non-Determinism: Cell (q₁, digit) = {q₁, q₄} contains multiple target states.",
+        "Systematic Input: Provides the formal transition matrix required for subset construction algorithms."
+      ],
+      explanation: "The transition table converts informal state diagrams into precise mathematical lookup matrices for compiler construction.",
+      codeSnippet: "Hopcroft Fig 2.20 Table: δ(q0, ε)={q1}, δ(q1, digit)={q1,q4}, δ(q3, ε)={q5}",
+      interactiveType: "hopcroft-figures",
+      figureKey: "2.20"
+    },
+    {
+      id: "hopcroft-fig-2-21",
+      title: "Figure 2.21: Step-by-Step ECLOSE(1) Computation",
+      subtitle: "Hopcroft, Motwani & Ullman - Section 2.5.2 Epsilon-Closure Example",
+      bullets: [
+        "Basis Step: ECLOSE(1) starts with state 1 itself: {1}.",
+        "Induction Step 1: Follow ε-arcs from 1 → Reach states 2 and 4. Set is now {1, 2, 4}.",
+        "Induction Step 2: Follow ε-arc from 2 → Reach state 3. Set is now {1, 2, 3, 4}.",
+        "Induction Step 3: Follow ε-arc from 3 → Reach state 6. Set is now {1, 2, 3, 4, 6}.",
+        "Boundary Check: State 4 has an arc to 5 labeled 'a' (NOT ε). State 5 is NOT added! Result = {1, 2, 3, 4, 6}."
+      ],
+      explanation: "ECLOSE(q) includes all states reachable by traversing zero or more ε-labeled edges.",
+      codeSnippet: "Hopcroft Fig 2.21: 1 --(ε)--> 2 --(ε)--> 3 --(ε)--> 6 & 1 --(ε)--> 4 ⇒ ECLOSE(1) = {1,2,3,4,6}",
+      interactiveType: "hopcroft-figures",
+      figureKey: "2.21"
+    },
+    {
+      id: "hopcroft-fig-2-22",
+      title: "Figure 2.22: DFA D Eliminating ε-Transitions",
+      subtitle: "Hopcroft, Motwani & Ullman - Section 2.5.5 Final Converted DFA",
+      bullets: [
+        "DFA Start State: State A = ECLOSE(q₀) = {q₀, q₁}.",
+        "Non-Accepting DFA States: State B = {q₁}, State C = {q₁, q₄}, State D = {q₂}.",
+        "Accepting DFA States: State E = {q₂, q₃, q₅} and State F = {q₃, q₅} (since both contain q₅ ∈ F_E).",
+        "Deterministic Guarantee: Every state has exactly 1 target state per input symbol with zero ε-transitions."
+      ],
+      explanation: "Figure 2.22 is the direct output of subset construction applied to Figure 2.18.",
+      codeSnippet: "Hopcroft Fig 2.22: DFA D states A={q0,q1}, B={q1}, C={q1,q4}, D={q2}, E*={q2,q3,q5}, F*={q3,q5}",
+      interactiveType: "hopcroft-figures",
+      figureKey: "2.22"
+    },
+    {
       id: "fa-app-text-search",
       title: "Applications of FA: Section 2.5.1 Text Searching",
       subtitle: "Keyword Matching, Pattern Recognition & Aho-Corasick Algorithm",

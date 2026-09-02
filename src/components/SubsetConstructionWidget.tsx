@@ -8,6 +8,7 @@ export interface NfaDefinition {
   alphabet: string[];
   startState: string;
   acceptStates: string[];
+  epsilonTransitions?: { from: string; to: string[] }[];
   transitions: { from: string; symbol: string; to: string[] }[];
 }
 
@@ -56,17 +57,65 @@ const defaultNfaPresets: Record<string, NfaDefinition> = {
       { from: "q2", symbol: "0", to: [] },
       { from: "q2", symbol: "1", to: [] }
     ]
+  },
+  decimal_numbers: {
+    title: "ε-NFA 4: Decimal Numbers (Hopcroft Fig 2.18)",
+    states: ["q0", "q1", "q2", "q3", "q4", "q5"],
+    alphabet: ["+/-", "digit", "."],
+    startState: "q0",
+    acceptStates: ["q5"],
+    epsilonTransitions: [
+      { from: "q0", to: ["q1"] },
+      { from: "q3", to: ["q5"] }
+    ],
+    transitions: [
+      { from: "q0", symbol: "+/-", to: ["q1"] },
+      { from: "q0", symbol: "digit", to: [] },
+      { from: "q0", symbol: ".", to: [] },
+      { from: "q1", symbol: "+/-", to: [] },
+      { from: "q1", symbol: "digit", to: ["q1", "q4"] },
+      { from: "q1", symbol: ".", to: ["q2"] },
+      { from: "q2", symbol: "+/-", to: [] },
+      { from: "q2", symbol: "digit", to: ["q3"] },
+      { from: "q2", symbol: ".", to: [] },
+      { from: "q3", symbol: "+/-", to: [] },
+      { from: "q3", symbol: "digit", to: ["q3"] },
+      { from: "q3", symbol: ".", to: [] },
+      { from: "q4", symbol: "+/-", to: [] },
+      { from: "q4", symbol: "digit", to: [] },
+      { from: "q4", symbol: ".", to: ["q3"] },
+      { from: "q5", symbol: "+/-", to: [] },
+      { from: "q5", symbol: "digit", to: [] },
+      { from: "q5", symbol: ".", to: [] }
+    ]
   }
 };
 
-export const SubsetConstructionWidget: React.FC = () => {
-  const [selectedPresetKey, setSelectedPresetKey] = useState<string>("ends_01");
-  const [nfa, setNfa] = useState<NfaDefinition>(defaultNfaPresets.ends_01);
-  const [customTableInput, setCustomTableInput] = useState<Record<string, Record<string, string>>>({
-    q0: { "0": "q0,q1", "1": "q0" },
-    q1: { "0": "-", "1": "q2" },
-    q2: { "0": "-", "1": "-" }
-  });
+export interface SubsetConstructionWidgetProps {
+  initialPreset?: string;
+}
+
+export const SubsetConstructionWidget: React.FC<SubsetConstructionWidgetProps> = ({ initialPreset = "decimal_numbers" }) => {
+  const initialPresetObj = defaultNfaPresets[initialPreset] || defaultNfaPresets.decimal_numbers;
+  const [selectedPresetKey, setSelectedPresetKey] = useState<string>(initialPreset);
+  const [nfa, setNfa] = useState<NfaDefinition>(initialPresetObj);
+
+  // Initialize custom table input based on initialPresetObj
+  const buildInitialCustomInput = (preset: NfaDefinition) => {
+    const custom: Record<string, Record<string, string>> = {};
+    preset.states.forEach(st => {
+      custom[st] = {};
+      preset.alphabet.forEach(sym => {
+        const t = preset.transitions.find(x => x.from === st && x.symbol === sym);
+        custom[st][sym] = t && t.to.length > 0 ? t.to.join(',') : '-';
+      });
+    });
+    return custom;
+  };
+
+  const [customTableInput, setCustomTableInput] = useState<Record<string, Record<string, string>>>(
+    buildInitialCustomInput(initialPresetObj)
+  );
 
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [autoPlay, setAutoPlay] = useState<boolean>(false);
@@ -76,6 +125,23 @@ export const SubsetConstructionWidget: React.FC = () => {
     if (!states || states.length === 0) return "∅";
     const sorted = Array.from(new Set(states)).sort();
     return `{${sorted.join(', ')}}`;
+  };
+
+  // Helper to compute ECLOSE of a set of states
+  const getEclose = (states: string[]): string[] => {
+    const closure = new Set<string>(states);
+    const stack = [...states];
+    while (stack.length > 0) {
+      const curr = stack.pop()!;
+      const epsTargets = nfa.epsilonTransitions?.find(x => x.from === curr)?.to || [];
+      epsTargets.forEach(target => {
+        if (!closure.has(target)) {
+          closure.add(target);
+          stack.push(target);
+        }
+      });
+    }
+    return Array.from(closure).sort();
   };
 
   // Helper to lookup NFA transitions
@@ -100,7 +166,7 @@ export const SubsetConstructionWidget: React.FC = () => {
     const labelGen = (idx: number) => String.fromCharCode(65 + idx); // A, B, C, D...
     const discoveredLabels: Record<string, string> = {};
     
-    const startSet = [nfa.startState];
+    const startSet = getEclose([nfa.startState]);
     const startSetStr = formatSet(startSet);
     discoveredLabels[startSetStr] = "A";
 
@@ -113,7 +179,7 @@ export const SubsetConstructionWidget: React.FC = () => {
     steps.push({
       stepNumber: stepCounter++,
       title: "Step 1: Initialize DFA Start State",
-      description: `Define DFA start state as the subset containing NFA start state: q₀_D = {${nfa.startState}} = State A. Add {${nfa.startState}} to the unprocessed queue.`,
+      description: `Define DFA start state as ECLOSE({${nfa.startState}}) = ${startSetStr} = State A. Add ${startSetStr} to the unprocessed queue.`,
       currentSubset: startSet,
       processedSubsets: [],
       unprocessedQueue: [startSet],
@@ -132,17 +198,18 @@ export const SubsetConstructionWidget: React.FC = () => {
       let stepDescMath = `Processing row for DFA State ${currentLabel} = ${currentSetStr}:\n`;
 
       for (const symbol of nfa.alphabet) {
-        let unionSet: string[] = [];
+        let directTargets: string[] = [];
         let mathParts: string[] = [];
 
         for (const st of current) {
           const targets = getNfaTransition(st, symbol);
-          targets.forEach(t => unionSet.push(t));
+          targets.forEach(t => directTargets.push(t));
           mathParts.push(`δ_N(${st}, '${symbol}') = ${formatSet(targets)}`);
         }
 
-        unionSet = Array.from(new Set(unionSet)).sort();
-        const targetSetStr = formatSet(unionSet);
+        const directTargetSet = Array.from(new Set(directTargets)).sort();
+        const eclosedTargets = getEclose(directTargetSet);
+        const targetSetStr = formatSet(eclosedTargets);
 
         let targetLabel = discoveredLabels[targetSetStr];
         let isNew = false;
@@ -150,15 +217,18 @@ export const SubsetConstructionWidget: React.FC = () => {
         if (!targetLabel) {
           targetLabel = labelGen(labelCount++);
           discoveredLabels[targetSetStr] = targetLabel;
-          queue.push(unionSet);
+          queue.push(eclosedTargets);
           isNew = true;
         }
 
-        const mathStr = `δ_D(${currentLabel}, '${symbol}') = ${mathParts.join(' ∪ ')} = ${targetSetStr} (${targetLabel})`;
+        const mathStr = nfa.epsilonTransitions && nfa.epsilonTransitions.length > 0
+          ? `δ_D(${currentLabel}, '${symbol}') = ECLOSE(${mathParts.join(' ∪ ')}) = ECLOSE(${formatSet(directTargetSet)}) = ${targetSetStr} (${targetLabel})`
+          : `δ_D(${currentLabel}, '${symbol}') = ${mathParts.join(' ∪ ')} = ${targetSetStr} (${targetLabel})`;
+          
         stepDescMath += `• Input '${symbol}': ${mathStr}${isNew ? ' [NEW STATE DISCOVERED!]' : ''}\n`;
 
         rowTransitions[symbol] = {
-          targetSet: unionSet,
+          targetSet: eclosedTargets,
           targetLabel,
           mathStr
         };
