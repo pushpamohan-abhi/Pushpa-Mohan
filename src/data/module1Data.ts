@@ -106,9 +106,334 @@ export const module1Deck: PresentationDeck = {
       interactiveType: "none"
     },
     {
+      id: "fa-intro-switch",
+      title: "Introduction to Finite Automata: The Switch Model",
+      subtitle: "Section 2.1 - Informal Intuition & Real-World State Machines (Ullman Textbook)",
+      bullets: [
+        "Finite Automaton (FA): An abstract mathematical model of a system that transitions between a finite set of internal states in response to external input events.",
+        "Real-World Example: The On/Off Push-Button Switch (or Automatic Door Controller):",
+        "• States Q = { OFF, ON } where OFF is the initial state (q₀ = OFF).",
+        "• Input Alphabet Σ = { PUSH } (pressing the power button).",
+        "• Transition Function δ: Pressing PUSH while OFF moves to ON. Pressing PUSH while ON moves back to OFF.",
+        "• Formal Transition Rules: δ(OFF, PUSH) = ON, δ(ON, PUSH) = OFF.",
+        "Key Takeaway: Finite memory — the automaton only needs to store its CURRENT state, not the infinite sequence of past inputs!"
+      ],
+      explanation: "The switch example demonstrates the core property of a finite automaton: maintaining a finite set of memory states that change predictably based on input events.",
+      codeSnippet: "Q = {OFF, ON}, Σ = {PUSH}, q0 = OFF  |  δ(OFF, PUSH) = ON, δ(ON, PUSH) = OFF",
+      interactiveType: "none"
+    },
+    {
+      id: "fa-structural-rep",
+      title: "Structural Representations of Finite Automata",
+      subtitle: "Section 2.1.1 - Transition Graphs, Tables & Grammars with Worked Examples",
+      bullets: [
+        "Hopcroft, Motwani, & Ullman outline 3 primary structural notations for finite state machines:",
+        "1. Transition Diagram (Graph): Directed graph where nodes represent states Q and arcs labeled with a ∈ Σ represent transitions δ(q, a).",
+        "   • Start State (q₀): Indicated by an unlabelled arrow pointing into q₀ from nowhere (→q₀).",
+        "   • Accepting/Final States (F): Indicated by double concentric circles ((q_f)).",
+        "2. Transition Table: Tabular representation where rows are states and columns are input symbols.",
+        "   • Row header →q₀ denotes start state, *q_f denotes accepting state.",
+        "   • Entry at row q and column a contains the target next state δ(q, a).",
+        "3. Grammars / Regular Expressions: Formal production rules specifying generated language.",
+        "Example (Switch Machine Table): Rows: OFF, ON. Column: PUSH. Entry for OFF is ON; entry for ON is OFF."
+      ],
+      explanation: "Transition diagrams offer visual clarity, while transition tables provide O(1) direct array lookup for software runtime execution.",
+      codeSnippet: "Table Matrix: Row = Current State | Column = Input Symbol | Cell = δ(Current, Input)",
+      interactiveType: "none"
+    },
+    {
+      id: "dfa-def-delta-hat",
+      title: "Deterministic Finite Automata (DFA) & Extended Transition Function (δ̂)",
+      subtitle: "Section 2.2 - Formal 5-Tuple & Inductive Definition of δ̂ (Ullman Textbook)",
+      bullets: [
+        "Formal DFA 5-Tuple Definition: M = (Q, Σ, δ, q₀, F)",
+        "• Q: Finite, non-empty set of states.",
+        "• Σ: Finite input alphabet.",
+        "• q₀ ∈ Q: Single initial / start state.",
+        "• F ⊆ Q: Set of final / accepting states.",
+        "• δ: Transition function mapping Q × Σ → Q (Exactly ONE next state per symbol).",
+        "Extended Transition Function δ̂ (Delta-Hat) on Strings (δ̂: Q × Σ* → Q):",
+        "• BASIS: δ̂(q, ε) = q  (Reading the empty string leaves the state unchanged).",
+        "• INDUCTION STEP: For any string w = xa (where x ∈ Σ* and a ∈ Σ):",
+        "  δ̂(q, xa) = δ( δ̂(q, x), a )",
+        "Language Accepted by DFA M: L(M) = { w ∈ Σ* | δ̂(q₀, w) ∈ F }."
+      ],
+      explanation: "The extended transition function δ̂ mathematically formalizes string processing step-by-step by decomposing string w into prefix x and final character a.",
+      codeSnippet: "Basis: δ̂(q, ε) = q  |  Induction: δ̂(q, xa) = δ(δ̂(q, x), a)",
+      interactiveType: "transition-table"
+    },
+    {
+      id: "dfa-proc-even-length",
+      title: "DFA Processing Example 1: Strings of Even Length",
+      subtitle: "Section 2.2.1 - Complete Transition Table, Diagram & δ̂ Evaluation",
+      bullets: [
+        "Problem: Construct a DFA accepting all binary strings of even length over Σ = {0, 1}.",
+        "Formal 5-Tuple: Q = {q_even, q_odd}, Σ = {0, 1}, q₀ = q_even, F = {q_even}.",
+        "Transition Table:",
+        "   State    |   0    |   1",
+        "  →*q_even  | q_odd  | q_odd",
+        "    q_odd   | q_even | q_even",
+        "Step-by-Step String Processing for w = '1011' using Extended Transition Function δ̂:",
+        "• δ̂(q_even, ε) = q_even  [Basis]",
+        "• δ̂(q_even, '1') = δ(q_even, '1') = q_odd",
+        "• δ̂(q_even, '10') = δ(q_odd, '0') = q_even",
+        "• δ̂(q_even, '101') = δ(q_even, '1') = q_odd",
+        "• δ̂(q_even, '1011') = δ(q_odd, '1') = q_even ∈ F  ⇒ ACCEPTED! (|1011| = 4, which is even)."
+      ],
+      explanation: "The state flips between q_even and q_odd on every symbol. Since 4 is even, processing '1011' terminates in accepting state q_even.",
+      dfaExample: {
+        title: "DFA: Even Length Strings",
+        states: ["q_even", "q_odd"],
+        alphabet: ["0", "1"],
+        startState: "q_even",
+        acceptStates: ["q_even"],
+        transitions: [
+          { from: "q_even", symbol: "0", to: "q_odd" },
+          { from: "q_even", symbol: "1", to: "q_odd" },
+          { from: "q_odd", symbol: "0", to: "q_even" },
+          { from: "q_odd", symbol: "1", to: "q_even" }
+        ],
+        testString: "1011"
+      },
+      interactiveType: "dfa-runner"
+    },
+    {
+      id: "dfa-proc-begins-01",
+      title: "DFA Processing Example 2: Strings Beginning with '01'",
+      subtitle: "Section 2.2.2 - Complete Transition Table, Diagram & δ̂ Proof",
+      bullets: [
+        "Problem: Construct a DFA over Σ = {0, 1} accepting strings that begin with prefix '01'.",
+        "Formal 5-Tuple: Q = {q0, q1, q2, q3}, Σ = {0, 1}, Start = q0, F = {q2}.",
+        "State Meaning: q0 (saw nothing), q1 (saw '0'), q2 (saw '01' - ACCEPT), q3 (trap state - invalid prefix).",
+        "Transition Table:",
+        "   State |  0  |  1",
+        "   → q0  | q1  | q3",
+        "     q1  | q3  | q2",
+        "    *q2  | q2  | q2",
+        "     q3  | q3  | q3  (Trap State)",
+        "Processing Test String w = '0101' using δ̂:",
+        "• δ̂(q0, ε) = q0 → δ̂(q0, '0') = q1 → δ̂(q0, '01') = q2 → δ̂(q0, '010') = q2 → δ̂(q0, '0101') = q2 ∈ F ⇒ ACCEPTED!",
+        "Processing Rejected String w = '1010' using δ̂:",
+        "• δ̂(q0, '1') = q3 (Trap state) → δ̂(q0, '1010') = q3 ∉ F ⇒ REJECTED!"
+      ],
+      explanation: "If the first character is '1', the DFA moves directly to dead state q3 and stays there forever. If the prefix is '01', it enters accepting state q2 and loops for all remaining symbols.",
+      dfaExample: {
+        title: "DFA: Begins with '01'",
+        states: ["q0", "q1", "q2", "q3"],
+        alphabet: ["0", "1"],
+        startState: "q0",
+        acceptStates: ["q2"],
+        transitions: [
+          { from: "q0", symbol: "0", to: "q1" },
+          { from: "q0", symbol: "1", to: "q3" },
+          { from: "q1", symbol: "0", to: "q3" },
+          { from: "q1", symbol: "1", to: "q2" },
+          { from: "q2", symbol: "0", to: "q2" },
+          { from: "q2", symbol: "1", to: "q2" },
+          { from: "q3", symbol: "0", to: "q3" },
+          { from: "q3", symbol: "1", to: "q3" }
+        ],
+        testString: "0101"
+      },
+      interactiveType: "dfa-runner"
+    },
+    {
+      id: "nfa-def-extended-delta",
+      title: "Nondeterministic Finite Automata (NFA) & Extended Transition Function",
+      subtitle: "Section 2.3 - Formal 5-Tuple, Powerset Codomain & Language of NFA",
+      bullets: [
+        "Formal NFA 5-Tuple Definition: N = (Q, Σ, δ, q₀, F)",
+        "• Q, Σ, q₀, F match DFA definitions.",
+        "• δ: Q × Σ → 2^Q  (Transition function maps to a SUBSET of Q, allowed to be ∅ or multiple states).",
+        "Extended Transition Function δ̂ for NFA (δ̂: Q × Σ* → 2^Q):",
+        "• BASIS: δ̂(q, ε) = {q}",
+        "• INDUCTION STEP: For string w = xa (where x ∈ Σ* and a ∈ Σ):",
+        "  δ̂(q, xa) = ⋃_{p ∈ δ̂(q, x)} δ(p, a)",
+        "Language Accepted by NFA N: L(N) = { w ∈ Σ* | δ̂(q₀, w) ∩ F ≠ ∅ }.",
+        "Key Intuition: An NFA accepts string w if AT LEAST ONE computational path from q₀ on input w terminates in an accepting state in F."
+      ],
+      explanation: "While DFAs follow a single deterministic trajectory, NFAs explore multiple computational paths simultaneously in parallel.",
+      codeSnippet: "NFA δ: Q × Σ → 2^Q  |  Acceptance condition: δ̂(q0, w) ∩ F ≠ ∅",
+      interactiveType: "none"
+    },
+    {
+      id: "nfa-dfa-subset-construction",
+      title: "Equivalence of DFA and NFA: Subset Construction Algorithm",
+      subtitle: "Section 2.3.1 & 2.3.2 - Lazy Reachable Subset Construction Method",
+      bullets: [
+        "Theorem 2.11 (Hopcroft & Ullman): A language L is accepted by an NFA if and only if L is accepted by some DFA.",
+        "Subset Construction Algorithm (NFA N = (Q_N, Σ, δ_N, q₀_N, F_N) → DFA D = (Q_D, Σ, δ_D, q₀_D, F_D)):",
+        "1. DFA Start State: q₀_D = {q₀_N}.",
+        "2. DFA State Set Q_D: Subsets of Q_N reachable from q₀_D.",
+        "3. DFA Transition Function: For composite state S ⊆ Q_N and a ∈ Σ:",
+        "   δ_D(S, a) = ⋃_{p ∈ S} δ_N(p, a).",
+        "4. DFA Final States: F_D = { S ⊆ Q_N | S ∩ F_N ≠ ∅ } (Any subset containing at least one NFA final state).",
+        "Worked Example: Converting NFA accepting strings ending in '01' to DFA."
+      ],
+      explanation: "Subset construction maps the non-deterministic set of active NFA states into single composite DFA states.",
+      dfaExample: {
+        title: "NFA: Ends with '01'",
+        states: ["q0", "q1", "q2"],
+        alphabet: ["0", "1"],
+        startState: "q0",
+        acceptStates: ["q2"],
+        transitions: [
+          { from: "q0", symbol: "0", to: "q0" },
+          { from: "q0", symbol: "1", to: "q0" },
+          { from: "q0", symbol: "0", to: "q1" },
+          { from: "q1", symbol: "1", to: "q2" }
+        ],
+        testString: "1001",
+        convertedDfa: {
+          title: "Converted DFA via Subset Construction",
+          states: ["{q0}", "{q0,q1}", "{q0,q2}"],
+          alphabet: ["0", "1"],
+          startState: "{q0}",
+          acceptStates: ["{q0,q2}"],
+          transitions: [
+            { from: "{q0}", symbol: "0", to: "{q0,q1}" },
+            { from: "{q0}", symbol: "1", to: "{q0}" },
+            { from: "{q0,q1}", symbol: "0", to: "{q0,q1}" },
+            { from: "{q0,q1}", symbol: "1", to: "{q0,q2}" },
+            { from: "{q0,q2}", symbol: "0", to: "{q0,q1}" },
+            { from: "{q0,q2}", symbol: "1", to: "{q0}" }
+          ],
+          testString: "1001"
+        }
+      },
+      interactiveType: "dfa-runner"
+    },
+    {
+      id: "nfa-subset-worst-case",
+      title: "Worst Case for Subset Construction: Exponential State Explosion",
+      subtitle: "Sections 2.3.1, 2.3.2 & 2.3.3 - The n-th Symbol from the End (Ullman Textbook)",
+      bullets: [
+        "Problem Statement: Consider the language L_n over Σ = {0, 1} where the n-th character from the right (end) is '1'.",
+        "NFA State Complexity: Requires only n + 1 states!",
+        "• States: q0 (looping start state), q1, q2, ..., qn (final state).",
+        "• Transition: δ(q0, 1) = {q0, q1}; δ(qi, 0) = δ(qi, 1) = {q_{i+1}} for i ≥ 1.",
+        "DFA State Complexity: REQUIRES EXACTLY 2^n STATES!",
+        "• Why 2^n States? To decide whether the symbol n steps ago was a '1', a deterministic automaton MUST memorize every possible binary string of length n.",
+        "• For n = 3 (3rd symbol from end is '1'): NFA needs 4 states, but DFA requires 2^3 = 8 states ({000}, {001}, {010}, ..., {111}).",
+        "• For n = 10: NFA needs 11 states, while DFA requires 2^10 = 1,024 states!",
+        "Conclusion: Demonstrates that the worst-case space bound |Q_D| = 2^|Q_N| is strictly tight!"
+      ],
+      explanation: "This classic example from Hopcroft & Ullman proves that NFAs can be exponentially more succinct than DFAs for certain languages.",
+      codeSnippet: "Language Ln: n-th symbol from right is 1  ⇒  NFA: n+1 states  |  DFA: 2^n states!",
+      interactiveType: "none"
+    },
+    {
+      id: "enfa-closure-delta",
+      title: "ε-NFA: Formal Definition, ε-Closure & Extended Transition Function",
+      subtitle: "Section 2.4 - Inductive Basis & Conversion to DFA (Ullman Textbook)",
+      bullets: [
+        "Formal ε-NFA Definition: E = (Q, Σ, δ, q₀, F) where δ: Q × (Σ ∪ {ε}) → 2^Q.",
+        "ε-Closure Definition (ECLOSE(q)): The set of all states reachable from q taking ZERO or more ε-transitions.",
+        "• BASIS: q ∈ ECLOSE(q)  (Every state is in its own ε-closure).",
+        "• INDUCTION STEP: If p ∈ ECLOSE(q) and r ∈ δ(p, ε), then r ∈ ECLOSE(q).",
+        "Extended Transition Function δ̂ for ε-NFA:",
+        "• BASIS: δ̂(q, ε) = ECLOSE(q)",
+        "• INDUCTION STEP: For w = xa (x ∈ Σ*, a ∈ Σ):",
+        "  δ̂(q, xa) = ECLOSE( ⋃_{p ∈ δ̂(q, x)} δ(p, a) )",
+        "Converting ε-NFA to DFA:",
+        "1. DFA Start state: q₀_D = ECLOSE(q₀_N).",
+        "2. For composite state S and a ∈ Σ: δ_D(S, a) = ECLOSE( ⋃_{p ∈ S} δ_N(p, a) ).",
+        "3. Final States F_D: Any composite state S where S ∩ F_N ≠ ∅."
+      ],
+      explanation: "Epsilon closures group states that are reachable instantaneously without consuming input symbols.",
+      codeSnippet: "ECLOSE(q): Basis q ∈ ECLOSE(q)  |  Induction: p ∈ ECLOSE(q), r ∈ δ(p, ε) ⇒ r ∈ ECLOSE(q)",
+      interactiveType: "none"
+    },
+    {
+      id: "fa-app-text-search",
+      title: "Applications of FA: Section 2.5.1 Text Searching",
+      subtitle: "Keyword Matching, Pattern Recognition & Aho-Corasick Algorithm",
+      bullets: [
+        "Text Searching Problem: Find all occurrences of a keyword (or set of keywords) K within a large text document T of length m.",
+        "DFA Approach: Construct a pattern matching DFA for keyword K (e.g., K = 'web' or 'ebay').",
+        "• States: Represent longest matching prefix of K seen so far.",
+        "• Execution: Scan document text character by character in linear time O(m).",
+        "• Performance: Processing requires only 1 state transition per text character — independent of keyword length!",
+        "Aho-Corasick Algorithm: Multi-pattern text searching DFA used in Unix `grep`, antivirus scanning, and web search engines to search millions of strings simultaneously."
+      ],
+      explanation: "DFA-based text search achieves optimal O(m) execution speed by compiling search patterns into deterministic lookup tables.",
+      codeSnippet: "Pattern DFA: State = Matched Prefix  |  Text Scan Time = O(|Text|) linear efficiency",
+      interactiveType: "none"
+    },
+    {
+      id: "fa-app-web-crawlers",
+      title: "Applications of FA: Section 2.5.2 Web Crawlers & HTML Parsing",
+      subtitle: "URL Pipeline Modeling & HTTP Status Code State Machines",
+      bullets: [
+        "Web Crawler URL Pipeline as a Finite State Machine:",
+        "1. Discovered State: URL added to frontier queue.",
+        "2. Fetching State: Issuing HTTP GET request.",
+        "3. Processing State: Parsing HTML DOM and extracting new hyperlinks.",
+        "4. Indexed / Dead State: Document stored, URL marked visited.",
+        "HTTP Response Code Finite State Classifier:",
+        "• State 2xx (Success): Parse document body.",
+        "• State 3xx (Redirect): Follow Location header to new URL state.",
+        "• State 4xx/5xx (Client/Server Error): Log error and transition to Retry or Dead state."
+      ],
+      explanation: "Web crawlers use state machine architectures to robustly manage millions of asynchronous web requests and error recovery paths.",
+      codeSnippet: "URL States: Discovered ➔ Fetching ➔ Parsing ➔ Indexed  |  HTTP 2xx/3xx/4xx Handlers",
+      interactiveType: "none"
+    },
+    {
+      id: "fa-app-regex-automata",
+      title: "Applications of FA: Section 2.5.3 Regular Expressions to Automata",
+      subtitle: "Thompson's Construction Algorithm (Regex ➔ ε-NFA ➔ DFA)",
+      bullets: [
+        "Thompson's Structural Construction: Inductively converts any Regular Expression into an equivalent ε-NFA:",
+        "1. Symbol a ∈ Σ: Two states (q0 ──a──> q1).",
+        "2. Empty String ε: Two states (q0 ──ε──> q1).",
+        "3. Union (r1 + r2): New start state with ε-branches to r1 and r2; ε-branches to single new final state.",
+        "4. Concatenation (r1 r2): Connect r1 final state to r2 start state via ε.",
+        "5. Kleene Star (r*): Add ε feedback loop from r final state to r start state, plus ε bypass path.",
+        "Pipeline in Regex Engines: Regular Expression ──[Thompson]──> ε-NFA ──[Subset Const.]──> DFA ──[Minimization]──> Optimized Code."
+      ],
+      explanation: "Thompson's algorithm guarantees that every regular expression can be automatically compiled into an executable state machine.",
+      codeSnippet: "Regex (r1 + r2)* ➔ Thompson ε-NFA ➔ Subset Construction DFA ➔ Fast Execution Engine",
+      interactiveType: "none"
+    },
+    {
+      id: "fa-app-moore-mealy",
+      title: "Applications of FA: Section 2.5.4 Moore and Mealy Machines",
+      subtitle: "Finite State Transducers with Output (Ullman Textbook)",
+      bullets: [
+        "Finite State Transducers: State machines that produce an output string over output alphabet Γ.",
+        "1. Moore Machine: Output function λ: Q → Γ is associated DIRECTLY with states.",
+        "   • Formal 6-Tuple: M = (Q, Σ, Γ, δ, λ, q₀).",
+        "   • Example: Modulo 3 residue classifier (State q0 outputs '0', q1 outputs '1', q2 outputs '2').",
+        "2. Mealy Machine: Output function λ: Q × Σ → Γ is associated with TRANSITIONS.",
+        "   • Formal 6-Tuple: M = (Q, Σ, Γ, δ, λ, q₀).",
+        "   • Example: 2's complement serial binary adder / Edge detector.",
+        "Equivalence: Every Moore machine can be converted to an equivalent Mealy machine and vice-versa!"
+      ],
+      explanation: "Moore outputs depend solely on the current state, whereas Mealy outputs react immediately to input transitions.",
+      codeSnippet: "Moore λ(q) ∈ Γ (State-bound output)  |  Mealy λ(q, a) ∈ Γ (Transition-bound output)",
+      interactiveType: "none"
+    },
+    {
+      id: "fa-app-lexical-protocols",
+      title: "Applications of FA: Section 2.5.5 Lexical Analysis & Protocol Verification",
+      subtitle: "Compiler Tokenizers (Lex/Flex) & Network Protocol Safety",
+      bullets: [
+        "Lexical Analysis in Compilers (Lex / Flex):",
+        "• First phase of a compiler converts source code text into token streams (Keywords `if`, `while`, Identifiers `varX`, Numbers `42`).",
+        "• Lex specifies token patterns using Regular Expressions, which are compiled into parallel DFAs for max tokenization speed.",
+        "Network Protocol Verification (TCP & Security Protocols):",
+        "• Modeling protocols as Finite State Machines (e.g., TCP States: CLOSED, LISTEN, SYN_SENT, SYN_RCVD, ESTABLISHED, FIN_WAIT).",
+        "• Formal Verification: Graph traversal algorithms verify that the protocol CANNOT reach invalid states, deadlock states, or unauthorized security states."
+      ],
+      explanation: "DFAs power both compiler frontends for rapid programming language tokenization and formal safety verification of network protocols.",
+      codeSnippet: "Source Code ➔ Lexer DFA ➔ Token Stream (IF, IDENT, NUMBER)  |  TCP Protocol FSM Verification",
+      interactiveType: "none"
+    },
+    {
       id: "slide-7",
-      title: "Structural Representations for Finite Automata",
-      subtitle: "Module 1.4.1 - Graphs, Tables & Grammars (Ullman Textbook)",
+      title: "Structural Representations for Finite Automata Summary",
+      subtitle: "Module 1.4.1 - Summary Comparison",
       bullets: [
         "As outlined by Hopcroft, Motwani, & Ullman, finite automata can be represented in 3 major structural forms:",
         "1. Transition Graphs (Diagrams): Visual nodes representing states (q₀ initial, double circles for final F) and directed edges labeled with alphabet symbols.",

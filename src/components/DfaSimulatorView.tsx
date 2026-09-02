@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { DfaDefinition } from '../types';
 import { DfaAnimatorWidget } from './DfaAnimatorWidget';
-import { Cpu, Plus, Trash2, CheckCircle2, Bookmark, Sliders, Layers, GitBranch, ArrowRight } from 'lucide-react';
+import { SubsetConstructionWidget } from './SubsetConstructionWidget';
+import { Cpu, Plus, Trash2, CheckCircle2, Bookmark, Sliders, Layers, GitBranch, ArrowRight, Table, Sparkles } from 'lucide-react';
 
 const presetDfas: Record<string, DfaDefinition & { category?: string; explanationNotes?: string[]; nfaDetails?: { title: string; states: string[]; transitions: { from: string; symbol: string; to: string[] }[] } }> = {
   ends_ab: {
@@ -134,49 +135,83 @@ const presetDfas: Record<string, DfaDefinition & { category?: string; explanatio
 };
 
 export const DfaSimulatorView: React.FC = () => {
+  const [activeStudioMode, setActiveStudioMode] = useState<'subset-converter' | 'dfa-animator'>('subset-converter');
   const [selectedPreset, setSelectedPreset] = useState<string>("ends_ab");
   const [currentDfa, setCurrentDfa] = useState<any>(presetDfas.ends_ab);
 
   const handleSelectPreset = (key: string) => {
     setSelectedPreset(key);
     setCurrentDfa(presetDfas[key]);
+    setActiveStudioMode('dfa-animator');
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+      {/* Studio View Mode Switcher Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
           <div className="flex items-center gap-2 text-indigo-600 mb-1">
             <Cpu className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase tracking-wider">State Machine Studio & Simulators</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Automata Studio & Interactive Tools</span>
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900">Interactive DFA, NFA-to-DFA & Minimization Simulator</h2>
+          <h2 className="text-2xl font-extrabold text-slate-900">NFA-to-DFA Subset Converter & DFA Animator</h2>
           <p className="text-sm text-slate-500 mt-1">
-            Explore standard DFAs, NFA Subset Construction conversions, and 2 complete DFA Minimization examples step-by-step.
+            Perform step-by-step NFA to DFA Subset Construction with table inputs or analyze pre-built DFAs and Minimization machines.
           </p>
         </div>
 
-        {/* Preset Selector by Category */}
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-bold text-slate-500 uppercase">Select Automaton / Example:</span>
-          <div className="flex flex-wrap items-center gap-2">
-            {Object.entries(presetDfas).map(([key, dfa]) => (
-              <button
-                key={key}
-                onClick={() => handleSelectPreset(key)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  selectedPreset === key
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                {dfa.title}
-              </button>
-            ))}
-          </div>
+        {/* Mode Switcher Pills */}
+        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+          <button
+            onClick={() => setActiveStudioMode('subset-converter')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              activeStudioMode === 'subset-converter'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <Table className="w-4 h-4" />
+            <span>Subset Construction Tool</span>
+          </button>
+
+          <button
+            onClick={() => setActiveStudioMode('dfa-animator')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              activeStudioMode === 'dfa-animator'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>DFA Animator & Minimization</span>
+          </button>
         </div>
       </div>
+
+      {activeStudioMode === 'subset-converter' ? (
+        /* Interactive Step-by-Step Subset Construction Widget with Table Input */
+        <SubsetConstructionWidget />
+      ) : (
+        /* DFA Animator & Minimization Studio */
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200">
+            <span className="text-xs font-bold text-slate-500 uppercase">Select Automaton / Example Preset:</span>
+            <div className="flex flex-wrap items-center gap-2">
+              {Object.entries(presetDfas).map(([key, dfa]) => (
+                <button
+                  key={key}
+                  onClick={() => handleSelectPreset(key)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    selectedPreset === key
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  }`}
+                >
+                  {dfa.title}
+                </button>
+              ))}
+            </div>
+          </div>
 
       {/* If NFA Subset Construction, show Original NFA side-by-side or above */}
       {currentDfa.nfaDetails && (
@@ -316,6 +351,8 @@ export const DfaSimulatorView: React.FC = () => {
         </div>
       </div>
     </div>
+  )}
+  </div>
   );
 };
 
