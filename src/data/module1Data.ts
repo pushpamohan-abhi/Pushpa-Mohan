@@ -33,7 +33,7 @@ export const module1Deck: PresentationDeck = {
         "• Union (A ∪ B): Elements in A, B, or both. Ex: {1, 2} ∪ {2, 3} = {1, 2, 3}.",
         "• Intersection (A ∩ B): Elements common to both. Ex: {1, 2} ∩ {2, 3} = {2}.",
         "• Difference (A - B): Elements in A not in B. Ex: {1, 2} - {2, 3} = {1}.",
-        "• Complement (Ā): Elements in Universal set U not in A."
+        "• Complement (Ā): Elements in Universal set U not in A. Ex: If U = {1, 2, 3, 4} and A = {1, 2}, then Ā = U - A = {3, 4}."
       ],
       explanation: "Cartesian products are fundamental when defining transition functions like δ: Q × Σ → Q (mapping state and symbol pairs to next states).",
       codeSnippet: "A = {1, 2}, B = {x, y} ⇒ A × B = {(1,x), (1,y), (2,x), (2,y)}",
@@ -80,7 +80,7 @@ export const module1Deck: PresentationDeck = {
         "• Union (L1 ∪ L2): Strings belonging to L1 or L2.",
         "• Intersection (L1 ∩ L2): Strings common to both.",
         "• Difference (L1 - L2): Strings in L1 but not L2.",
-        "• Complement (~L): All strings in Σ* not in L (Σ* - L).",
+        "• Complement (L̄ or ~L): All strings in Σ* not in L (Σ* - L). Ex: If Σ = {a, b} and L = {strings starting with 'a'}, then L̄ = {ε, strings starting with 'b'}.",
         "• Concatenation (L1L2): {xy | x ∈ L1, y ∈ L2}."
       ],
       explanation: "Languages form an algebra under set operations. Recognizing how languages combine is essential for building complex automata.",
@@ -658,6 +658,88 @@ export const module1Deck: PresentationDeck = {
             }
         ],
         "testString": "ababaabb"
+    },
+    "interactiveType": "dfa-runner"
+},
+{
+    "id": "dfa-theory-complement",
+    "title": "Complement of a Language & DFA Construction",
+    "subtitle": "Closure Properties & Inverting Final States",
+    "bullets": [
+        "Language Complement (L̄): For a language L ⊆ Σ*, its complement L̄ = Σ* - L consists of all strings over Σ NOT in L.",
+        "Closure Under Complementation: Regular languages are closed under complementation. If L is regular, L̄ is also regular.",
+        "Complement DFA Construction Algorithm:",
+        "1. Ensure Complete DFA: The original DFA M = (Q, Σ, δ, q₀, F) must be complete (every state has a defined transition for every symbol a ∈ Σ).",
+        "2. Swap Accepting & Non-Accepting States: Define new final states F' = Q \\ F.",
+        "3. Preserve Machine Structure: States Q, start state q₀, and transition function δ remain completely unchanged!"
+    ],
+    "explanation": "Because a complete DFA is strictly deterministic, a string w lands on a unique state q. If q ∈ F in M, w ∈ L. In M', q ∉ F', so w ∉ L̄. Conversely, if q ∉ F in M, w ∉ L, but q ∈ F' in M', so w ∈ L̄. Thus M' accepts exactly L̄.",
+    "codeSnippet": "Original DFA M = (Q, Σ, δ, q0, F) ⇒ Complement DFA M' = (Q, Σ, δ, q0, Q \\ F)",
+    "interactiveType": "none"
+},
+{
+    "id": "dfa-prob-comp-aa",
+    "title": "Problem: Complement DFA (NOT Containing 'aa')",
+    "subtitle": "Inverting 'Substring aa' Automaton",
+    "bullets": [
+        "Requirement: Accept all strings over Σ = {a, b} that DO NOT contain 'aa' as a substring.",
+        "Step 1: Start with complete DFA for 'Contains aa' (q0: no 'a', q1: saw 'a', q2: saw 'aa' trap).",
+        "Step 2: Invert Accepting States F = {q2} ⇒ New Accepting States F' = {q0, q1}.",
+        "State Roles in Complement Machine M':",
+        "• q0 (Accepting): Safe state (no trailing 'a'). Accepts ε, 'b', 'ab', 'bab'.",
+        "• q1 (Accepting): Safe state (saw single 'a'). Accepts 'a', 'ba', 'aba'.",
+        "• q2 (Non-accepting): Trap state! Entered upon seeing 'aa' — permanently rejects!"
+    ],
+    "explanation": "Notice how swapping accepting and non-accepting states instantly transforms a pattern recognizer (contains 'aa') into a constraint validator (does NOT contain 'aa'). Try testing strings like 'ababa' (accepted) vs 'aab' (rejected).",
+    "dfaExample": {
+        "title": "Complement DFA: NOT containing 'aa'",
+        "states": [
+            "q0",
+            "q1",
+            "q2"
+        ],
+        "alphabet": [
+            "a",
+            "b"
+        ],
+        "startState": "q0",
+        "acceptStates": [
+            "q0",
+            "q1"
+        ],
+        "transitions": [
+            {
+                "from": "q0",
+                "symbol": "a",
+                "to": "q1"
+            },
+            {
+                "from": "q0",
+                "symbol": "b",
+                "to": "q0"
+            },
+            {
+                "from": "q1",
+                "symbol": "a",
+                "to": "q2"
+            },
+            {
+                "from": "q1",
+                "symbol": "b",
+                "to": "q0"
+            },
+            {
+                "from": "q2",
+                "symbol": "a",
+                "to": "q2"
+            },
+            {
+                "from": "q2",
+                "symbol": "b",
+                "to": "q2"
+            }
+        ],
+        "testString": "ababa"
     },
     "interactiveType": "dfa-runner"
 },
@@ -1918,5 +2000,17 @@ export const module1Quiz: QuizQuestion[] = [
     ],
     correctAnswer: 2,
     explanation: "A complete DFA must specify exactly one transition for each (state, symbol) pair. 4 states × 3 input symbols = 12 total transitions."
+  },
+  {
+    id: "q25",
+    question: "How do you construct a DFA M' that accepts the complement language L̄ = Σ* - L of a complete DFA M = (Q, Σ, δ, q₀, F)?",
+    options: [
+      "Reverse the direction of all directed edges in transition function δ.",
+      "Invert the set of accepting and non-accepting states: define new final states F' = Q \\ F.",
+      "Add a new start state with spontaneous ε-transitions to all states in F.",
+      "Square the total number of states |Q|."
+    ],
+    correctAnswer: 1,
+    explanation: "Because a complete DFA is deterministic, swapping accepting states (F) and non-accepting states (Q \\ F) accepts all strings originally rejected and rejects all strings originally accepted, recognizing the complement language L̄."
   }
 ];
