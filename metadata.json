@@ -1,0 +1,6 @@
+{
+  "name": "DFA Module 1 PPT & Animation Studio",
+  "description": "Interactive presentation builder and step-by-step state machine animation studio for Deterministic Finite Automata (Module 1 TOC)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
