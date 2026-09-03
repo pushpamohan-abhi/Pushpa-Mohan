@@ -4,16 +4,35 @@ export interface FormExportResult {
   formId: string;
   responderUri: string;
   editUrl: string;
+  formTitle: string;
 }
 
 /**
-  Creates a Google Form and converts it into a graded Quiz with questions and correct answers.
+  Creates a Google Form and converts it into a graded Quiz with questions and correct answers,
+  customized for a specific faculty member and class section.
  */
 export async function createGoogleFormQuiz(
   accessToken: string,
   quizTitle: string,
-  questions: QuizQuestion[]
+  questions: QuizQuestion[],
+  options?: {
+    facultyName?: string;
+    facultyEmail?: string;
+    sectionName?: string;
+  }
 ): Promise<FormExportResult> {
+  const facultyStr = options?.facultyName ? ` (${options.facultyName})` : '';
+  const sectionStr = options?.sectionName ? ` [${options.sectionName}]` : '';
+  const fullTitle = `${quizTitle}${sectionStr}${facultyStr}`;
+
+  const descriptionLines = [
+    `Formal Languages & Automata Theory - Course Assessment`,
+    options?.sectionName ? `Class Section: ${options.sectionName}` : null,
+    options?.facultyName ? `Course Faculty: ${options.facultyName}` : null,
+    options?.facultyEmail ? `Contact Email: ${options.facultyEmail}` : null,
+    `Please answer all questions and submit your response.`,
+  ].filter(Boolean).join('\n');
+
   // 1. Create the Form
   const createResponse = await fetch('https://forms.googleapis.com/v1/forms', {
     method: 'POST',
@@ -23,8 +42,9 @@ export async function createGoogleFormQuiz(
     },
     body: JSON.stringify({
       info: {
-        title: quizTitle,
-        documentTitle: quizTitle,
+        title: fullTitle,
+        documentTitle: fullTitle,
+        description: descriptionLines,
       },
     }),
   });
@@ -113,5 +133,6 @@ export async function createGoogleFormQuiz(
     formId,
     responderUri: finalResponderUri,
     editUrl,
+    formTitle: fullTitle,
   };
 }
