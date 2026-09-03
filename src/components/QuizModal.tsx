@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { QuizQuestion } from '../types';
-import { HelpCircle, CheckCircle2, XCircle, Award, RotateCcw, ArrowRight, ArrowLeft } from 'lucide-react';
+import { HelpCircle, CheckCircle2, XCircle, Award, RotateCcw, ArrowRight, ArrowLeft, ExternalLink, Share2, Loader2, Copy, Check } from 'lucide-react';
+import { signInWithGoogle, getCachedAccessToken } from '../utils/googleAuth';
+import { createGoogleFormQuiz, FormExportResult } from '../utils/googleFormsExport';
 
 interface QuizModalProps {
   questions: QuizQuestion[];
@@ -12,9 +14,45 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
 
+  // Google Forms Export state
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportResult, setExportResult] = useState<FormExportResult | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+
   const currentQ = questions[currentIdx];
   const selectedOption = selectedAnswers[currentIdx];
   const isAnswered = selectedOption !== undefined;
+
+  const handleExportToGoogleForms = async () => {
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      let token = getCachedAccessToken();
+      if (!token) {
+        const authRes = await signInWithGoogle();
+        token = authRes.accessToken;
+      }
+
+      const res = await createGoogleFormQuiz(
+        token,
+        'Formal Languages & Automata Theory - Quiz Assignment',
+        questions
+      );
+      setExportResult(res);
+    } catch (err: any) {
+      console.error('Export to Google Forms failed:', err);
+      setExportError(err.message || 'Failed to export quiz to Google Forms. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleCopyLink = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   const handleSelectOption = (optIdx: number) => {
     if (isAnswered) return; // already answered
@@ -58,23 +96,102 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
       <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl border border-slate-200 flex flex-col gap-6 max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-lg font-extrabold text-slate-900">Module 1 Mastery Quiz ({questions.length} Questions)</h3>
-              <p className="text-xs text-slate-500">Test your understanding of Set Theory, DFAs, NFAs, and Languages</p>
+              <p className="text-xs text-slate-500">Test your understanding or create an online student assignment</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 font-bold text-sm px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors"
-          >
-            ✕
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportToGoogleForms}
+              disabled={isExporting}
+              className="flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-xs shadow-sm transition-all disabled:opacity-50 shrink-0"
+              title="Convert this quiz into an online Google Forms assignment for your students"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Creating Form...</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4 text-emerald-200" />
+                  <span>Assign via Google Forms</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 font-bold text-sm px-2.5 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
         </div>
+
+        {/* Google Forms Export Success / Error Banner */}
+        {exportResult && (
+          <div className="p-4 bg-emerald-50 border-2 border-emerald-300 rounded-2xl flex flex-col gap-3 text-slate-900 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-black text-emerald-900 text-sm">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span>Google Forms Quiz Created Successfully!</span>
+              </div>
+              <button
+                onClick={() => setExportResult(null)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-xs"
+              >
+                Dismiss
+              </button>
+            </div>
+            <p className="text-xs text-slate-700 leading-relaxed">
+              All {questions.length} questions, answer choices, and automated answer key grading rules have been uploaded to Google Forms.
+            </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <a
+                href={exportResult.responderUri}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition-all shadow-xs"
+              >
+                <span>Student Link (Submit Quiz)</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
+              <button
+                onClick={() => handleCopyLink(exportResult.responderUri)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-xs rounded-xl transition-all border border-emerald-300"
+              >
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5 text-emerald-700" />}
+                <span>{copiedLink ? 'Copied!' : 'Copy Student Link'}</span>
+              </button>
+
+              <a
+                href={exportResult.editUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl transition-all shadow-xs ml-auto"
+              >
+                <span>View Responses & Edit Form</span>
+                <ExternalLink className="w-3.5 h-3.5 text-indigo-300" />
+              </a>
+            </div>
+          </div>
+        )}
+
+        {exportError && (
+          <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-xs text-rose-900">
+            <span>⚠️ {exportError}</span>
+            <button onClick={() => setExportError(null)} className="font-bold underline ml-2">Dismiss</button>
+          </div>
+        )}
 
         {!showResults ? (
           <div className="flex flex-col gap-6">
