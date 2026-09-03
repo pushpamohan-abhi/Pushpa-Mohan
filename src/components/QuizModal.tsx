@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { QuizQuestion } from '../types';
-import { HelpCircle, CheckCircle2, XCircle, Award, RotateCcw, ArrowRight, ArrowLeft, ExternalLink, Share2, Loader2, Copy, Check, ShieldAlert, KeyRound, UserCheck, Users, Settings2, Sparkles } from 'lucide-react';
+import { HelpCircle, CheckCircle2, XCircle, Award, RotateCcw, ArrowRight, ArrowLeft, ExternalLink, Share2, Loader2, Copy, Check, ShieldAlert, KeyRound, UserCheck, Users, Settings2, Sparkles, UserPlus, Layers } from 'lucide-react';
 import { requestGoogleAccessToken, getCachedAccessToken, initGoogleOAuth } from '../utils/googleAuth';
-import { createGoogleFormQuiz, FormExportResult } from '../utils/googleFormsExport';
+import { createGoogleFormQuiz, createGoogleFormsForFacultyList, FormExportResult, BatchFormExportResult } from '../utils/googleFormsExport';
 
 const FACULTY_PRESETS = [
   { id: 'juliet', name: 'Prof. Juliet Johny', email: 'julietjohny.cs@hkbk.edu.in', section: 'Section 5A' },
   { id: 'pushpa', name: 'Dr. Pushpa Mohan', email: 'pushpamohan.cs@gmail.com', section: 'Section 5B' },
-  { id: 'moze', name: 'Prof. Moze', email: 'moze.cs@hkbk.edu.in', section: 'Section 5C' },
-  { id: 'mohazzebat', name: 'Prof. Mohazzebat', email: 'mohazzebat.cs@hkbk.edu.in', section: 'Section 5D' },
+  { id: 'mohazzebat', name: 'Prof. Mohazzebat', email: 'mohazzebat.cs@hkbk.edu.in', section: 'Section 5C' },
+  { id: 'moze', name: 'Prof. Moze', email: 'moze.cs@hkbk.edu.in', section: 'Section 5D' },
   { id: 'sneha', name: 'Prof. Sneha Roy', email: 'sneharoy.cs@hkbk.edu.in', section: 'Section 5E' },
   { id: 'shivani', name: 'Prof. Shivani', email: 'shivani.cs@hkbk.edu.in', section: 'Section 5F' },
   { id: 'custom', name: 'Other Faculty Member', email: '', section: 'Section 5A' },
@@ -29,6 +29,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
   const [customFacultyName, setCustomFacultyName] = useState('');
   const [customFacultyEmail, setCustomFacultyEmail] = useState('');
   const [sectionName, setSectionName] = useState('Section 5B');
+  const [formTitle, setFormTitle] = useState('Module-1-TOC-5B-26-27');
   const [showAssignPanel, setShowAssignPanel] = useState(false);
 
   // Google Forms Export state
@@ -67,6 +68,37 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
     };
   };
 
+  // Manual token fallback
+  const [manualToken, setManualToken] = useState('');
+  const [showManualTokenInput, setShowManualTokenInput] = useState(false);
+
+  const handleExportWithManualToken = async () => {
+    if (!manualToken.trim()) return;
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      const faculty = getActiveFacultyDetails();
+      const res = await createGoogleFormQuiz(
+        manualToken.trim(),
+        formTitle.trim() || 'Module-1-TOC-5B-26-27',
+        questions,
+        {
+          facultyName: faculty.name,
+          facultyEmail: faculty.email,
+          sectionName: sectionName || 'Section 5B',
+        }
+      );
+      setExportResult(res);
+      setShowAssignPanel(false);
+      setShowManualTokenInput(false);
+    } catch (err: any) {
+      console.error('Manual token export failed:', err);
+      setExportError(err.message || 'Failed to export with provided access token.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleExportToGoogleForms = async () => {
     setIsExporting(true);
     setExportError(null);
@@ -80,12 +112,12 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
 
       const res = await createGoogleFormQuiz(
         token,
-        'Formal Languages & Automata Theory - Quiz Assignment',
+        formTitle.trim() || 'Module-1-TOC-5B-26-27',
         questions,
         {
           facultyName: faculty.name,
           facultyEmail: faculty.email,
-          sectionName: sectionName || 'Section A',
+          sectionName: sectionName || 'Section 5B',
         }
       );
       setExportResult(res);
@@ -93,7 +125,9 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
     } catch (err: any) {
       console.error('Export to Google Forms failed:', err);
       let errorMsg = err.message || 'Failed to export quiz to Google Forms. Please try again.';
-      if (errorMsg.includes('popup') || errorMsg.includes('blocked') || errorMsg.includes('closed')) {
+      if (errorMsg.includes('origin_mismatch') || errorMsg.includes('origin') || errorMsg.includes('OAuth Error')) {
+        errorMsg = `Google OAuth Origin Mismatch: The domain "${window.location.hostname}" is not registered in Google Cloud Console under Authorized JavaScript Origins for Client ID 451003026922-ittemi1jq8h7f5gtqgbfk47dvhoa8he4.apps.googleusercontent.com.`;
+      } else if (errorMsg.includes('popup') || errorMsg.includes('blocked') || errorMsg.includes('closed')) {
         errorMsg = 'Google Sign-In popup window was closed or blocked by your browser. Please allow popups or click the authorization button below to proceed.';
       }
       setExportError(errorMsg);
@@ -200,6 +234,21 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
               Select the course faculty and class section below. When you authorize Google, a <strong>separate Google Form and isolated Response Sheet</strong> will be created directly in that faculty member's Google Drive.
             </p>
 
+            {/* Form Title Input */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-indigo-200 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Google Form Name / Title</span>
+              </label>
+              <input
+                type="text"
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+                placeholder="e.g. Module-1-TOC-5B-26-27"
+                className="bg-slate-800/90 text-white border border-indigo-700/60 rounded-xl px-3.5 py-2 text-xs font-bold font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Faculty Selector */}
               <div className="flex flex-col gap-1.5">
@@ -272,32 +321,38 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
             )}
 
             {/* Active Target Banner */}
-            <div className="p-3 bg-indigo-900/50 border border-indigo-700/50 rounded-xl text-xs flex items-center justify-between text-indigo-100">
-              <div>
-                <span className="font-bold text-emerald-400">Target Assignment: </span>
-                <span className="font-extrabold">{getActiveFacultyDetails().name}</span>
-                <span className="opacity-75"> ({getActiveFacultyDetails().email})</span>
-                <span className="mx-1 font-bold text-indigo-300">•</span>
-                <span className="bg-indigo-700/80 px-2 py-0.5 rounded text-[11px] font-bold">{sectionName}</span>
+            <div className="p-3 bg-indigo-900/50 border border-indigo-700/50 rounded-xl text-xs flex flex-col gap-2 text-indigo-100">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <span className="font-bold text-emerald-400">Target Assignment: </span>
+                  <span className="font-extrabold">{getActiveFacultyDetails().name}</span>
+                  <span className="opacity-75"> ({getActiveFacultyDetails().email})</span>
+                  <span className="mx-1 font-bold text-indigo-300">•</span>
+                  <span className="bg-indigo-700/80 px-2 py-0.5 rounded text-[11px] font-bold">{sectionName}</span>
+                </div>
+                
+                <button
+                  onClick={handleExportToGoogleForms}
+                  disabled={isExporting}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all disabled:opacity-50 shrink-0"
+                >
+                  {isExporting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Creating Form...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 text-slate-900" />
+                      <span>Generate Google Form</span>
+                    </>
+                  )}
+                </button>
               </div>
-              
-              <button
-                onClick={handleExportToGoogleForms}
-                disabled={isExporting}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all disabled:opacity-50 shrink-0"
-              >
-                {isExporting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Creating Form...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 text-slate-900" />
-                    <span>Generate Google Form</span>
-                  </>
-                )}
-              </button>
+
+              <div className="text-[11px] text-indigo-200/90 bg-slate-950/40 px-3 py-1.5 rounded-lg border border-indigo-900/50">
+                💡 <strong>Faculty Sign-In:</strong> Other faculty members simply select their name above, click <em>Generate Google Form</em>, and sign in with their own <strong>@hkbk.edu.in</strong> Google account.
+              </div>
             </div>
           </div>
         )}
@@ -308,7 +363,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-black text-emerald-900 text-sm">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                <span>Google Forms Quiz Created!</span>
+                <span>Google Forms Quiz Created & Shared!</span>
               </div>
               <button
                 onClick={() => setExportResult(null)}
@@ -321,8 +376,16 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
               <span className="bg-emerald-200/80 text-emerald-950 font-black px-2 py-0.5 rounded mr-1">
                 {exportResult.formTitle}
               </span>
-              has been uploaded to Google Forms. All {questions.length} questions & automated grading rules are ready. Responses will land directly in this faculty member's Google Drive.
+              has been uploaded to Google Forms with all {questions.length} questions & automated grading.
             </p>
+
+            {exportResult.sharedWithEmail && (
+              <div className="p-2.5 bg-emerald-100/80 border border-emerald-300 rounded-xl text-xs flex items-center gap-2 text-emerald-950 font-medium">
+                <UserPlus className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>Section Editor Access automatically shared with: <strong>{exportResult.sharedWithEmail}</strong></span>
+              </div>
+            )}
+
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <a
                 href={exportResult.responderUri}
@@ -360,14 +423,49 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 font-black text-amber-900 text-sm">
                 <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0" />
-                <span>Google Sign-In Notice</span>
+                <span>Google OAuth Authorization Notice</span>
               </div>
               <button onClick={() => setExportError(null)} className="font-bold text-slate-400 hover:text-slate-600 text-xs">✕</button>
             </div>
             
-            <p className="text-slate-700 leading-relaxed">
+            <p className="text-slate-800 leading-relaxed font-medium">
               {exportError}
             </p>
+
+            {exportError.includes('Origin Mismatch') && (
+              <div className="p-3 bg-amber-100/80 border border-amber-300/80 rounded-xl space-y-1.5 text-amber-900 text-[11px] font-medium">
+                <p className="font-extrabold text-amber-950">How to fix this in Google Cloud Console:</p>
+                <ol className="list-decimal list-inside space-y-1 text-slate-800">
+                  <li>Open <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="font-bold text-indigo-700 underline">Google Cloud Credentials</a></li>
+                  <li>Click Client ID: <code className="bg-amber-200/80 px-1 py-0.5 rounded text-[10px] font-mono">451003026922-ittemi1jq8h7f5gt...</code></li>
+                  <li>Under <strong>Authorized JavaScript origins</strong>, click <strong>+ ADD URI</strong> and add: <code className="bg-amber-200/80 px-1 py-0.5 rounded text-[10px] font-mono">https://{window.location.hostname}</code></li>
+                  <li>Under <strong>Authorized redirect URIs</strong>, click <strong>+ ADD URI</strong> and add: <code className="bg-amber-200/80 px-1 py-0.5 rounded text-[10px] font-mono">https://{window.location.hostname}</code></li>
+                  <li>Save changes and wait 1 minute before trying again.</li>
+                </ol>
+              </div>
+            )}
+
+            {showManualTokenInput ? (
+              <div className="flex flex-col gap-2 p-3 bg-white border border-amber-200 rounded-xl">
+                <label className="font-extrabold text-slate-800 text-xs">Paste Google OAuth Access Token</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="ya29.a0..."
+                    value={manualToken}
+                    onChange={(e) => setManualToken(e.target.value)}
+                    className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-mono"
+                  />
+                  <button
+                    onClick={handleExportWithManualToken}
+                    disabled={isExporting || !manualToken.trim()}
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-lg transition-all shadow-xs disabled:opacity-50 shrink-0"
+                  >
+                    {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Create Form'}
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <button
@@ -376,12 +474,19 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
                 className="flex items-center gap-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl transition-all shadow-xs disabled:opacity-50"
               >
                 {isExporting ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <KeyRound className="w-4 h-4 text-indigo-200" />}
-                <span>Authorize & Create Google Form</span>
+                <span>Retry Sign In</span>
+              </button>
+
+              <button
+                onClick={() => setShowManualTokenInput(!showManualTokenInput)}
+                className="px-3 py-2 text-indigo-700 hover:text-indigo-900 font-bold text-xs underline"
+              >
+                {showManualTokenInput ? 'Hide Access Token Input' : 'Enter Access Token Manually'}
               </button>
 
               <button
                 onClick={() => setExportError(null)}
-                className="px-3 py-2 text-slate-600 hover:text-slate-900 font-bold text-xs"
+                className="px-3 py-2 text-slate-600 hover:text-slate-900 font-bold text-xs ml-auto"
               >
                 Dismiss
               </button>
