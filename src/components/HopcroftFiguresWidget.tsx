@@ -114,109 +114,109 @@ const Figure218View: React.FC<{ stepIndex: number; setStepIndex: React.Dispatch<
       <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 relative overflow-x-auto flex justify-center">
         <svg viewBox="0 0 700 320" className="w-full max-w-3xl h-auto">
           <defs>
-            <marker id="arrow218" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <marker id="arrow218" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
             </marker>
-            <marker id="arrow218-active" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <marker id="arrow218-active" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#f43f5e" />
             </marker>
           </defs>
 
           {/* Start Arrow */}
-          <line x1="20" y1="160" x2="60" y2="160" stroke="#38bdf8" strokeWidth="2.5" markerEnd="url(#arrow218)" />
-          <text x="35" y="150" fill="#94a3b8" fontSize="12" fontWeight="bold">Start</text>
+          <line x1="10" y1="160" x2="55" y2="160" stroke="#38bdf8" strokeWidth="4" markerEnd="url(#arrow218)" />
+          <text x="25" y="145" fill="#38bdf8" fontSize="14" fontWeight="900">Start</text>
 
           {/* Edges */}
           {/* q0 -> q1 */}
           <path d="M 80 160 Q 130 110 180 160" fill="none" 
             stroke={curr.edges.includes("q0-q1") ? "#f43f5e" : "#38bdf8"} 
-            strokeWidth={curr.edges.includes("q0-q1") ? "4" : "2"} 
+            strokeWidth={curr.edges.includes("q0-q1") ? "5" : "3.5"} 
             markerEnd={curr.edges.includes("q0-q1") ? "url(#arrow218-active)" : "url(#arrow218)"} />
-          <text x="130" y="125" fill="#f43f5e" fontSize="13" fontWeight="extrabold" textAnchor="middle">ε, +, -</text>
+          <text x="130" y="120" fill="#f43f5e" fontSize="16" fontWeight="900" textAnchor="middle">ε, +, -</text>
 
           {/* q1 loop */}
           <path d="M 180 140 C 160 80 200 80 180 140" fill="none"
             stroke={curr.edges.includes("q1-q1") ? "#f43f5e" : "#38bdf8"}
-            strokeWidth={curr.edges.includes("q1-q1") ? "4" : "2"} />
-          <text x="180" y="75" fill="#f43f5e" fontSize="12" fontWeight="extrabold" textAnchor="middle">0, 1, ..., 9</text>
+            strokeWidth={curr.edges.includes("q1-q1") ? "5" : "3.5"} />
+          <text x="180" y="70" fill="#f43f5e" fontSize="15" fontWeight="900" textAnchor="middle">0, 1, ..., 9</text>
 
           {/* q1 -> q4 */}
           <path d="M 180 180 L 300 240" fill="none"
             stroke={curr.edges.includes("q1-q4") ? "#f43f5e" : "#38bdf8"}
-            strokeWidth={curr.edges.includes("q1-q4") ? "4" : "2"}
+            strokeWidth={curr.edges.includes("q1-q4") ? "5" : "3.5"}
             markerEnd={curr.edges.includes("q1-q4") ? "url(#arrow218-active)" : "url(#arrow218)"} />
-          <text x="225" y="225" fill="#e2e8f0" fontSize="12" fontWeight="bold" textAnchor="middle">0, 1, ..., 9</text>
+          <text x="225" y="225" fill="#e2e8f0" fontSize="15" fontWeight="900" textAnchor="middle">0, 1, ..., 9</text>
 
           {/* q1 -> q2 */}
           <path d="M 200 160 L 320 160" fill="none"
             stroke={curr.edges.includes("q1-q2") ? "#f43f5e" : "#38bdf8"}
-            strokeWidth={curr.edges.includes("q1-q2") ? "4" : "2"}
+            strokeWidth={curr.edges.includes("q1-q2") ? "5" : "3.5"}
             markerEnd={curr.edges.includes("q1-q2") ? "url(#arrow218-active)" : "url(#arrow218)"} />
-          <text x="260" y="150" fill="#e2e8f0" fontSize="13" fontWeight="bold" textAnchor="middle">.</text>
+          <text x="260" y="145" fill="#e2e8f0" fontSize="18" fontWeight="900" textAnchor="middle">.</text>
 
           {/* q2 -> q3 */}
           <path d="M 340 160 L 460 160" fill="none"
             stroke={curr.edges.includes("q2-q3") ? "#f43f5e" : "#38bdf8"}
-            strokeWidth={curr.edges.includes("q2-q3") ? "4" : "2"}
+            strokeWidth={curr.edges.includes("q2-q3") ? "5" : "3.5"}
             markerEnd={curr.edges.includes("q2-q3") ? "url(#arrow218-active)" : "url(#arrow218)"} />
-          <text x="400" y="150" fill="#e2e8f0" fontSize="12" fontWeight="bold" textAnchor="middle">0, 1, ..., 9</text>
+          <text x="400" y="145" fill="#e2e8f0" fontSize="15" fontWeight="900" textAnchor="middle">0, 1, ..., 9</text>
 
           {/* q4 -> q3 */}
           <path d="M 320 240 L 460 180" fill="none"
             stroke={curr.edges.includes("q4-q3") ? "#f43f5e" : "#38bdf8"}
-            strokeWidth={curr.edges.includes("q4-q3") ? "4" : "2"}
+            strokeWidth={curr.edges.includes("q4-q3") ? "5" : "3.5"}
             markerEnd={curr.edges.includes("q4-q3") ? "url(#arrow218-active)" : "url(#arrow218)"} />
-          <text x="400" y="225" fill="#e2e8f0" fontSize="13" fontWeight="bold" textAnchor="middle">.</text>
+          <text x="400" y="225" fill="#e2e8f0" fontSize="18" fontWeight="900" textAnchor="middle">.</text>
 
           {/* q3 loop */}
           <path d="M 480 140 C 460 80 500 80 480 140" fill="none"
             stroke={curr.edges.includes("q3-q3") ? "#f43f5e" : "#38bdf8"}
-            strokeWidth={curr.edges.includes("q3-q3") ? "4" : "2"} />
-          <text x="480" y="75" fill="#f43f5e" fontSize="12" fontWeight="extrabold" textAnchor="middle">0, 1, ..., 9</text>
+            strokeWidth={curr.edges.includes("q3-q3") ? "5" : "3.5"} />
+          <text x="480" y="70" fill="#f43f5e" fontSize="15" fontWeight="900" textAnchor="middle">0, 1, ..., 9</text>
 
           {/* q3 -> q5 */}
           <path d="M 500 160 L 620 160" fill="none"
             stroke={curr.edges.includes("q3-q5") ? "#f43f5e" : "#38bdf8"}
-            strokeWidth={curr.edges.includes("q3-q5") ? "4" : "2"}
+            strokeWidth={curr.edges.includes("q3-q5") ? "5" : "3.5"}
             markerEnd={curr.edges.includes("q3-q5") ? "url(#arrow218-active)" : "url(#arrow218)"} />
-          <text x="560" y="150" fill="#f43f5e" fontSize="14" fontWeight="black" textAnchor="middle">ε</text>
+          <text x="560" y="145" fill="#f43f5e" fontSize="18" fontWeight="900" textAnchor="middle">ε</text>
 
           {/* Nodes */}
           {/* q0 */}
           <g transform="translate(80, 160)">
-            <circle r="20" fill={curr.highlight.includes("q0") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="3" />
-            <text fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle" dy="4">q₀</text>
+            <circle r="25" fill={curr.highlight.includes("q0") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="4" />
+            <text fill="#ffffff" fontSize="16" fontWeight="900" textAnchor="middle" dy="5">q₀</text>
           </g>
 
           {/* q1 */}
           <g transform="translate(180, 160)">
-            <circle r="20" fill={curr.highlight.includes("q1") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="3" />
-            <text fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle" dy="4">q₁</text>
+            <circle r="25" fill={curr.highlight.includes("q1") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="4" />
+            <text fill="#ffffff" fontSize="16" fontWeight="900" textAnchor="middle" dy="5">q₁</text>
           </g>
 
           {/* q2 */}
           <g transform="translate(330, 160)">
-            <circle r="20" fill={curr.highlight.includes("q2") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="3" />
-            <text fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle" dy="4">q₂</text>
+            <circle r="25" fill={curr.highlight.includes("q2") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="4" />
+            <text fill="#ffffff" fontSize="16" fontWeight="900" textAnchor="middle" dy="5">q₂</text>
           </g>
 
           {/* q3 */}
           <g transform="translate(480, 160)">
-            <circle r="20" fill={curr.highlight.includes("q3") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="3" />
-            <text fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle" dy="4">q₃</text>
+            <circle r="25" fill={curr.highlight.includes("q3") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="4" />
+            <text fill="#ffffff" fontSize="16" fontWeight="900" textAnchor="middle" dy="5">q₃</text>
           </g>
 
           {/* q4 */}
           <g transform="translate(310, 240)">
-            <circle r="20" fill={curr.highlight.includes("q4") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="3" />
-            <text fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle" dy="4">q₄</text>
+            <circle r="25" fill={curr.highlight.includes("q4") ? "#818cf8" : "#1e293b"} stroke="#818cf8" strokeWidth="4" />
+            <text fill="#ffffff" fontSize="16" fontWeight="900" textAnchor="middle" dy="5">q₄</text>
           </g>
 
           {/* q5 (Accepting) */}
           <g transform="translate(630, 160)">
-            <circle r="23" fill={curr.highlight.includes("q5") ? "#10b981" : "#1e293b"} stroke="#10b981" strokeWidth="3" />
-            <circle r="18" fill="none" stroke="#10b981" strokeWidth="2" />
-            <text fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle" dy="4">q₅</text>
+            <circle r="28" fill={curr.highlight.includes("q5") ? "#10b981" : "#1e293b"} stroke="#10b981" strokeWidth="4" />
+            <circle r="22" fill="none" stroke="#10b981" strokeWidth="3" />
+            <text fill="#ffffff" fontSize="16" fontWeight="900" textAnchor="middle" dy="5">q₅</text>
           </g>
         </svg>
       </div>

@@ -401,7 +401,11 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                 <div className="flex-1 flex flex-col justify-center my-auto">
                   {currentSlide.dfaExample ? (
                     <div className="w-full">
-                      <DfaAnimatorWidget dfa={currentSlide.dfaExample} onAskAI={handleAskAI} />
+                      <DfaAnimatorWidget
+                        dfa={currentSlide.dfaExample}
+                        onAskAI={handleAskAI}
+                        defaultTheme={projectorTheme}
+                      />
                     </div>
                   ) : currentSlide.interactiveType === 'subset-construction' ? (
                     <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
@@ -429,20 +433,20 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                         return (
                           <div
                             key={`proj-bullet-${idx}`}
-                            className={`flex items-start gap-6 p-6 sm:p-8 rounded-2xl border shadow-md ${
+                            className={`flex items-start gap-6 p-6 sm:p-8 rounded-2xl border shadow-lg ${
                               projectorTheme === 'light'
-                                ? 'bg-slate-50 border-slate-200 text-slate-800'
-                                : 'bg-slate-950/80 border-slate-800 text-slate-100'
+                                ? 'bg-slate-100 border-slate-300 text-slate-950 font-black'
+                                : 'bg-slate-950 border-slate-700 text-white font-extrabold shadow-[0_0_30px_rgba(0,0,0,0.9)]'
                             }`}
                           >
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl shrink-0 mt-0.5 shadow-sm ${
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-2xl shrink-0 mt-0.5 shadow-md ${
                               projectorTheme === 'light'
                                 ? 'bg-indigo-600 text-white'
-                                : 'bg-cyan-500 text-slate-950'
+                                : 'bg-cyan-400 text-slate-950'
                             }`}>
                               {item.bulletNumber}
                             </div>
-                            <p className="text-xl sm:text-3xl font-bold leading-snug">
+                            <p className="text-2xl sm:text-4xl font-extrabold leading-snug tracking-tight">
                               {item.text}
                             </p>
                           </div>
