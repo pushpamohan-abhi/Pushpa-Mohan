@@ -143,15 +143,13 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
   };
 
   const handleSelectOption = (optIdx: number) => {
-    if (isAnswered) return; // already answered
+    // Allow selecting and changing options freely before submit
     setSelectedAnswers({ ...selectedAnswers, [currentIdx]: optIdx });
   };
 
   const handleNext = () => {
     if (currentIdx < questions.length - 1) {
       setCurrentIdx(currentIdx + 1);
-    } else {
-      setShowResults(true);
     }
   };
 
@@ -159,6 +157,10 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
     if (currentIdx > 0) {
       setCurrentIdx(currentIdx - 1);
     }
+  };
+
+  const handleSubmitQuiz = () => {
+    setShowResults(true);
   };
 
   const calculateScore = () => {
@@ -500,18 +502,14 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
             <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200/80">
               {questions.map((q, idx) => {
                 const ans = selectedAnswers[idx];
-                let pillBg = "bg-slate-200 text-slate-600 hover:bg-slate-300";
+                let pillBg = "bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/80";
                 
                 if (ans !== undefined) {
-                  if (ans === q.correctAnswer) {
-                    pillBg = "bg-emerald-500 text-white font-bold";
-                  } else {
-                    pillBg = "bg-rose-500 text-white font-bold";
-                  }
+                  pillBg = "bg-indigo-600 text-white font-extrabold shadow-xs border border-indigo-700";
                 }
                 
                 if (idx === currentIdx) {
-                  pillBg += " ring-2 ring-indigo-600 ring-offset-1 font-bold";
+                  pillBg += " ring-2 ring-indigo-500 ring-offset-1 font-extrabold";
                 }
 
                 return (
@@ -538,18 +536,14 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
               {currentIdx + 1}. {currentQ.question}
             </h4>
 
-            {/* Options */}
+            {/* Options - Clean selection without revealing correct/wrong answers */}
             <div className="flex flex-col gap-3">
               {currentQ.options.map((option, optIdx) => {
+                const isSelected = selectedOption === optIdx;
                 let btnStyle = "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800";
-                if (isAnswered) {
-                  if (optIdx === currentQ.correctAnswer) {
-                    btnStyle = "bg-emerald-50 border-emerald-500 text-emerald-900 font-bold";
-                  } else if (optIdx === selectedOption) {
-                    btnStyle = "bg-rose-50 border-rose-500 text-rose-900 font-bold";
-                  } else {
-                    btnStyle = "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
-                  }
+                
+                if (isSelected) {
+                  btnStyle = "bg-indigo-600 border-indigo-600 text-white font-bold shadow-md";
                 }
 
                 return (
@@ -558,28 +552,26 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
                     onClick={() => handleSelectOption(optIdx)}
                     className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center justify-between text-sm ${btnStyle}`}
                   >
-                    <span>{option}</span>
-                    {isAnswered && optIdx === currentQ.correctAnswer && (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                    )}
-                    {isAnswered && optIdx === selectedOption && optIdx !== currentQ.correctAnswer && (
-                      <XCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                    <div className="flex items-center gap-3">
+                      <span className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold shrink-0 ${
+                        isSelected ? 'bg-white text-indigo-700 border-white' : 'bg-slate-200 text-slate-700 border-slate-300'
+                      }`}>
+                        {String.fromCharCode(65 + optIdx)}
+                      </span>
+                      <span>{option}</span>
+                    </div>
+                    {isSelected && (
+                      <span className="text-xs font-bold bg-indigo-500/40 text-white px-2.5 py-1 rounded-md">
+                        Selected
+                      </span>
                     )}
                   </button>
                 );
               })}
             </div>
 
-            {/* Explanation box after answer */}
-            {isAnswered && (
-              <div className="p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl flex flex-col gap-1 animate-fade-in">
-                <span className="text-xs font-bold text-indigo-900 uppercase">Explanation</span>
-                <p className="text-xs text-indigo-950 font-medium leading-relaxed">{currentQ.explanation}</p>
-              </div>
-            )}
-
-            {/* Navigation Buttons */}
-            <div className="flex justify-between items-center pt-2">
+            {/* Navigation & Submit Buttons */}
+            <div className="flex justify-between items-center pt-2 gap-3 flex-wrap">
               <button
                 onClick={handlePrev}
                 disabled={currentIdx === 0}
@@ -589,71 +581,155 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
                 <span>Previous</span>
               </button>
 
-              <button
-                onClick={handleNext}
-                disabled={!isAnswered}
-                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-40"
-              >
-                <span>{currentIdx === questions.length - 1 ? 'View Summary' : 'Next Question'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2 ml-auto">
+                {currentIdx < questions.length - 1 && (
+                  <button
+                    onClick={handleNext}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all"
+                  >
+                    <span>Next Question</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
+
+                <button
+                  onClick={handleSubmitQuiz}
+                  disabled={totalAnswered === 0}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-sm shadow-md transition-all disabled:opacity-40"
+                >
+                  <Award className="w-4 h-4 text-emerald-200" />
+                  <span>Submit Quiz & View Score ({totalAnswered}/{questions.length})</span>
+                </button>
+              </div>
             </div>
           </div>
         ) : (
-          /* Results View */
-          <div className="flex flex-col items-center justify-center py-6 text-center gap-5">
-            <div className="w-20 h-20 rounded-3xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-inner">
-              <Award className="w-10 h-10" />
-            </div>
+          /* Results View - ONLY displayed AFTER Submit */
+          <div className="flex flex-col gap-6 py-2">
+            <div className="flex flex-col items-center justify-center text-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+              <div className="w-16 h-16 rounded-3xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-inner">
+                <Award className="w-8 h-8" />
+              </div>
 
-            <div>
-              <h4 className="text-2xl font-extrabold text-slate-900">Quiz Completed!</h4>
-              <p className="text-base text-slate-600 mt-2">
-                You scored <span className="font-extrabold text-indigo-600 text-lg">{calculateScore()}</span> out of <span className="font-bold text-lg">{questions.length}</span> ({Math.round((calculateScore() / questions.length) * 100)}%)
-              </p>
-              <div className="mt-3">
-                {calculateScore() / questions.length >= 0.8 ? (
-                  <span className="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-extrabold tracking-wide uppercase">
-                    🏆 Excellent Mastery! (Pass)
-                  </span>
-                ) : calculateScore() / questions.length >= 0.5 ? (
-                  <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-800 rounded-full text-xs font-extrabold tracking-wide uppercase">
-                    👍 Good Effort! Review missed concepts.
-                  </span>
-                ) : (
-                  <span className="inline-block px-4 py-1.5 bg-rose-100 text-rose-800 rounded-full text-xs font-extrabold tracking-wide uppercase">
-                    📚 Keep Practicing the Slide Deck!
-                  </span>
-                )}
+              <div>
+                <h4 className="text-2xl font-extrabold text-slate-900">Quiz Submitted Successfully!</h4>
+                <p className="text-base text-slate-600 mt-1">
+                  Your Final Score: <span className="font-extrabold text-indigo-600 text-xl">{calculateScore()}</span> / <span className="font-bold text-xl">{questions.length}</span> ({Math.round((calculateScore() / questions.length) * 100)}%)
+                </p>
+                <div className="mt-3">
+                  {calculateScore() / questions.length >= 0.8 ? (
+                    <span className="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-extrabold tracking-wide uppercase">
+                      🏆 Excellent Mastery! (Pass)
+                    </span>
+                  ) : calculateScore() / questions.length >= 0.5 ? (
+                    <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-800 rounded-full text-xs font-extrabold tracking-wide uppercase">
+                      👍 Good Effort! Review missed concepts below.
+                    </span>
+                  ) : (
+                    <span className="inline-block px-4 py-1.5 bg-rose-100 text-rose-800 rounded-full text-xs font-extrabold tracking-wide uppercase">
+                      📚 Keep Practicing! Review answers below.
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Answer Summary Pills */}
-            <div className="w-full bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <span className="text-xs font-bold text-slate-500 uppercase block mb-3">Question Results Overview</span>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {questions.map((q, idx) => {
-                  const isCorrect = selectedAnswers[idx] === q.correctAnswer;
+            {/* Complete Answers & Explanation Review Section */}
+            <div className="flex flex-col gap-5">
+              <h5 className="font-extrabold text-sm text-slate-800 uppercase tracking-wide flex items-center gap-2 border-b pb-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Detailed Answers & Explanations</span>
+              </h5>
+
+              <div className="flex flex-col gap-6">
+                {questions.map((q, qIdx) => {
+                  const studentAns = selectedAnswers[qIdx];
+                  const isCorrect = studentAns === q.correctAnswer;
+
                   return (
-                    <button
+                    <div
                       key={q.id}
-                      onClick={() => {
-                        setShowResults(false);
-                        setCurrentIdx(idx);
-                      }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-transform hover:scale-105 flex items-center gap-1 ${
-                        isCorrect ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'
+                      className={`p-5 rounded-2xl border-2 flex flex-col gap-4 transition-all ${
+                        isCorrect ? 'bg-emerald-50/40 border-emerald-300' : 'bg-slate-50 border-slate-200'
                       }`}
                     >
-                      <span>Q{idx + 1}</span>
-                      {isCorrect ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <XCircle className="w-3.5 h-3.5 text-rose-600" />}
-                    </button>
+                      <div className="flex items-start justify-between gap-3">
+                        <h6 className="font-extrabold text-sm sm:text-base text-slate-900 leading-snug">
+                          {qIdx + 1}. {q.question}
+                        </h6>
+
+                        {isCorrect ? (
+                          <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shrink-0">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            Correct (+1)
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1 shrink-0">
+                            <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                            {studentAns !== undefined ? 'Incorrect (0)' : 'Unanswered (0)'}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Options Review */}
+                      <div className="grid grid-cols-1 gap-2 text-xs font-semibold">
+                        {q.options.map((opt, oIdx) => {
+                          const isCorrectOpt = oIdx === q.correctAnswer;
+                          const isStudentSelected = oIdx === studentAns;
+
+                          let style = 'bg-white border-slate-200 text-slate-700';
+                          if (isCorrectOpt) {
+                            style = 'bg-emerald-100/80 border-emerald-500 text-emerald-950 font-extrabold shadow-2xs';
+                          } else if (isStudentSelected && !isCorrectOpt) {
+                            style = 'bg-rose-100/80 border-rose-400 text-rose-950 font-extrabold';
+                          }
+
+                          return (
+                            <div
+                              key={oIdx}
+                              className={`p-3 rounded-xl border flex items-center justify-between gap-2 ${style}`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="font-bold font-mono opacity-80">
+                                  ({String.fromCharCode(65 + oIdx)})
+                                </span>
+                                <span>{opt}</span>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                {isCorrectOpt && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-600 text-white flex items-center gap-1">
+                                    <Check className="w-3 h-3" />
+                                    Correct Answer
+                                  </span>
+                                )}
+                                {isStudentSelected && !isCorrectOpt && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-rose-600 text-white">
+                                    Your Choice
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Explanation */}
+                      {q.explanation && (
+                        <div className="p-3.5 bg-indigo-50/90 border border-indigo-200 rounded-xl text-xs text-indigo-950 flex flex-col gap-1">
+                          <span className="font-black text-indigo-900 uppercase tracking-wider text-[10px]">
+                            💡 Explanation
+                          </span>
+                          <p className="leading-relaxed font-medium">{q.explanation}</p>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
             </div>
 
-            <div className="flex items-center gap-3 mt-2">
+            <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t">
               <button
                 onClick={restartQuiz}
                 className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-sm transition-colors"

@@ -3,6 +3,8 @@ import { PresentationDeck, Slide } from '../types';
 import { DfaAnimatorWidget } from './DfaAnimatorWidget';
 import { SubsetConstructionWidget } from './SubsetConstructionWidget';
 import { HopcroftFiguresWidget } from './HopcroftFiguresWidget';
+import { TransitionTableCard } from './TransitionTableCard';
+import { parseSlideBullets } from '../utils/slideParser';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronLeft,
@@ -71,6 +73,10 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
   const [loadingAi, setLoadingAi] = useState(false);
 
   const currentSlide = processedSlides[currentIndex] || processedSlides[0];
+
+  const parsedContent = useMemo(() => {
+    return parseSlideBullets(currentSlide.bullets || []);
+  }, [currentSlide.bullets]);
 
   // Presentation Timer
   useEffect(() => {
@@ -407,27 +413,41 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                     </div>
                   ) : (
                     <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
-                      {(currentSlide.bullets || []).map((bullet, idx) => (
-                        <div
-                          key={idx}
-                          className={`flex items-start gap-6 p-6 sm:p-8 rounded-2xl border shadow-md ${
-                            projectorTheme === 'light'
-                              ? 'bg-slate-50 border-slate-200 text-slate-800'
-                              : 'bg-slate-950/80 border-slate-800 text-slate-100'
-                          }`}
-                        >
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl shrink-0 mt-0.5 shadow-sm ${
-                            projectorTheme === 'light'
-                              ? 'bg-indigo-600 text-white'
-                              : 'bg-cyan-500 text-slate-950'
-                          }`}>
-                            {idx + 1}
+                      {parsedContent.map((item, idx) => {
+                        if (item.type === 'table') {
+                          return (
+                            <TransitionTableCard
+                              key={`proj-table-${idx}`}
+                              title={item.title}
+                              headers={item.headers}
+                              rows={item.rows}
+                              theme={projectorTheme}
+                              bulletNumber={item.bulletNumber}
+                            />
+                          );
+                        }
+                        return (
+                          <div
+                            key={`proj-bullet-${idx}`}
+                            className={`flex items-start gap-6 p-6 sm:p-8 rounded-2xl border shadow-md ${
+                              projectorTheme === 'light'
+                                ? 'bg-slate-50 border-slate-200 text-slate-800'
+                                : 'bg-slate-950/80 border-slate-800 text-slate-100'
+                            }`}
+                          >
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl shrink-0 mt-0.5 shadow-sm ${
+                              projectorTheme === 'light'
+                                ? 'bg-indigo-600 text-white'
+                                : 'bg-cyan-500 text-slate-950'
+                            }`}>
+                              {item.bulletNumber}
+                            </div>
+                            <p className="text-xl sm:text-3xl font-bold leading-snug">
+                              {item.text}
+                            </p>
                           </div>
-                          <p className="text-xl sm:text-3xl font-bold leading-snug">
-                            {bullet}
-                          </p>
-                        </div>
-                      ))}
+                        );
+                      })}
 
                       {currentSlide.codeSnippet && (
                         <div className="mt-4 bg-slate-950 text-cyan-300 p-6 rounded-2xl border border-cyan-500/40 font-mono text-xl sm:text-2xl font-bold flex items-center gap-4">
@@ -655,22 +675,36 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                         currentSlide.dfaExample ? 'md:col-span-6' : 'md:col-span-12'
                       } flex flex-col gap-6`}
                     >
-                      {(currentSlide.bullets || []).map((bullet, idx) => (
-                        <motion.div
-                          key={idx}
-                          initial={{ opacity: 0, x: -12 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.06 }}
-                          className="flex items-start gap-5 bg-blue-900/50 backdrop-blur-md p-6 rounded-2xl border border-blue-500/30 shadow-lg hover:border-cyan-400/50 transition-colors"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center justify-center shrink-0 mt-1 font-extrabold text-base shadow-inner">
-                            {idx + 1}
-                          </div>
-                          <p className="text-xl sm:text-2xl text-blue-50 leading-relaxed font-semibold">
-                            {bullet}
-                          </p>
-                        </motion.div>
-                      ))}
+                      {parsedContent.map((item, idx) => {
+                        if (item.type === 'table') {
+                          return (
+                            <TransitionTableCard
+                              key={`std-table-${idx}`}
+                              title={item.title}
+                              headers={item.headers}
+                              rows={item.rows}
+                              theme="dark"
+                              bulletNumber={item.bulletNumber}
+                            />
+                          );
+                        }
+                        return (
+                          <motion.div
+                            key={`std-bullet-${idx}`}
+                            initial={{ opacity: 0, x: -12 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.06 }}
+                            className="flex items-start gap-5 bg-blue-900/50 backdrop-blur-md p-6 rounded-2xl border border-blue-500/30 shadow-lg hover:border-cyan-400/50 transition-colors"
+                          >
+                            <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center justify-center shrink-0 mt-1 font-extrabold text-base shadow-inner">
+                              {item.bulletNumber}
+                            </div>
+                            <p className="text-xl sm:text-2xl text-blue-50 leading-relaxed font-semibold">
+                              {item.text}
+                            </p>
+                          </motion.div>
+                        );
+                      })}
 
                       {/* Code Snippet / Example Highlight */}
                       {currentSlide.codeSnippet && (

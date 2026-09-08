@@ -114,7 +114,6 @@ export async function createGoogleFormQuiz(
       createItem: {
         item: {
           title: `${idx + 1}. ${q.question}`,
-          description: q.explanation ? `Explanation: ${q.explanation}` : undefined,
           questionItem: {
             question: {
               required: true,
@@ -127,6 +126,21 @@ export async function createGoogleFormQuiz(
                     },
                   ],
                 },
+                generalFeedback: q.explanation
+                  ? {
+                      text: `Correct Answer: (${String.fromCharCode(65 + q.correctAnswer)}) ${correctAnswerText}\n\nExplanation: ${q.explanation}`,
+                    }
+                  : undefined,
+                whenRight: q.explanation
+                  ? {
+                      text: `Correct! ${q.explanation}`,
+                    }
+                  : undefined,
+                whenWrong: q.explanation
+                  ? {
+                      text: `Correct Answer: (${String.fromCharCode(65 + q.correctAnswer)}) ${correctAnswerText}. Explanation: ${q.explanation}`,
+                    }
+                  : undefined,
               },
               choiceQuestion: {
                 type: 'RADIO',
