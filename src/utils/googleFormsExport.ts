@@ -126,11 +126,6 @@ export async function createGoogleFormQuiz(
                     },
                   ],
                 },
-                generalFeedback: q.explanation
-                  ? {
-                      text: `Correct Answer: (${String.fromCharCode(65 + q.correctAnswer)}) ${correctAnswerText}\n\nExplanation: ${q.explanation}`,
-                    }
-                  : undefined,
                 whenRight: q.explanation
                   ? {
                       text: `Correct! ${q.explanation}`,

@@ -3143,11 +3143,11 @@ export const module1Quiz: QuizQuestion[] = [
       "DFA supports epsilon transitions, whereas NFA does not."
     ],
     "correctAnswer": 1,
-    "explanation": "In a DFA, the transition function δ: Q × Σ → Q is deterministic (exactly 1 state). In an NFA, δ: Q × Σ → 2^Q allows 0, 1, or multiple states."
+    "explanation": "In a DFA, δ: Q × Σ → Q is deterministic (exactly 1 next state). In an NFA, δ: Q × Σ → 2^Q yields a subset of states (0, 1, or multiple)."
   },
   {
     "id": "q2",
-    "question": "If an NFA has n states, what is the maximum number of states in its equivalent minimal DFA after subset construction?",
+    "question": "If an NFA has n states, what is the theoretical maximum number of states in its equivalent minimal/converted DFA?",
     "options": [
       "n",
       "2n",
@@ -3155,31 +3155,31 @@ export const module1Quiz: QuizQuestion[] = [
       "n^2"
     ],
     "correctAnswer": 2,
-    "explanation": "By the subset construction algorithm, the power set of n states contains 2^n possible subsets, representing the worst-case upper bound of states in the converted DFA."
+    "explanation": "By the subset construction algorithm, the power set of n states contains 2^n possible state subsets in the worst case."
   },
   {
     "id": "q3",
     "question": "What does ECLOSE(q) represent in an ε-NFA?",
     "options": [
-      "The set of all states reachable from q without reading any input symbol (using zero or more ε-transitions).",
+      "The set of states reachable from q traversing zero or more ε-transitions without consuming input.",
       "The set of all accept states in the automaton.",
       "The set of all start states in the automaton.",
-      "The set of states reachable after reading at least one character."
+      "The set of states reachable after reading at least one non-empty symbol."
     ],
     "correctAnswer": 0,
-    "explanation": "ECLOSE(q) contains state q itself plus any states reachable from q by traversing zero or more ε-transitions."
+    "explanation": "ECLOSE(q) includes state q itself plus any state reachable via paths labeled exclusively with ε."
   },
   {
     "id": "q4",
-    "question": "Which of the following is TRUE about DFA accept states?",
+    "question": "Which of the following is TRUE about DFA accept states F ⊆ Q?",
     "options": [
       "A DFA can have at most one accept state.",
       "A DFA must have at least one accept state.",
       "A DFA can have zero, one, or multiple accept states.",
-      "Accept states must not have outgoing transitions."
+      "Accept states cannot have outgoing transitions."
     ],
     "correctAnswer": 2,
-    "explanation": "F ⊆ Q can be empty (accepting no strings) or contain any subset of states, including all states."
+    "explanation": "The subset of final states F ⊆ Q can be empty, contain 1 state, or contain multiple states up to |Q|."
   },
   {
     "id": "q5",
@@ -3191,6 +3191,258 @@ export const module1Quiz: QuizQuestion[] = [
       "N + 1"
     ],
     "correctAnswer": 1,
-    "explanation": "A modulo N tracking DFA requires exactly N states corresponding to remainders 0, 1, 2, ..., N-1."
+    "explanation": "Tracking remainders modulo N requires exactly N states corresponding to remainders 0, 1, 2, ..., N-1."
+  },
+  {
+    "id": "q6",
+    "question": "How is the complement DFA D' constructed from a given complete DFA D = (Q, Σ, δ, q0, F)?",
+    "options": [
+      "Reverse all transition arrows.",
+      "Invert the accept states: F' = Q - F while keeping Q, Σ, δ, q0 unchanged.",
+      "Add a new start state with ε-transitions.",
+      "Remove all non-accepting trap states."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Complementing a complete DFA language requires swapping accepting and non-accepting states (F' = Q \\ F)."
+  },
+  {
+    "id": "q7",
+    "question": "In the formal 5-tuple definition of a Finite Automaton (Q, Σ, δ, q0, F), what does Σ represent?",
+    "options": [
+      "The finite set of internal states.",
+      "The finite alphabet of input symbols.",
+      "The state transition function.",
+      "The set of final accepting states."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Σ (Sigma) denotes the non-empty finite alphabet of allowable input characters."
+  },
+  {
+    "id": "q8",
+    "question": "What is the value of the extended transition function δ̂(q, ε) for any state q in a DFA?",
+    "options": [
+      "∅ (empty set)",
+      "q",
+      "q0",
+      "Trap State"
+    ],
+    "correctAnswer": 1,
+    "explanation": "By formal definition, processing the empty string ε leaves the automaton in its current state q: δ̂(q, ε) = q."
+  },
+  {
+    "id": "q9",
+    "question": "A string w is accepted by an NFA if and only if:",
+    "options": [
+      "ALL computation paths for w end in accept states.",
+      "AT LEAST ONE computation path for w ends in an accept state in F.",
+      "The NFA visits every state in Q while processing w.",
+      "No path for w reaches a trap state."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Nondeterminism means acceptance requires only a single valid path ending in an accepting state f ∈ F."
+  },
+  {
+    "id": "q10",
+    "question": "What is the length of the empty string ε?",
+    "options": [
+      "0",
+      "1",
+      "Undefined",
+      "-1"
+    ],
+    "correctAnswer": 0,
+    "explanation": "The empty string ε contains zero symbols, so its length |ε| = 0."
+  },
+  {
+    "id": "q11",
+    "question": "In subset construction (converting NFA to DFA), when is a macro-state S = {q1, q2, ..., qk} marked as an accepting state in the DFA?",
+    "options": [
+      "When ALL states in S are accept states of the NFA.",
+      "When AT LEAST ONE state qi ∈ S is an accept state of the NFA (S ∩ F ≠ ∅).",
+      "When S contains the start state q0.",
+      "When S has no outgoing transitions."
+    ],
+    "correctAnswer": 1,
+    "explanation": "A subset S in the converted DFA accepts if it contains any NFA accepting state."
+  },
+  {
+    "id": "q12",
+    "question": "What is a Dead State (Sink/Trap State) in a DFA?",
+    "options": [
+      "A state from which no input can ever transition to an accepting state.",
+      "The initial start state q0.",
+      "An accepting state with no incoming transitions.",
+      "A state that automatically halts the CPU."
+    ],
+    "correctAnswer": 0,
+    "explanation": "A dead/trap state is a non-accepting state whose transitions all loop back to itself."
+  },
+  {
+    "id": "q13",
+    "question": "What is the primary objective of DFA Minimization (Table-Filling Algorithm)?",
+    "options": [
+      "To convert an NFA into a DFA.",
+      "To eliminate unreachable/redundant states and merge equivalent states to produce a unique minimal DFA.",
+      "To add ε-transitions to reduce transition arrows.",
+      "To generate regular expressions automatically."
+    ],
+    "correctAnswer": 1,
+    "explanation": "DFA minimization eliminates inaccessible states and collapses indistinguishable state pairs."
+  },
+  {
+    "id": "q14",
+    "question": "In Hopcroft's Table-Filling method, when are two states p and q immediately marked as distinguishable (X) in Step 1?",
+    "options": [
+      "When one state is an accepting state (∈ F) and the other is a non-accepting state (∉ F).",
+      "When both states are start states.",
+      "When both states have self-loops on symbol 0.",
+      "When p and q have the same number of incoming arrows."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Base case: Any pair (p, q) with p ∈ F and q ∉ F is inherently distinguishable because ε distinguishes them."
+  },
+  {
+    "id": "q15",
+    "question": "What is the minimum number of states needed in a DFA to accept strings over {a, b} containing the substring 'aa'?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "correctAnswer": 1,
+    "explanation": "3 states: q0 (no 'a' seen), q1 (one 'a' seen), q2 (seen 'aa', trap accepting state)."
+  },
+  {
+    "id": "q16",
+    "question": "If state q0 has ε-transitions to q1 and q2, and q1 has an ε-transition to q3, what is ECLOSE(q0)?",
+    "options": [
+      "{q0}",
+      "{q0, q1, q2}",
+      "{q0, q1, q2, q3}",
+      "{q1, q2, q3}"
+    ],
+    "correctAnswer": 2,
+    "explanation": "ECLOSE is transitive: ECLOSE(q0) includes q0 itself, q1, q2, and q3 via q1."
+  },
+  {
+    "id": "q17",
+    "question": "What is the minimum number of states in a DFA accepting strings over {0,1} that END WITH '011'?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "correctAnswer": 1,
+    "explanation": "A DFA searching for a pattern of length k = 3 ending requires k + 1 = 4 states."
+  },
+  {
+    "id": "q18",
+    "question": "How are finite automata applied in compiler design lexical analysis (scanners)?",
+    "options": [
+      "To parse context-free syntax trees.",
+      "To recognize valid tokens (keywords, identifiers, literals) from raw source code character streams.",
+      "To generate target machine code assembly.",
+      "To optimize memory register allocation."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Lexical analyzers (e.g. Lex/Flex) use finite automata derived from regular expressions to tokenize code."
+  },
+  {
+    "id": "q19",
+    "question": "Which of the following describes a Moore Machine?",
+    "options": [
+      "An automaton where output depends ONLY on the current state.",
+      "An automaton where output depends on BOTH the current state and current input symbol.",
+      "An automaton with no output alphabet.",
+      "An automaton with infinite memory tape."
+    ],
+    "correctAnswer": 0,
+    "explanation": "In a Moore Machine, output function λ: Q → Δ maps each state directly to an output value."
+  },
+  {
+    "id": "q20",
+    "question": "Which of the following describes a Mealy Machine?",
+    "options": [
+      "An automaton where output depends ONLY on the current state.",
+      "An automaton where output depends on BOTH the current state and input symbol (λ: Q × Σ → Δ).",
+      "An automaton with non-deterministic state stacks.",
+      "An automaton without an initial state."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Mealy Machine outputs are associated with state transitions (edges), depending on (state, input)."
+  },
+  {
+    "id": "q21",
+    "question": "For an input string of length n, what is the length of the output string generated by a Moore Machine vs a Mealy Machine?",
+    "options": [
+      "Moore: n, Mealy: n",
+      "Moore: n + 1, Mealy: n",
+      "Moore: n, Mealy: n + 1",
+      "Moore: 2n, Mealy: n"
+    ],
+    "correctAnswer": 1,
+    "explanation": "A Moore machine emits an output for the initial state before reading input (length n + 1); Mealy emits on transitions (length n)."
+  },
+  {
+    "id": "q22",
+    "question": "What is the language L(G) generated by a grammar G = (V, T, P, S)?",
+    "options": [
+      "The set of all terminals and variables in V ∪ T.",
+      "The set of all terminal strings w ∈ T* derivable from start symbol S using production rules P.",
+      "The set of all production rules P.",
+      "The set of all infinite trees."
+    ],
+    "correctAnswer": 1,
+    "explanation": "L(G) consists of all terminal-only strings derived from S via S ⇒* w where w ∈ T*."
+  },
+  {
+    "id": "q23",
+    "question": "What does the regular expression (0 + 1)* represent?",
+    "options": [
+      "Only strings with equal numbers of 0s and 1s.",
+      "All possible binary strings over the alphabet {0, 1}, including the empty string ε.",
+      "Strings consisting only of alternating 0s and 1s.",
+      "Strings starting with 0 and ending with 1."
+    ],
+    "correctAnswer": 1,
+    "explanation": "(0 + 1)* generates any combination of 0s and 1s of any length, including length 0 (ε)."
+  },
+  {
+    "id": "q24",
+    "question": "Which regular expression represents strings over {a, b} containing AT LEAST ONE 'a'?",
+    "options": [
+      "(a + b)*",
+      "b* a b*",
+      "(a + b)* a (a + b)*",
+      "a* b*"
+    ],
+    "correctAnswer": 2,
+    "explanation": "(a + b)* a (a + b)* guarantees at least one 'a' surrounded by arbitrary combinations of 'a' and 'b'."
+  },
+  {
+    "id": "q25",
+    "question": "In text searching applications (Section 2.5.1), how does an automaton-based search algorithm achieve O(n) time complexity for a text of length n?",
+    "options": [
+      "By backtracking whenever a character mismatch occurs.",
+      "By maintaining a state corresponding to the longest pattern prefix matched so far, processing each character in O(1) time without backtracking.",
+      "By sorting the text characters alphabetically first.",
+      "By converting text into binary trees."
+    ],
+    "correctAnswer": 1,
+    "explanation": "DFA text search processes each text character exactly once in constant O(1) time without resetting index."
+  },
+  {
+    "id": "q26",
+    "question": "Why do web crawlers and HTML parsers (Section 2.5.2) use finite state machines?",
+    "options": [
+      "To execute JavaScript code in parallel.",
+      "To parse HTML tag states (e.g., inside tag, inside attribute quote, text body) deterministically.",
+      "To store web pages in SQL databases.",
+      "To encrypt network passwords."
+    ],
+    "correctAnswer": 1,
+    "explanation": "HTML tokenizer state machines track structural contexts like open brackets, tag names, and attribute string quotes."
   }
 ];

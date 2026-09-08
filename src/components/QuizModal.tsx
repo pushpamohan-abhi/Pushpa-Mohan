@@ -42,7 +42,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
     initGoogleOAuth();
   }, []);
 
-  const currentQ = questions[currentIdx];
+  const currentQ = questions && questions.length > 0 ? (questions[currentIdx] || questions[0]) : null;
   const selectedOption = selectedAnswers[currentIdx];
   const isAnswered = selectedOption !== undefined;
 
