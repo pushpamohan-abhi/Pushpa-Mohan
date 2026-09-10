@@ -244,21 +244,21 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
       viewBox={viewBoxStr}
     >
       <defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="48" refY="5" markerWidth="12" markerHeight="12" orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill={isLightCanvas ? '#0284c7' : '#38bdf8'} />
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill={isLightCanvas ? '#0284c7' : '#38bdf8'} />
         </marker>
-        <marker id="arrow-active" viewBox="0 0 10 10" refX="48" refY="5" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill={isLightCanvas ? '#6d28d9' : '#818cf8'} />
+        <marker id="arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill={isLightCanvas ? '#6d28d9' : '#818cf8'} />
         </marker>
         {dfa.states.map(st => {
           const stColor = getStateColor(st, isLightCanvas);
           return (
             <React.Fragment key={st}>
-              <marker id={`arrow-state-${st}`} viewBox="0 0 10 10" refX="48" refY="5" markerWidth="12" markerHeight="12" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill={stColor.stroke} />
+              <marker id={`arrow-state-${st}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill={stColor.stroke} />
               </marker>
-              <marker id={`arrow-active-state-${st}`} viewBox="0 0 10 10" refX="48" refY="5" markerWidth="14" markerHeight="14" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill={stColor.activeStroke} />
+              <marker id={`arrow-active-state-${st}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill={stColor.activeStroke} />
               </marker>
             </React.Fragment>
           );
@@ -300,11 +300,14 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
           const textColor = isActiveTransition ? '#ffffff' : (isLightCanvas ? fromStateColor.stroke : fromStateColor.text);
           const markerEndUrl = isActiveTransition ? `url(#arrow-active-state-${gt.from})` : `url(#arrow-state-${gt.from})`;
 
+          const R_from = dfa.acceptStates.includes(gt.from) ? 50 : 44;
+          const R_to = dfa.acceptStates.includes(gt.to) ? 50 : 44;
+
           // Self loop
           if (gt.from === gt.to) {
             const labelWidth = Math.max(48, displayLabel.length * 14 + 28);
             
-            // Compute outward normal vector from center
+            // Compute outward normal vector from graph center
             let nx = fromCoord.x - centerX;
             let ny = fromCoord.y - centerY;
             const len = Math.sqrt(nx*nx + ny*ny);
@@ -316,24 +319,30 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
               ny /= len;
             }
 
-            // Control points
-            const cpDist = 160;
-            const cpSpread = 100;
-            
-            const cp1X = fromCoord.x + nx * cpDist - ny * cpSpread;
-            const cp1Y = fromCoord.y + ny * cpDist + nx * cpSpread;
-            
-            const cp2X = fromCoord.x + nx * cpDist + ny * cpSpread;
-            const cp2Y = fromCoord.y + ny * cpDist - nx * cpSpread;
-            
-            // Text and label peak
-            const peakX = fromCoord.x + nx * 130;
-            const peakY = fromCoord.y + ny * 130;
+            const phi = Math.atan2(ny, nx);
+            const startAngle = phi - 0.45;
+            const endAngle = phi + 0.45;
+
+            const startX = fromCoord.x + R_from * Math.cos(startAngle);
+            const startY = fromCoord.y + R_from * Math.sin(startAngle);
+
+            const endX = fromCoord.x + R_from * Math.cos(endAngle);
+            const endY = fromCoord.y + R_from * Math.sin(endAngle);
+
+            const loopDist = 110;
+            const cp1X = startX + loopDist * Math.cos(startAngle);
+            const cp1Y = startY + loopDist * Math.sin(startAngle);
+
+            const cp2X = endX + loopDist * Math.cos(endAngle);
+            const cp2Y = endY + loopDist * Math.sin(endAngle);
+
+            const peakX = fromCoord.x + (R_from + 75) * nx;
+            const peakY = fromCoord.y + (R_from + 75) * ny;
 
             return (
               <g key={i}>
                 <path
-                  d={`M ${fromCoord.x} ${fromCoord.y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${fromCoord.x} ${fromCoord.y}`}
+                  d={`M ${startX} ${startY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${endX} ${endY}`}
                   fill="none"
                   stroke={strokeColor}
                   strokeWidth={isActiveTransition ? "6" : "4"}
@@ -369,20 +378,37 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
           const dy = toCoord.y - fromCoord.y;
           const angle = Math.atan2(dy, dx);
           
-          let pathD = `M ${fromCoord.x} ${fromCoord.y} L ${toCoord.x} ${toCoord.y}`;
+          let pathD = '';
           let midX = (fromCoord.x + toCoord.x) / 2;
           let midY = (fromCoord.y + toCoord.y) / 2;
           
           if (gt.isBidirectional) {
-            const curveOffset = 75;
+            const curveOffset = 65;
             const cx = midX - curveOffset * Math.sin(angle);
             const cy = midY + curveOffset * Math.cos(angle);
-            pathD = `M ${fromCoord.x} ${fromCoord.y} Q ${cx} ${cy} ${toCoord.x} ${toCoord.y}`;
+
+            const startAngle = Math.atan2(cy - fromCoord.y, cx - fromCoord.x);
+            const endAngle = Math.atan2(toCoord.y - cy, toCoord.x - cx);
+
+            const startX = fromCoord.x + R_from * Math.cos(startAngle);
+            const startY = fromCoord.y + R_from * Math.sin(startAngle);
+
+            const endX = toCoord.x - R_to * Math.cos(endAngle);
+            const endY = toCoord.y - R_to * Math.sin(endAngle);
+
+            pathD = `M ${startX} ${startY} Q ${cx} ${cy} ${endX} ${endY}`;
             midX = (midX + cx) / 2;
             midY = (midY + cy) / 2;
           } else {
-            midX -= 42 * Math.sin(angle);
-            midY += 42 * Math.cos(angle);
+            const startX = fromCoord.x + R_from * Math.cos(angle);
+            const startY = fromCoord.y + R_from * Math.sin(angle);
+
+            const endX = toCoord.x - R_to * Math.cos(angle);
+            const endY = toCoord.y - R_to * Math.sin(angle);
+
+            pathD = `M ${startX} ${startY} L ${endX} ${endY}`;
+            midX -= 25 * Math.sin(angle);
+            midY += 25 * Math.cos(angle);
           }
 
           const labelWidth = Math.max(48, displayLabel.length * 14 + 28);
@@ -549,8 +575,8 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
             </div>
           )}
 
-          {/* Input String Controller */}
-          <div className="flex items-center gap-2">
+          {/* Input String & Direct Playback Controller */}
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-mono font-bold">Input w:</span>
             <input
               type="text"
@@ -558,13 +584,45 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
               onChange={(e) => {
                 setInputString(e.target.value.trim());
               }}
-              className={`border rounded-lg px-3 py-1 text-sm font-mono font-bold focus:outline-none focus:border-indigo-500 w-32 ${
+              className={`border rounded-lg px-3 py-1 text-sm font-mono font-bold focus:outline-none focus:border-indigo-500 w-28 ${
                 isLightCanvas
-                  ? 'bg-white border-slate-300 text-slate-950 shadow-sm'
+                  ? 'bg-white border-slate-300 text-slate-950 shadow-xs'
                   : 'bg-slate-800 border-slate-700 text-white'
               }`}
-              placeholder="e.g. aab"
+              placeholder="e.g. 010"
             />
+
+            {/* Auto Play Button right next to Input */}
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              disabled={status === 'accepted' || status === 'rejected'}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-black text-xs transition-all shadow-sm ${
+                isPlaying
+                  ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-900/40'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={isPlaying ? "Pause Simulation" : "Auto Play Simulation"}
+            >
+              {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+              <span>{isPlaying ? 'Pause' : 'Auto Play'}</span>
+            </button>
+
+            {/* Step Button next to Auto Play */}
+            <button
+              onClick={stepForward}
+              disabled={isPlaying || status === 'accepted' || status === 'rejected'}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-xs transition-colors border disabled:opacity-50 ${
+                isLightCanvas
+                  ? 'bg-white hover:bg-slate-100 text-slate-900 border-slate-300'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
+              }`}
+              title="Step 1 Symbol Forward"
+            >
+              <SkipForward className="w-3.5 h-3.5" />
+              <span>Step</span>
+            </button>
+
+            {/* Reset Button */}
             <button
               onClick={resetSimulation}
               className={`p-1.5 rounded-lg border transition-colors ${
