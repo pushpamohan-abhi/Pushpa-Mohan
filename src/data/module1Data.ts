@@ -660,16 +660,18 @@ export const module1Deck: SlideDeck = {
     },
     {
       "id": "slide-10",
-      "title": "DFA Design: Even vs Odd Number of 1s",
-      "subtitle": "Parity Checker State Machine",
+      "title": "DFA Design: Odd Number of 1s",
+      "subtitle": "Parity Checker State Machine for Strings with Odd Count of 1s",
       "bullets": [
-        "Problem 1: DFA over Σ = {0, 1} accepting even number of 1s (q0 accepting).",
-        "Problem 2: DFA over Σ = {0, 1} accepting odd number of 1s:",
-        "• q0: Even count of 1s (Non-accepting)",
-        "• q1: Odd count of 1s (Accepting state F = {q1})",
-        "• Transition on '0': Stay in current parity. Transition on '1': Flip parity."
+        "Language L = { w ∈ {0, 1}* | w contains an odd number of 1s }",
+        "State Definitions:",
+        "• q0: Even count of 1s encountered so far (Non-accepting start state)",
+        "• q1: Odd count of 1s encountered so far (Accepting state F = {q1})",
+        "Transition Rules:",
+        "• Reading '0': Retain current state parity (self-loop on q0 and q1).",
+        "• Reading '1': Toggle parity state between q0 (even) and q1 (odd)."
       ],
-      "explanation": "Parity checking switches between even and odd states upon encountering each '1'.",
+      "explanation": "Parity checking toggles between q0 (even) and q1 (odd) upon encountering each '1'. State q1 is the sole accept state, enforcing that only strings with an odd number of 1s are accepted.",
       "dfaExample": {
         "title": "DFA: Odd Number of 1s",
         "states": [
@@ -1889,6 +1891,28 @@ export const module1Deck: SlideDeck = {
         "testString": "011101"
       },
       "interactiveType": "dfa-runner"
+    },
+    {
+      "id": "dfa-disadvantages-motivation-nfa",
+      "title": "Disadvantages of DFA & Motivation for NFA",
+      "subtitle": "Why Deterministic Machines Become Complex & Why We Need NFA",
+      "bullets": [
+        "1. Deterministic Rigidity (Exactly 1 Transition Per Symbol):",
+        "   • Every DFA state MUST define an outgoing transition for EVERY alphabet symbol in Σ.",
+        "   • Missing choices require explicit, redundant 'dead / trap' states (e.g. q_dead).",
+        "2. State Explosion Problem for Pattern Matching:",
+        "   • Designing DFAs for complex pattern matching (e.g., 'k-th character from right is 1') requires 2^k states.",
+        "   • Complex parallel string patterns (e.g. 'contains 101 OR 110') lead to unwieldy transition matrices.",
+        "3. Harder to Design & Human Readability:",
+        "   • DFAs require tracking global state memory at every single step, making manual design error-prone.",
+        "4. Why We Need Non-Determinism (NFA):",
+        "   • Guesses & Parallel Branching: Allows multiple transitions or 0 transitions on the same symbol.",
+        "   • Compact Machine Sizes: NFAs require significantly fewer states (e.g., k+1 states vs 2^k states in DFA).",
+        "   • Natural Mapping to Regular Expressions: Ideal bridge for compilers, tokenizers, and search engines."
+      ],
+      "explanation": "DFAs are rigid and computationally strict. NFAs provide an intuitive, highly compact abstraction that allows parallel path exploration without requiring dead states or exponential manual state tracking.",
+      "codeSnippet": "DFA: Rigid (Strictly 1 transition per symbol, 2^k states)  vs  NFA: Flexible (0, 1, or multiple transitions, k+1 states)",
+      "interactiveType": "none"
     },
     {
       "id": "nfa-def-extended-delta",
