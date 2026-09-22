@@ -1,44 +1,9 @@
-import { SlideDeck, QuizQuestion } from "../types";
+import { PresentationDeck, QuizQuestion } from '../types';
 
-export const module1Deck: SlideDeck = {
+export const module1Deck: PresentationDeck = {
   "title": "Theory of Computation: Module 1 Master Notes",
   "description": "Comprehensive curriculum covering set theory foundations, alphabets, strings, languages, formal DFA/NFA definitions, subset construction, DFA minimization, and language hierarchies based on your uploaded notes.",
   "slides": [
-    {
-      "id": "slide-1",
-      "title": "Set Theory Foundations: Cardinality & Power Set",
-      "subtitle": "Module 0 - Mathematical Preliminaries",
-      "bullets": [
-        "Set Definition: A set is an unordered collection of distinct, well-defined objects or elements.",
-        "• Example: Let A = {red, blue, green}. Here A is a set containing 3 distinct color elements.",
-        "Cardinality (|A|): The exact count of elements in set A.",
-        "• Example: If A = {10, 20, 30, 40}, then cardinality |A| = 4.",
-        "Power Set (2^A): The collection of ALL possible subsets of A.",
-        "• Formula: If a set A has n elements (|A| = n), its power set 2^A has exactly 2^n subsets.",
-        "• Concrete Example: Let A = {a, b}. Power set 2^A = { ∅, {a}, {b}, {a, b} } (Total 2^2 = 4 subsets)."
-      ],
-      "explanation": "Set theory forms the foundational language of discrete mathematics and automata theory, defining how states, alphabets, and languages are structured.",
-      "codeSnippet": "Set A = {1, 2}  |  Cardinality |A| = 2  |  Power Set 2^A = { ∅, {1}, {2}, {1,2} } (2^2 = 4 subsets)",
-      "interactiveType": "none"
-    },
-    {
-      "id": "slide-2",
-      "title": "Cartesian Product & Set Operations",
-      "subtitle": "Module 0.2 - Set Algebra & Examples",
-      "bullets": [
-        "Cartesian Product (A × B): The set of all ordered pairs (a, b) where a ∈ A and b ∈ B.",
-        "• Concrete Example: Let A = {1, 2} and B = {x, y}.",
-        "• Result: A × B = { (1,x), (1,y), (2,x), (2,y) } (Total pairs = |A| × |B| = 2 × 2 = 4).",
-        "Set Operations with Examples:",
-        "• Union (A ∪ B): Elements in A, B, or both. Ex: {1, 2} ∪ {2, 3} = {1, 2, 3}.",
-        "• Intersection (A ∩ B): Elements common to both. Ex: {1, 2} ∩ {2, 3} = {2}.",
-        "• Difference (A - B): Elements in A not in B. Ex: {1, 2} - {2, 3} = {1}.",
-        "• Complement (Ā): Elements in Universal set U not in A. Ex: If U = {1, 2, 3, 4} and A = {1, 2}, then Ā = U - A = {3, 4}."
-      ],
-      "explanation": "Cartesian products are fundamental when defining transition functions like δ: Q × Σ → Q (mapping state and symbol pairs to next states).",
-      "codeSnippet": "A = {1, 2}, B = {x, y} ⇒ A × B = {(1,x), (1,y), (2,x), (2,y)}",
-      "interactiveType": "none"
-    },
     {
       "id": "fa-intro-switch",
       "title": "Introduction to Finite Automata: The Switch Model",
@@ -73,6 +38,76 @@ export const module1Deck: SlideDeck = {
       ],
       "explanation": "Transition diagrams offer visual clarity, while transition tables provide O(1) direct array lookup for software runtime execution.",
       "codeSnippet": "Table Matrix: Row = Current State | Column = Input Symbol | Cell = δ(Current, Input)",
+      "interactiveType": "none"
+    },
+    {
+      "id": "slide-7",
+      "title": "Structural Representations for Finite Automata Summary",
+      "subtitle": "Module 1.4.1 - Summary Comparison",
+      "bullets": [
+        "As outlined by Hopcroft, Motwani, & Ullman, finite automata can be represented in 3 major structural forms:",
+        "1. Transition Graphs (Diagrams): Visual nodes representing states (q₀ initial, double circles for final F) and directed edges labeled with alphabet symbols.",
+        "2. Transition Tables: 2D tabular matrices mapping current states (rows) and input symbols (columns) to next states (cells). Ideal for algorithmic lookup.",
+        "3. Grammars / Regular Expressions: Algebraic production rules (e.g., A → aB, A → ε) specifying how valid strings are syntactically generated."
+      ],
+      "explanation": "Structural representations allow automata to be studied visually, implemented efficiently in software tables, or analyzed algebraically via grammars.",
+      "codeSnippet": "Graph (Visual) ⟷ Table (Algorithmic) ⟷ Grammar (Algebraic)",
+      "interactiveType": "none"
+    },
+    {
+      "id": "fa-automata-complexity",
+      "title": "Automata and Complexity",
+      "subtitle": "Hopcroft, Motwani & Ullman Section 1.3 - Decidability, Intractability & Memory Bounds",
+      "bullets": [
+        "1. What Can a Computer Do? (Decidability vs Undecidability):",
+        "   • Decidable Problems: Problems solvable by formal algorithmic models (e.g. Finite Automata, Turing Machines).",
+        "   • Undecidable Problems: Problems that NO computer program can ever solve (e.g. Turing's Halting Problem).",
+        "2. What Can a Computer Do Efficiently? (Intractability & Complexity):",
+        "   • Tractable (Class P): Problems solvable in Polynomial Time O(n^k).",
+        "   • Intractable (Class NP / NP-Hard): Problems with no known polynomial-time solution (e.g. Travelling Salesperson).",
+        "3. Finite Automata as the Simplest Computational Model:",
+        "   • Memory Constraint: Finite Automata have ZERO auxiliary memory storage—only a fixed, finite set of internal states.",
+        "   • Time Complexity: Processing an input string of length n takes strictly O(n) linear time!",
+        "4. The Hierarchy of Automata & Computational Models:",
+        "   • Finite Automata (Regular Languages) ⊂ Pushdown Automata (Context-Free) ⊂ Turing Machines (Recursively Enumerable)."
+      ],
+      "explanation": "Automata theory provides the theoretical foundation for computational limits. Finite Automata represent bounded-memory computers operating in guaranteed linear O(n) time.",
+      "codeSnippet": "Regular (Finite Memory O(n))  ⊂  Context-Free (Stack)  ⊂  Decidable  ⊂  Recursively Enumerable (Turing Machine)",
+      "interactiveType": "none"
+    },
+    {
+      "id": "slide-1",
+      "title": "Set Theory Foundations: Cardinality & Power Set",
+      "subtitle": "Module 0 - Mathematical Preliminaries",
+      "bullets": [
+        "Set Definition: A set is an unordered collection of distinct, well-defined objects or elements.",
+        "• Example: Let A = {red, blue, green}. Here A is a set containing 3 distinct color elements.",
+        "Cardinality (|A|): The exact count of elements in set A.",
+        "• Example: If A = {10, 20, 30, 40}, then cardinality |A| = 4.",
+        "Power Set (2^A): The collection of ALL possible subsets of A.",
+        "• Formula: If a set A has n elements (|A| = n), its power set 2^A has exactly 2^n subsets.",
+        "• Concrete Example: Let A = {a, b}. Power set 2^A = { ∅, {a}, {b}, {a, b} } (Total 2^2 = 4 subsets)."
+      ],
+      "explanation": "Set theory forms the foundational language of discrete mathematics and automata theory, defining how states, alphabets, and languages are structured.",
+      "codeSnippet": "Set A = {1, 2}  |  Cardinality |A| = 2  |  Power Set 2^A = { ∅, {1}, {2}, {1,2} } (2^2 = 4 subsets)",
+      "interactiveType": "none"
+    },
+    {
+      "id": "slide-2",
+      "title": "Cartesian Product & Set Operations",
+      "subtitle": "Module 0.2 - Set Algebra & Examples",
+      "bullets": [
+        "Cartesian Product (A × B): The set of all ordered pairs (a, b) where a ∈ A and b ∈ B.",
+        "• Concrete Example: Let A = {1, 2} and B = {x, y}.",
+        "• Result: A × B = { (1,x), (1,y), (2,x), (2,y) } (Total pairs = |A| × |B| = 2 × 2 = 4).",
+        "Set Operations with Examples:",
+        "• Union (A ∪ B): Elements in A, B, or both. Ex: {1, 2} ∪ {2, 3} = {1, 2, 3}.",
+        "• Intersection (A ∩ B): Elements common to both. Ex: {1, 2} ∩ {2, 3} = {2}.",
+        "• Difference (A - B): Elements in A not in B. Ex: {1, 2} - {2, 3} = {1}.",
+        "• Complement (Ā): Elements in Universal set U not in A. Ex: If U = {1, 2, 3, 4} and A = {1, 2}, then Ā = U - A = {3, 4}."
+      ],
+      "explanation": "Cartesian products are fundamental when defining transition functions like δ: Q × Σ → Q (mapping state and symbol pairs to next states).",
+      "codeSnippet": "A = {1, 2}, B = {x, y} ⇒ A × B = {(1,x), (1,y), (2,x), (2,y)}",
       "interactiveType": "none"
     },
     {
@@ -139,20 +174,6 @@ export const module1Deck: SlideDeck = {
       ],
       "explanation": "The automata hierarchy classifies problems by computational power and resource constraints, governing what computers can efficiently solve.",
       "codeSnippet": "Regular ⊂ Context-Free ⊂ Context-Sensitive ⊂ Recursively Enumerable",
-      "interactiveType": "none"
-    },
-    {
-      "id": "slide-7",
-      "title": "Structural Representations for Finite Automata Summary",
-      "subtitle": "Module 1.4.1 - Summary Comparison",
-      "bullets": [
-        "As outlined by Hopcroft, Motwani, & Ullman, finite automata can be represented in 3 major structural forms:",
-        "1. Transition Graphs (Diagrams): Visual nodes representing states (q₀ initial, double circles for final F) and directed edges labeled with alphabet symbols.",
-        "2. Transition Tables: 2D tabular matrices mapping current states (rows) and input symbols (columns) to next states (cells). Ideal for algorithmic lookup.",
-        "3. Grammars / Regular Expressions: Algebraic production rules (e.g., A → aB, A → ε) specifying how valid strings are syntactically generated."
-      ],
-      "explanation": "Structural representations allow automata to be studied visually, implemented efficiently in software tables, or analyzed algebraically via grammars.",
-      "codeSnippet": "Graph (Visual) ⟷ Table (Algorithmic) ⟷ Grammar (Algebraic)",
       "interactiveType": "none"
     },
     {
@@ -1893,169 +1914,142 @@ export const module1Deck: SlideDeck = {
       "interactiveType": "dfa-runner"
     },
     {
-      "id": "dfa-disadvantages-motivation-nfa",
-      "title": "Disadvantages of DFA & Motivation for NFA",
-      "subtitle": "Why Deterministic Machines Become Complex & Why We Need NFA",
+      "id": "slide-18",
+      "title": "DFA Minimization (Table Filling Method)",
+      "subtitle": "Module 1.8 - Optimizing State Machines",
       "bullets": [
-        "1. Deterministic Rigidity (Exactly 1 Transition Per Symbol):",
-        "   • Every DFA state MUST define an outgoing transition for EVERY alphabet symbol in Σ.",
-        "   • Missing choices require explicit, redundant 'dead / trap' states (e.g. q_dead).",
-        "2. State Explosion Problem for Pattern Matching:",
-        "   • Designing DFAs for complex pattern matching (e.g., 'k-th character from right is 1') requires 2^k states.",
-        "   • Complex parallel string patterns (e.g. 'contains 101 OR 110') lead to unwieldy transition matrices.",
-        "3. Harder to Design & Human Readability:",
-        "   • DFAs require tracking global state memory at every single step, making manual design error-prone.",
-        "4. Why We Need Non-Determinism (NFA):",
-        "   • Guesses & Parallel Branching: Allows multiple transitions or 0 transitions on the same symbol.",
-        "   • Compact Machine Sizes: NFAs require significantly fewer states (e.g., k+1 states vs 2^k states in DFA).",
-        "   • Natural Mapping to Regular Expressions: Ideal bridge for compilers, tokenizers, and search engines."
+        "Goal: Reduce the number of states in a DFA while preserving its accepted language.",
+        "Steps for Minimization:",
+        "1. Remove all states unreachable from the start state.",
+        "2. Create a table of all state pairs (p, q).",
+        "3. Mark all pairs (Final, Non-Final) as distinguishable (X).",
+        "4. For remaining pairs, check transitions on each symbol. If they lead to a marked pair, mark current pair.",
+        "5. Merge indistinguishable states into single equivalence classes."
       ],
-      "explanation": "DFAs are rigid and computationally strict. NFAs provide an intuitive, highly compact abstraction that allows parallel path exploration without requiring dead states or exponential manual state tracking.",
-      "codeSnippet": "DFA: Rigid (Strictly 1 transition per symbol, 2^k states)  vs  NFA: Flexible (0, 1, or multiple transitions, k+1 states)",
-      "interactiveType": "none"
-    },
-    {
-      "id": "nfa-def-extended-delta",
-      "title": "Nondeterministic Finite Automata (NFA) & Extended Transition Function",
-      "subtitle": "Section 2.3 - Formal 5-Tuple, Powerset Codomain & Language of NFA",
-      "bullets": [
-        "Formal NFA 5-Tuple Definition: N = (Q, Σ, δ, q₀, F)",
-        "• Q, Σ, q₀, F match DFA definitions.",
-        "• δ: Q × Σ → 2^Q  (Transition function maps to a SUBSET of Q, allowed to be ∅ or multiple states).",
-        "Extended Transition Function δ̂ for NFA (δ̂: Q × Σ* → 2^Q):",
-        "• BASIS: δ̂(q, ε) = {q}",
-        "• INDUCTION STEP: For string w = xa (where x ∈ Σ* and a ∈ Σ):",
-        "  δ̂(q, xa) = ⋃_{p ∈ δ̂(q, x)} δ(p, a)",
-        "Language Accepted by NFA N: L(N) = { w ∈ Σ* | δ̂(q₀, w) ∩ F ≠ ∅ }.",
-        "Key Intuition: An NFA accepts string w if AT LEAST ONE computational path from q₀ on input w terminates in an accepting state in F."
-      ],
-      "explanation": "While DFAs follow a single deterministic trajectory, NFAs explore multiple computational paths simultaneously in parallel.",
-      "codeSnippet": "NFA δ: Q × Σ → 2^Q  |  Acceptance condition: δ̂(q0, w) ∩ F ≠ ∅",
-      "interactiveType": "none"
-    },
-    {
-      "id": "nfa-dfa-subset-construction",
-      "title": "Equivalence of DFA and NFA: Subset Construction Algorithm",
-      "subtitle": "Section 2.3.1 & 2.3.2 - Lazy Reachable Subset Construction Method",
-      "bullets": [
-        "Theorem 2.11 (Hopcroft & Ullman): A language L is accepted by an NFA if and only if L is accepted by some DFA.",
-        "Subset Construction Algorithm (NFA N = (Q_N, Σ, δ_N, q₀_N, F_N) → DFA D = (Q_D, Σ, δ_D, q₀_D, F_D)):",
-        "1. DFA Start State: q₀_D = {q₀_N}.",
-        "2. DFA State Set Q_D: Subsets of Q_N reachable from q₀_D.",
-        "3. DFA Transition Function: For composite state S ⊆ Q_N and a ∈ Σ:",
-        "   δ_D(S, a) = ⋃_{p ∈ S} δ_N(p, a).",
-        "4. DFA Final States: F_D = { S ⊆ Q_N | S ∩ F_N ≠ ∅ } (Any subset containing at least one NFA final state).",
-        "Worked Example: Converting NFA accepting strings ending in '01' to DFA."
-      ],
-      "explanation": "Subset construction maps the non-deterministic set of active NFA states into single composite DFA states.",
+      "explanation": "Minimized DFAs have the theoretical minimum number of states, achieving maximum hardware and software execution efficiency.",
+      "codeSnippet": "Equivalence Classes: e.g., states C and D merged into [C, D]",
       "dfaExample": {
-        "title": "NFA: Ends with '01'",
+        "title": "Original DFA (Unminimized)",
         "states": [
-          "q0",
-          "q1",
-          "q2"
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
         ],
         "alphabet": [
           "0",
           "1"
         ],
-        "startState": "q0",
+        "startState": "A",
         "acceptStates": [
-          "q2"
+          "C",
+          "D"
         ],
         "transitions": [
           {
-            "from": "q0",
+            "from": "A",
             "symbol": "0",
-            "to": "q0"
+            "to": "B"
           },
           {
-            "from": "q0",
+            "from": "A",
             "symbol": "1",
-            "to": "q0"
+            "to": "C"
           },
           {
-            "from": "q0",
+            "from": "B",
             "symbol": "0",
-            "to": "q1"
+            "to": "A"
           },
           {
-            "from": "q1",
+            "from": "B",
             "symbol": "1",
-            "to": "q2"
+            "to": "D"
+          },
+          {
+            "from": "C",
+            "symbol": "0",
+            "to": "C"
+          },
+          {
+            "from": "C",
+            "symbol": "1",
+            "to": "D"
+          },
+          {
+            "from": "D",
+            "symbol": "0",
+            "to": "D"
+          },
+          {
+            "from": "D",
+            "symbol": "1",
+            "to": "C"
+          },
+          {
+            "from": "E",
+            "symbol": "0",
+            "to": "A"
+          },
+          {
+            "from": "E",
+            "symbol": "1",
+            "to": "C"
           }
         ],
-        "testString": "1001",
+        "testString": "0110",
         "convertedDfa": {
-          "title": "Converted DFA via Subset Construction",
+          "title": "Minimized DFA (3 States)",
           "states": [
-            "{q0}",
-            "{q0,q1}",
-            "{q0,q2}"
+            "A",
+            "B",
+            "[C,D]"
           ],
           "alphabet": [
             "0",
             "1"
           ],
-          "startState": "{q0}",
+          "startState": "A",
           "acceptStates": [
-            "{q0,q2}"
+            "[C,D]"
           ],
           "transitions": [
             {
-              "from": "{q0}",
+              "from": "A",
               "symbol": "0",
-              "to": "{q0,q1}"
+              "to": "B"
             },
             {
-              "from": "{q0}",
+              "from": "A",
               "symbol": "1",
-              "to": "{q0}"
+              "to": "[C,D]"
             },
             {
-              "from": "{q0,q1}",
+              "from": "B",
               "symbol": "0",
-              "to": "{q0,q1}"
+              "to": "A"
             },
             {
-              "from": "{q0,q1}",
+              "from": "B",
               "symbol": "1",
-              "to": "{q0,q2}"
+              "to": "[C,D]"
             },
             {
-              "from": "{q0,q2}",
+              "from": "[C,D]",
               "symbol": "0",
-              "to": "{q0,q1}"
+              "to": "[C,D]"
             },
             {
-              "from": "{q0,q2}",
+              "from": "[C,D]",
               "symbol": "1",
-              "to": "{q0}"
+              "to": "[C,D]"
             }
           ],
-          "testString": "1001"
+          "testString": "0110"
         }
       },
       "interactiveType": "dfa-runner"
-    },
-    {
-      "id": "nfa-subset-worst-case",
-      "title": "Worst Case for Subset Construction: Exponential State Explosion",
-      "subtitle": "Sections 2.3.1, 2.3.2 & 2.3.3 - The n-th Symbol from the End (Ullman Textbook)",
-      "bullets": [
-        "Problem Statement: Consider the language L_n over Σ = {0, 1} where the n-th character from the right (end) is '1'.",
-        "NFA State Complexity: Requires only n + 1 states!",
-        "• States: q0 (looping start state), q1, q2, ..., qn (final state).",
-        "• Transition: δ(q0, 1) = {q0, q1}; δ(qi, 0) = δ(qi, 1) = {q_{i+1}} for i ≥ 1.",
-        "DFA State Complexity: REQUIRES EXACTLY 2^n STATES!",
-        "• Why 2^n States? To decide whether the symbol n steps ago was a '1', a deterministic automaton MUST memorize every possible binary string of length n.",
-        "• For n = 3 (3rd symbol from end is '1'): NFA needs 4 states, but DFA requires 2^3 = 8 states ({000}, {001}, {010}, ..., {111}).",
-        "• For n = 10: NFA needs 11 states, while DFA requires 2^10 = 1,024 states!",
-        "Conclusion: Demonstrates that the worst-case space bound |Q_D| = 2^|Q_N| is strictly tight!"
-      ],
-      "explanation": "This classic example from Hopcroft & Ullman proves that NFAs can be exponentially more succinct than DFAs for certain languages.",
-      "codeSnippet": "Language Ln: n-th symbol from right is 1  ⇒  NFA: n+1 states  |  DFA: 2^n states!",
-      "interactiveType": "none"
     },
     {
       "id": "nfa-sol-1",
@@ -2452,170 +2446,6 @@ export const module1Deck: SlideDeck = {
         "testString": "bbaab"
       },
       "interactiveType": "dfa-runner"
-    },
-    {
-      "id": "slide-18",
-      "title": "DFA Minimization (Table Filling Method)",
-      "subtitle": "Module 1.8 - Optimizing State Machines",
-      "bullets": [
-        "Goal: Reduce the number of states in a DFA while preserving its accepted language.",
-        "Steps for Minimization:",
-        "1. Remove all states unreachable from the start state.",
-        "2. Create a table of all state pairs (p, q).",
-        "3. Mark all pairs (Final, Non-Final) as distinguishable (X).",
-        "4. For remaining pairs, check transitions on each symbol. If they lead to a marked pair, mark current pair.",
-        "5. Merge indistinguishable states into single equivalence classes."
-      ],
-      "explanation": "Minimized DFAs have the theoretical minimum number of states, achieving maximum hardware and software execution efficiency.",
-      "codeSnippet": "Equivalence Classes: e.g., states C and D merged into [C, D]",
-      "dfaExample": {
-        "title": "Original DFA (Unminimized)",
-        "states": [
-          "A",
-          "B",
-          "C",
-          "D",
-          "E"
-        ],
-        "alphabet": [
-          "0",
-          "1"
-        ],
-        "startState": "A",
-        "acceptStates": [
-          "C",
-          "D"
-        ],
-        "transitions": [
-          {
-            "from": "A",
-            "symbol": "0",
-            "to": "B"
-          },
-          {
-            "from": "A",
-            "symbol": "1",
-            "to": "C"
-          },
-          {
-            "from": "B",
-            "symbol": "0",
-            "to": "A"
-          },
-          {
-            "from": "B",
-            "symbol": "1",
-            "to": "D"
-          },
-          {
-            "from": "C",
-            "symbol": "0",
-            "to": "C"
-          },
-          {
-            "from": "C",
-            "symbol": "1",
-            "to": "D"
-          },
-          {
-            "from": "D",
-            "symbol": "0",
-            "to": "D"
-          },
-          {
-            "from": "D",
-            "symbol": "1",
-            "to": "C"
-          },
-          {
-            "from": "E",
-            "symbol": "0",
-            "to": "A"
-          },
-          {
-            "from": "E",
-            "symbol": "1",
-            "to": "C"
-          }
-        ],
-        "testString": "0110",
-        "convertedDfa": {
-          "title": "Minimized DFA (3 States)",
-          "states": [
-            "A",
-            "B",
-            "[C,D]"
-          ],
-          "alphabet": [
-            "0",
-            "1"
-          ],
-          "startState": "A",
-          "acceptStates": [
-            "[C,D]"
-          ],
-          "transitions": [
-            {
-              "from": "A",
-              "symbol": "0",
-              "to": "B"
-            },
-            {
-              "from": "A",
-              "symbol": "1",
-              "to": "[C,D]"
-            },
-            {
-              "from": "B",
-              "symbol": "0",
-              "to": "A"
-            },
-            {
-              "from": "B",
-              "symbol": "1",
-              "to": "[C,D]"
-            },
-            {
-              "from": "[C,D]",
-              "symbol": "0",
-              "to": "[C,D]"
-            },
-            {
-              "from": "[C,D]",
-              "symbol": "1",
-              "to": "[C,D]"
-            }
-          ],
-          "testString": "0110"
-        }
-      },
-      "interactiveType": "dfa-runner"
-    },
-    {
-      "id": "slide-19",
-      "title": "Regular Expressions & Grammars",
-      "subtitle": "Module 1.9 - Algebraic Pattern Matching",
-      "bullets": [
-        "Regular Expressions (RE): Algebraic notation to describe regular languages.",
-        "• Operators: Union (+), Concatenation (.), Kleene Star (*).",
-        "• Example: [A-Z][a-z]* represents capitalized words.",
-        "Grammars: Production rules generating strings of a language.",
-        "• Chomsky Type-3 Grammars generate Regular Languages."
-      ],
-      "explanation": "Regular expressions are widely used in text editors, compilers, and search engines for pattern recognition.",
-      "codeSnippet": "RE for binary strings ending in 1: (0 + 1)*1",
-      "interactiveType": "none"
-    },
-    {
-      "id": "slide-20",
-      "title": "Module 1 Mastery Quiz",
-      "subtitle": "Test Your Knowledge across All Topics",
-      "bullets": [
-        "Review your understanding of Alphabets, DFAs, NFAs, Subset Construction, and Minimization.",
-        "Take the interactive quiz below to test your exam readiness!"
-      ],
-      "explanation": "Complete this quiz to verify your mastery of Module 1 Theory of Computation concepts.",
-      "interactiveType": "quiz"
     },
     {
       "id": "nfa-sol-lab-cab-dad",
@@ -3068,6 +2898,230 @@ export const module1Deck: SlideDeck = {
       "figureKey": "2.22"
     },
     {
+      "id": "dfa-disadvantages-motivation-nfa",
+      "title": "Disadvantages of DFA & Motivation for NFA",
+      "subtitle": "Why Deterministic Machines Become Complex & Why We Need NFA",
+      "bullets": [
+        "1. Deterministic Rigidity (Exactly 1 Transition Per Symbol):",
+        "   • Every DFA state MUST define an outgoing transition for EVERY alphabet symbol in Σ.",
+        "   • Missing choices require explicit, redundant 'dead / trap' states (e.g. q_dead).",
+        "2. State Explosion Problem for Pattern Matching:",
+        "   • Designing DFAs for complex pattern matching (e.g., 'k-th character from right is 1') requires 2^k states.",
+        "   • Complex parallel string patterns (e.g. 'contains 101 OR 110') lead to unwieldy transition matrices.",
+        "3. Harder to Design & Human Readability:",
+        "   • DFAs require tracking global state memory at every single step, making manual design error-prone.",
+        "4. Why We Need Non-Determinism (NFA):",
+        "   • Guesses & Parallel Branching: Allows multiple transitions or 0 transitions on the same symbol.",
+        "   • Compact Machine Sizes: NFAs require significantly fewer states (e.g., k+1 states vs 2^k states in DFA).",
+        "   • Natural Mapping to Regular Expressions: Ideal bridge for compilers, tokenizers, and search engines."
+      ],
+      "explanation": "DFAs are rigid and computationally strict. NFAs provide an intuitive, highly compact abstraction that allows parallel path exploration without requiring dead states or exponential manual state tracking.",
+      "codeSnippet": "DFA: Rigid (Strictly 1 transition per symbol, 2^k states)  vs  NFA: Flexible (0, 1, or multiple transitions, k+1 states)",
+      "interactiveType": "none"
+    },
+    {
+      "id": "nfa-def-extended-delta",
+      "title": "NFA Formal Definition, Extended Transition Function & Language L(N)",
+      "subtitle": "Hopcroft, Motwani & Ullman (HMU) Section 2.3 - Formal 5-Tuple & String Processing",
+      "bullets": [
+        "1. Formal NFA 5-Tuple Definition: N = (Q, Σ, δ, q₀, F)",
+        "   • Q: Finite set of states | Σ: Input alphabet | q₀ ∈ Q: Start state | F ⊆ Q: Set of accepting states.",
+        "   • δ: Q × Σ → 2^Q  (Transition function maps to a SUBSET of Q, allowing ∅, single, or multiple choices).",
+        "2. Extended Transition Function δ̂ for NFA (δ̂: Q × Σ* → 2^Q):",
+        "   • BASIS: δ̂(q, ε) = {q}  (In zero steps without input, the automaton remains in state q).",
+        "   • INDUCTION: For string w = x·a (where x ∈ Σ* and a ∈ Σ):",
+        "     δ̂(q, w) = δ̂(q, x·a) = ⋃_{p ∈ δ̂(q, x)} δ(p, a)",
+        "   • Intuition: Compute the set of all states p reached from q on string x, then take the union of all transitions δ(p, a).",
+        "3. Language Accepted by an NFA (L(N)):",
+        "   • L(N) = { w ∈ Σ* | δ̂(q₀, w) ∩ F ≠ ∅ }",
+        "   • Acceptance Rule: String w is in L(N) if AT LEAST ONE computational path from q₀ on input w ends in F.",
+        "   • DFA vs NFA Comparison: DFA requires δ̂(q₀, w) ∈ F, whereas NFA requires set intersection δ̂(q₀, w) ∩ F ≠ ∅."
+      ],
+      "explanation": "The extended transition function δ̂ inductively defines string processing for non-deterministic machines by accumulating sets of reachable states. A string is accepted if any active parallel path touches an accept state.",
+      "codeSnippet": "Basis: δ̂(q, ε) = {q}  |  Induction: δ̂(q, xa) = ⋃_{p ∈ δ̂(q, x)} δ(p, a)  |  L(N) = { w | δ̂(q0, w) ∩ F ≠ ∅ }",
+      "interactiveType": "none"
+    },
+    {
+      "id": "nfa-dfa-subset-construction",
+      "title": "Equivalence of DFA & NFA: Subset Construction Algorithm (Simulator)",
+      "subtitle": "Hopcroft, Motwani & Ullman Section 2.3.1 - Step-by-Step Conversion for {w | w ends with '01'}",
+      "bullets": [
+        "Theorem 2.11 (HMU Equivalence Theorem): A language L is accepted by an NFA if and only if L is accepted by some DFA.",
+        "NFA for L = { w ∈ {0, 1}* | w ends with '01' } Definition:",
+        "• Q = {q₀, q₁, q₂}, Σ = {0, 1}, Start = q₀, Final F = {q₂}",
+        "• δ(q₀, 0) = {q₀, q₁}, δ(q₀, 1) = {q₀}; δ(q₁, 1) = {q₂}; δ(q₂, 0) = ∅, δ(q₂, 1) = ∅",
+        "Step-by-Step Subset Construction Walkthrough:",
+        "• Step 1 (Start State A): A = {q₀} (Initial subset)",
+        "  - δ_D(A, 0) = δ(q₀, 0) = {q₀, q₁} = B (New composite state)",
+        "  - δ_D(A, 1) = δ(q₀, 1) = {q₀} = A",
+        "• Step 2 (Evaluate B = {q₀, q₁}):",
+        "  - δ_D(B, 0) = δ(q₀, 0) ∪ δ(q₁, 0) = {q₀, q₁} ∪ ∅ = {q₀, q₁} = B",
+        "  - δ_D(B, 1) = δ(q₀, 1) ∪ δ(q₁, 1) = {q₀} ∪ {q₂} = {q₀, q₂} = C (New state containing final q₂!)",
+        "• Step 3 (Evaluate C = {q₀, q₂} - Accepting State since q₂ ∈ C):",
+        "  - δ_D(C, 0) = δ(q₀, 0) ∪ δ(q₂, 0) = {q₀, q₁} ∪ ∅ = {q₀, q₁} = B",
+        "  - δ_D(C, 1) = δ(q₀, 1) ∪ δ(q₂, 1) = {q₀} ∪ ∅ = {q₀} = A",
+        "Resulting DFA D: 3 States: {q₀}, {q₀, q₁}, {q₀, q₂} with Final State F_D = {{q₀, q₂}}."
+      ],
+      "explanation": "Subset construction converts non-deterministic transition choices into deterministic subset states step by step. Use the interactive simulator controls below to test conversion.",
+      "presetKey": "ends_01",
+      "interactiveType": "subset-construction",
+      "dfaExample": {
+        "title": "NFA: Ends with '01'",
+        "states": [
+          "q0",
+          "q1",
+          "q2"
+        ],
+        "alphabet": [
+          "0",
+          "1"
+        ],
+        "startState": "q0",
+        "acceptStates": [
+          "q2"
+        ],
+        "transitions": [
+          {
+            "from": "q0",
+            "symbol": "0",
+            "to": "q0"
+          },
+          {
+            "from": "q0",
+            "symbol": "1",
+            "to": "q0"
+          },
+          {
+            "from": "q0",
+            "symbol": "0",
+            "to": "q1"
+          },
+          {
+            "from": "q1",
+            "symbol": "1",
+            "to": "q2"
+          }
+        ],
+        "testString": "1001",
+        "convertedDfa": {
+          "title": "Converted DFA via Subset Construction",
+          "states": [
+            "{q0}",
+            "{q0,q1}",
+            "{q0,q2}"
+          ],
+          "alphabet": [
+            "0",
+            "1"
+          ],
+          "startState": "{q0}",
+          "acceptStates": [
+            "{q0,q2}"
+          ],
+          "transitions": [
+            {
+              "from": "{q0}",
+              "symbol": "0",
+              "to": "{q0,q1}"
+            },
+            {
+              "from": "{q0}",
+              "symbol": "1",
+              "to": "{q0}"
+            },
+            {
+              "from": "{q0,q1}",
+              "symbol": "0",
+              "to": "{q0,q1}"
+            },
+            {
+              "from": "{q0,q1}",
+              "symbol": "1",
+              "to": "{q0,q2}"
+            },
+            {
+              "from": "{q0,q2}",
+              "symbol": "0",
+              "to": "{q0,q1}"
+            },
+            {
+              "from": "{q0,q2}",
+              "symbol": "1",
+              "to": "{q0}"
+            }
+          ],
+          "testString": "1001"
+        }
+      }
+    },
+    {
+      "id": "subset-construction-disadvantages",
+      "title": "Disadvantages & Limitations of Subset Construction Method",
+      "subtitle": "Theoretical & Practical Bottlenecks in NFA-to-DFA Powerset Conversion",
+      "bullets": [
+        "1. Exponential State Explosion (Worst-Case Complexity O(2^n)):",
+        "   • For an NFA with n states, the powerset 2^n contains 2^n potential composite DFA states.",
+        "   • An NFA with just 30 states can theoretically produce 2^30 ≈ 1.07 billion DFA states!",
+        "2. Unreachable & Dead State Overhead (Naive Powerset Method):",
+        "   • Precomputing all 2^n subsets creates millions of unreachable or dead states that never receive transitions from start state {q₀}.",
+        "3. High Memory Footprint for Transition Tables:",
+        "   • Storage for DFA transition matrix scales as O(2^n × |Σ|), causing severe memory pressure in compilers.",
+        "4. Redundancy & Post-Conversion Minimization Required:",
+        "   • The converted DFA is frequently non-minimal, containing equivalent states that necessitate a secondary Minimization algorithm (e.g., Hopcroft O(n log n) Table Filling Method).",
+        "5. Modern Solutions & Engineering Workarounds:",
+        "   • Lazy Evaluation (Reachable Subset Construction) - computes states on-demand during parsing.",
+        "   • Direct NFA Simulation (Thompson Algorithm) - executes string matching in O(|w| · |Q_N|) time directly on the NFA without constructing a DFA."
+      ],
+      "explanation": "While subset construction proves theoretical equivalence (DFA ≡ NFA), naive powerset conversion suffers from exponential space explosion and unreachable state pollution.",
+      "codeSnippet": "Space Complexity: O(2^n × |Σ|)  |  Mitigation: Lazy Evaluation or Thompson Direct NFA Simulation",
+      "interactiveType": "none"
+    },
+    {
+      "id": "nfa-lazy-evaluation-method",
+      "title": "Lazy Evaluation Method for Subset Construction",
+      "subtitle": "Hopcroft, Motwani & Ullman Section 2.3.5 - Reachable Subset Construction Algorithm",
+      "bullets": [
+        "Why Naive Powerset Construction Is Impractical:",
+        "• Generating all 2^{|Q_N|} subsets explicitly is intractable for large machines (e.g. 2^20 ≈ 1,048,576 states).",
+        "• Most of the 2^{|Q_N|} states are dead or unreachable from the start state q₀_D = {q₀_N}.",
+        "The Lazy Evaluation Strategy (On-Demand Reachable State Discovery):",
+        "• Instead of precomputing 2^n states upfront, compute and materialize DFA states LAZILY on demand!",
+        "• Only generate a subset state S if it is reachable from {q₀} by some input string.",
+        "Worklist Algorithm for Lazy Subset Construction (HMU Section 2.3.5):",
+        "1. Initialize DFA State Set Q_D = {{q₀}} and Worklist Queue W = [{q₀}].",
+        "2. While Queue W is NOT empty:",
+        "   a. Dequeue subset state S.",
+        "   b. For each symbol a ∈ Σ:",
+        "      i. Compute target subset T = δ_D(S, a) = ⋃_{p ∈ S} δ_N(p, a).",
+        "      ii. If T ∉ Q_D: Add T to Q_D and enqueue T into Worklist W.",
+        "      iii. Record DFA transition δ_D(S, a) = T.",
+        "3. Mark any S ∈ Q_D as accepting in F_D if S ∩ F_N ≠ ∅.",
+        "Practical Compiler Advantage: Used in lexical analyzer tools (e.g., flex, lex, search engines) to construct DFAs on-demand without exponential memory overhead."
+      ],
+      "explanation": "Lazy evaluation computes only the reachable subsets on demand using a queue/worklist approach, preventing memory explosion and avoiding unreachable dead states.",
+      "codeSnippet": "Worklist W = [{q0}]; while(W) { S = pop(); for a∈Σ { T = ⋃_{p∈S} δ(p,a); if(T ∉ Q_D) { add T; enqueue(T); } } }",
+      "interactiveType": "none"
+    },
+    {
+      "id": "nfa-subset-worst-case",
+      "title": "Worst Case for Subset Construction: Exponential State Explosion",
+      "subtitle": "Sections 2.3.1, 2.3.2 & 2.3.3 - The n-th Symbol from the End (Ullman Textbook)",
+      "bullets": [
+        "Problem Statement: Consider the language L_n over Σ = {0, 1} where the n-th character from the right (end) is '1'.",
+        "NFA State Complexity: Requires only n + 1 states!",
+        "• States: q0 (looping start state), q1, q2, ..., qn (final state).",
+        "• Transition: δ(q0, 1) = {q0, q1}; δ(qi, 0) = δ(qi, 1) = {q_{i+1}} for i ≥ 1.",
+        "DFA State Complexity: REQUIRES EXACTLY 2^n STATES!",
+        "• Why 2^n States? To decide whether the symbol n steps ago was a '1', a deterministic automaton MUST memorize every possible binary string of length n.",
+        "• For n = 3 (3rd symbol from end is '1'): NFA needs 4 states, but DFA requires 2^3 = 8 states ({000}, {001}, {010}, ..., {111}).",
+        "• For n = 10: NFA needs 11 states, while DFA requires 2^10 = 1,024 states!",
+        "Conclusion: Demonstrates that the worst-case space bound |Q_D| = 2^|Q_N| is strictly tight!"
+      ],
+      "explanation": "This classic example from Hopcroft & Ullman proves that NFAs can be exponentially more succinct than DFAs for certain languages.",
+      "codeSnippet": "Language Ln: n-th symbol from right is 1  ⇒  NFA: n+1 states  |  DFA: 2^n states!",
+      "interactiveType": "none"
+    },
+    {
       "id": "fa-app-text-search",
       "title": "Applications of FA: Section 2.5.1 Text Searching",
       "subtitle": "Keyword Matching, Pattern Recognition & Aho-Corasick Algorithm",
@@ -3152,6 +3206,32 @@ export const module1Deck: SlideDeck = {
       "explanation": "DFAs power both compiler frontends for rapid programming language tokenization and formal safety verification of network protocols.",
       "codeSnippet": "Source Code ➔ Lexer DFA ➔ Token Stream (IF, IDENT, NUMBER)  |  TCP Protocol FSM Verification",
       "interactiveType": "none"
+    },
+    {
+      "id": "slide-19",
+      "title": "Regular Expressions & Grammars",
+      "subtitle": "Module 1.9 - Algebraic Pattern Matching",
+      "bullets": [
+        "Regular Expressions (RE): Algebraic notation to describe regular languages.",
+        "• Operators: Union (+), Concatenation (.), Kleene Star (*).",
+        "• Example: [A-Z][a-z]* represents capitalized words.",
+        "Grammars: Production rules generating strings of a language.",
+        "• Chomsky Type-3 Grammars generate Regular Languages."
+      ],
+      "explanation": "Regular expressions are widely used in text editors, compilers, and search engines for pattern recognition.",
+      "codeSnippet": "RE for binary strings ending in 1: (0 + 1)*1",
+      "interactiveType": "none"
+    },
+    {
+      "id": "slide-20",
+      "title": "Module 1 Mastery Quiz",
+      "subtitle": "Test Your Knowledge across All Topics",
+      "bullets": [
+        "Review your understanding of Alphabets, DFAs, NFAs, Subset Construction, and Minimization.",
+        "Take the interactive quiz below to test your exam readiness!"
+      ],
+      "explanation": "Complete this quiz to verify your mastery of Module 1 Theory of Computation concepts.",
+      "interactiveType": "quiz"
     }
   ]
 };
@@ -3159,314 +3239,122 @@ export const module1Deck: SlideDeck = {
 export const module1Quiz: QuizQuestion[] = [
   {
     "id": "q1",
-    "question": "What is the key difference between a DFA and an NFA?",
+    "question": "Which of the following formal 5-tuple definitions represents a Deterministic Finite Automaton (DFA)?",
     "options": [
-      "DFA can have multiple next states for a single symbol, while NFA cannot.",
-      "DFA has exactly one next state for every state and input symbol pair, whereas NFA can have zero, one, or multiple next states.",
-      "NFA can process infinite length strings, whereas DFA cannot.",
-      "DFA supports epsilon transitions, whereas NFA does not."
+      "M = (Q, Σ, δ, q0, F) where δ: Q × Σ → Q",
+      "M = (Q, Σ, δ, q0, F) where δ: Q × Σ → 2^Q",
+      "M = (Q, Σ, δ, q0, F) where δ: Q × (Σ ∪ {ε}) → 2^Q",
+      "M = (Q, Σ, δ, q0, F) where δ: Q × Q → Σ"
     ],
-    "correctAnswer": 1,
-    "explanation": "In a DFA, δ: Q × Σ → Q is deterministic (exactly 1 next state). In an NFA, δ: Q × Σ → 2^Q yields a subset of states (0, 1, or multiple)."
+    "correctAnswer": 0,
+    "explanation": "A DFA transition function δ maps each state and input symbol to strictly ONE single target state in Q (δ: Q × Σ → Q)."
   },
   {
     "id": "q2",
-    "question": "If an NFA has n states, what is the theoretical maximum number of states in its equivalent minimal/converted DFA?",
+    "question": "What is the primary difference between the transition function δ and extended transition function δ̂ for a DFA?",
     "options": [
-      "n",
-      "2n",
-      "2^n",
-      "n^2"
+      "δ processes single symbols, while δ̂ processes input strings w ∈ Σ*",
+      "δ applies to NFAs, while δ̂ applies strictly to DFAs",
+      "δ outputs sets of states, while δ̂ outputs boolean accept/reject states",
+      "There is no difference; they are identical functions"
     ],
-    "correctAnswer": 2,
-    "explanation": "By the subset construction algorithm, the power set of n states contains 2^n possible state subsets in the worst case."
+    "correctAnswer": 0,
+    "explanation": "The transition function δ operates on a single alphabet symbol (a ∈ Σ), whereas δ̂ is defined inductively to process strings of arbitrary length (w ∈ Σ*)."
   },
   {
     "id": "q3",
-    "question": "What does ECLOSE(q) represent in an ε-NFA?",
+    "question": "In an NFA, if δ(q, a) = ∅ for state q and input a, what happens when the automaton reads symbol 'a' in state q?",
     "options": [
-      "The set of states reachable from q traversing zero or more ε-transitions without consuming input.",
-      "The set of all accept states in the automaton.",
-      "The set of all start states in the automaton.",
-      "The set of states reachable after reading at least one non-empty symbol."
+      "The computational path dies (rejects) at state q",
+      "The automaton loops on state q indefinitely",
+      "The automaton automatically transitions to start state q0",
+      "The NFA throws a runtime error"
     ],
     "correctAnswer": 0,
-    "explanation": "ECLOSE(q) includes state q itself plus any state reachable via paths labeled exclusively with ε."
+    "explanation": "In an NFA, an empty transition set ∅ means there are no valid outgoing transitions on symbol 'a', causing that specific parallel execution branch to die."
   },
   {
     "id": "q4",
-    "question": "Which of the following is TRUE about DFA accept states F ⊆ Q?",
+    "question": "Under the Subset Construction algorithm, if an NFA has n states, what is the MAXIMUM possible number of states in the equivalent converted DFA?",
     "options": [
-      "A DFA can have at most one accept state.",
-      "A DFA must have at least one accept state.",
-      "A DFA can have zero, one, or multiple accept states.",
-      "Accept states cannot have outgoing transitions."
+      "2^n states",
+      "n^2 states",
+      "2n states",
+      "n! states"
     ],
-    "correctAnswer": 2,
-    "explanation": "The subset of final states F ⊆ Q can be empty, contain 1 state, or contain multiple states up to |Q|."
+    "correctAnswer": 0,
+    "explanation": "The state set of the converted DFA is the powerset 2^Q of the NFA, yielding a theoretical maximum of 2^n states."
   },
   {
     "id": "q5",
-    "question": "How many states are required in a DFA to check if a binary string represents a number divisible by N?",
+    "question": "Which state set constitutes the final/accepting states (F_D) of a DFA constructed via Subset Construction from NFA N?",
     "options": [
-      "N - 1",
-      "N",
-      "2^N",
-      "N + 1"
+      "All subset states S ⊆ Q_N such that S ∩ F_N ≠ ∅",
+      "Only subset states S that are identical to F_N",
+      "All subset states S ⊆ Q_N such that S ⊆ F_N",
+      "Only single-element subset states containing start state q0"
     ],
-    "correctAnswer": 1,
-    "explanation": "Tracking remainders modulo N requires exactly N states corresponding to remainders 0, 1, 2, ..., N-1."
+    "correctAnswer": 0,
+    "explanation": "A composite subset state S in the DFA is accepting if it contains AT LEAST ONE accepting state from the original NFA (S ∩ F_N ≠ ∅)."
   },
   {
     "id": "q6",
-    "question": "How is the complement DFA D' constructed from a given complete DFA D = (Q, Σ, δ, q0, F)?",
+    "question": "What is the key advantage of the Lazy Evaluation method (HMU Section 2.3.5) over naive powerset construction?",
     "options": [
-      "Reverse all transition arrows.",
-      "Invert the accept states: F' = Q - F while keeping Q, Σ, δ, q0 unchanged.",
-      "Add a new start state with ε-transitions.",
-      "Remove all non-accepting trap states."
+      "It generates only reachable subset states on-demand, preventing exponential 2^n state explosion for dead states",
+      "It eliminates the need for initial states",
+      "It converts DFAs directly into Regular Expressions without state tables",
+      "It reduces all NFAs to single-state machines"
     ],
-    "correctAnswer": 1,
-    "explanation": "Complementing a complete DFA language requires swapping accepting and non-accepting states (F' = Q \\ F)."
+    "correctAnswer": 0,
+    "explanation": "Lazy evaluation computes reachable subset states dynamically using a worklist queue, avoiding the precomputation of millions of unreachable or dead states."
   },
   {
     "id": "q7",
-    "question": "In the formal 5-tuple definition of a Finite Automaton (Q, Σ, δ, q0, F), what does Σ represent?",
+    "question": "What is the ε-closure of a state q in an ε-NFA?",
     "options": [
-      "The finite set of internal states.",
-      "The finite alphabet of input symbols.",
-      "The state transition function.",
-      "The set of final accepting states."
+      "The set of all states reachable from q using zero or more ε-transitions",
+      "The set of all states reachable from q using strictly one input symbol",
+      "The empty set ∅",
+      "The set containing only non-accepting states"
     ],
-    "correctAnswer": 1,
-    "explanation": "Σ (Sigma) denotes the non-empty finite alphabet of allowable input characters."
+    "correctAnswer": 0,
+    "explanation": "ECLOSE(q) contains state q itself plus all states that can be reached from q by following paths labeled solely with ε."
   },
   {
     "id": "q8",
-    "question": "What is the value of the extended transition function δ̂(q, ε) for any state q in a DFA?",
+    "question": "For an NFA accepting strings over Σ = {0, 1} where the n-th symbol from the right is '1', how many states does the minimal DFA require?",
     "options": [
-      "∅ (empty set)",
-      "q",
-      "q0",
-      "Trap State"
+      "2^n states",
+      "n + 1 states",
+      "2n states",
+      "n^2 states"
     ],
-    "correctAnswer": 1,
-    "explanation": "By formal definition, processing the empty string ε leaves the automaton in its current state q: δ̂(q, ε) = q."
+    "correctAnswer": 0,
+    "explanation": "Deciding if the n-th symbol from the end was '1' requires a DFA to memorize all binary strings of length n, necessitating 2^n states."
   },
   {
     "id": "q9",
-    "question": "A string w is accepted by an NFA if and only if:",
+    "question": "In Hopcroft's DFA Minimization Table Filling Algorithm, when are two states (p, q) marked as distinguishable in the initial step (Basis)?",
     "options": [
-      "ALL computation paths for w end in accept states.",
-      "AT LEAST ONE computation path for w ends in an accept state in F.",
-      "The NFA visits every state in Q while processing w.",
-      "No path for w reaches a trap state."
+      "When one state is accepting (p ∈ F) and the other is non-accepting (q ∉ F)",
+      "When both states have identical self-loops",
+      "When both states are start states",
+      "When p and q transition to the exact same state on symbol '0'"
     ],
-    "correctAnswer": 1,
-    "explanation": "Nondeterminism means acceptance requires only a single valid path ending in an accepting state f ∈ F."
+    "correctAnswer": 0,
+    "explanation": "The basis step marks pair (p, q) distinguishable immediately if p ∈ F and q ∉ F (or vice versa), because ε distinguishes them."
   },
   {
     "id": "q10",
-    "question": "What is the length of the empty string ε?",
+    "question": "Which of the following is true regarding the language acceptance of DFAs and NFAs?",
     "options": [
-      "0",
-      "1",
-      "Undefined",
-      "-1"
+      "DFAs and NFAs recognize the exact same class of languages (Regular Languages)",
+      "NFAs can recognize Context-Free Languages that DFAs cannot",
+      "DFAs are strictly more powerful than NFAs",
+      "NFAs can recognize non-regular languages like { a^n b^n | n ≥ 0 }"
     ],
     "correctAnswer": 0,
-    "explanation": "The empty string ε contains zero symbols, so its length |ε| = 0."
-  },
-  {
-    "id": "q11",
-    "question": "In subset construction (converting NFA to DFA), when is a macro-state S = {q1, q2, ..., qk} marked as an accepting state in the DFA?",
-    "options": [
-      "When ALL states in S are accept states of the NFA.",
-      "When AT LEAST ONE state qi ∈ S is an accept state of the NFA (S ∩ F ≠ ∅).",
-      "When S contains the start state q0.",
-      "When S has no outgoing transitions."
-    ],
-    "correctAnswer": 1,
-    "explanation": "A subset S in the converted DFA accepts if it contains any NFA accepting state."
-  },
-  {
-    "id": "q12",
-    "question": "What is a Dead State (Sink/Trap State) in a DFA?",
-    "options": [
-      "A state from which no input can ever transition to an accepting state.",
-      "The initial start state q0.",
-      "An accepting state with no incoming transitions.",
-      "A state that automatically halts the CPU."
-    ],
-    "correctAnswer": 0,
-    "explanation": "A dead/trap state is a non-accepting state whose transitions all loop back to itself."
-  },
-  {
-    "id": "q13",
-    "question": "What is the primary objective of DFA Minimization (Table-Filling Algorithm)?",
-    "options": [
-      "To convert an NFA into a DFA.",
-      "To eliminate unreachable/redundant states and merge equivalent states to produce a unique minimal DFA.",
-      "To add ε-transitions to reduce transition arrows.",
-      "To generate regular expressions automatically."
-    ],
-    "correctAnswer": 1,
-    "explanation": "DFA minimization eliminates inaccessible states and collapses indistinguishable state pairs."
-  },
-  {
-    "id": "q14",
-    "question": "In Hopcroft's Table-Filling method, when are two states p and q immediately marked as distinguishable (X) in Step 1?",
-    "options": [
-      "When one state is an accepting state (∈ F) and the other is a non-accepting state (∉ F).",
-      "When both states are start states.",
-      "When both states have self-loops on symbol 0.",
-      "When p and q have the same number of incoming arrows."
-    ],
-    "correctAnswer": 0,
-    "explanation": "Base case: Any pair (p, q) with p ∈ F and q ∉ F is inherently distinguishable because ε distinguishes them."
-  },
-  {
-    "id": "q15",
-    "question": "What is the minimum number of states needed in a DFA to accept strings over {a, b} containing the substring 'aa'?",
-    "options": [
-      "2",
-      "3",
-      "4",
-      "5"
-    ],
-    "correctAnswer": 1,
-    "explanation": "3 states: q0 (no 'a' seen), q1 (one 'a' seen), q2 (seen 'aa', trap accepting state)."
-  },
-  {
-    "id": "q16",
-    "question": "If state q0 has ε-transitions to q1 and q2, and q1 has an ε-transition to q3, what is ECLOSE(q0)?",
-    "options": [
-      "{q0}",
-      "{q0, q1, q2}",
-      "{q0, q1, q2, q3}",
-      "{q1, q2, q3}"
-    ],
-    "correctAnswer": 2,
-    "explanation": "ECLOSE is transitive: ECLOSE(q0) includes q0 itself, q1, q2, and q3 via q1."
-  },
-  {
-    "id": "q17",
-    "question": "What is the minimum number of states in a DFA accepting strings over {0,1} that END WITH '011'?",
-    "options": [
-      "3",
-      "4",
-      "5",
-      "6"
-    ],
-    "correctAnswer": 1,
-    "explanation": "A DFA searching for a pattern of length k = 3 ending requires k + 1 = 4 states."
-  },
-  {
-    "id": "q18",
-    "question": "How are finite automata applied in compiler design lexical analysis (scanners)?",
-    "options": [
-      "To parse context-free syntax trees.",
-      "To recognize valid tokens (keywords, identifiers, literals) from raw source code character streams.",
-      "To generate target machine code assembly.",
-      "To optimize memory register allocation."
-    ],
-    "correctAnswer": 1,
-    "explanation": "Lexical analyzers (e.g. Lex/Flex) use finite automata derived from regular expressions to tokenize code."
-  },
-  {
-    "id": "q19",
-    "question": "Which of the following describes a Moore Machine?",
-    "options": [
-      "An automaton where output depends ONLY on the current state.",
-      "An automaton where output depends on BOTH the current state and current input symbol.",
-      "An automaton with no output alphabet.",
-      "An automaton with infinite memory tape."
-    ],
-    "correctAnswer": 0,
-    "explanation": "In a Moore Machine, output function λ: Q → Δ maps each state directly to an output value."
-  },
-  {
-    "id": "q20",
-    "question": "Which of the following describes a Mealy Machine?",
-    "options": [
-      "An automaton where output depends ONLY on the current state.",
-      "An automaton where output depends on BOTH the current state and input symbol (λ: Q × Σ → Δ).",
-      "An automaton with non-deterministic state stacks.",
-      "An automaton without an initial state."
-    ],
-    "correctAnswer": 1,
-    "explanation": "Mealy Machine outputs are associated with state transitions (edges), depending on (state, input)."
-  },
-  {
-    "id": "q21",
-    "question": "For an input string of length n, what is the length of the output string generated by a Moore Machine vs a Mealy Machine?",
-    "options": [
-      "Moore: n, Mealy: n",
-      "Moore: n + 1, Mealy: n",
-      "Moore: n, Mealy: n + 1",
-      "Moore: 2n, Mealy: n"
-    ],
-    "correctAnswer": 1,
-    "explanation": "A Moore machine emits an output for the initial state before reading input (length n + 1); Mealy emits on transitions (length n)."
-  },
-  {
-    "id": "q22",
-    "question": "What is the language L(G) generated by a grammar G = (V, T, P, S)?",
-    "options": [
-      "The set of all terminals and variables in V ∪ T.",
-      "The set of all terminal strings w ∈ T* derivable from start symbol S using production rules P.",
-      "The set of all production rules P.",
-      "The set of all infinite trees."
-    ],
-    "correctAnswer": 1,
-    "explanation": "L(G) consists of all terminal-only strings derived from S via S ⇒* w where w ∈ T*."
-  },
-  {
-    "id": "q23",
-    "question": "What does the regular expression (0 + 1)* represent?",
-    "options": [
-      "Only strings with equal numbers of 0s and 1s.",
-      "All possible binary strings over the alphabet {0, 1}, including the empty string ε.",
-      "Strings consisting only of alternating 0s and 1s.",
-      "Strings starting with 0 and ending with 1."
-    ],
-    "correctAnswer": 1,
-    "explanation": "(0 + 1)* generates any combination of 0s and 1s of any length, including length 0 (ε)."
-  },
-  {
-    "id": "q24",
-    "question": "Which regular expression represents strings over {a, b} containing AT LEAST ONE 'a'?",
-    "options": [
-      "(a + b)*",
-      "b* a b*",
-      "(a + b)* a (a + b)*",
-      "a* b*"
-    ],
-    "correctAnswer": 2,
-    "explanation": "(a + b)* a (a + b)* guarantees at least one 'a' surrounded by arbitrary combinations of 'a' and 'b'."
-  },
-  {
-    "id": "q25",
-    "question": "In text searching applications (Section 2.5.1), how does an automaton-based search algorithm achieve O(n) time complexity for a text of length n?",
-    "options": [
-      "By backtracking whenever a character mismatch occurs.",
-      "By maintaining a state corresponding to the longest pattern prefix matched so far, processing each character in O(1) time without backtracking.",
-      "By sorting the text characters alphabetically first.",
-      "By converting text into binary trees."
-    ],
-    "correctAnswer": 1,
-    "explanation": "DFA text search processes each text character exactly once in constant O(1) time without resetting index."
-  },
-  {
-    "id": "q26",
-    "question": "Why do web crawlers and HTML parsers (Section 2.5.2) use finite state machines?",
-    "options": [
-      "To execute JavaScript code in parallel.",
-      "To parse HTML tag states (e.g., inside tag, inside attribute quote, text body) deterministically.",
-      "To store web pages in SQL databases.",
-      "To encrypt network passwords."
-    ],
-    "correctAnswer": 1,
-    "explanation": "HTML tokenizer state machines track structural contexts like open brackets, tag names, and attribute string quotes."
+    "explanation": "By the Subset Construction theorem (Theorem 2.11), DFAs and NFAs are equivalent in power and both accept exactly the class of Regular Languages."
   }
 ];

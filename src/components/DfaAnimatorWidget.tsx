@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { DfaDefinition } from '../types';
 import {
   Play,
@@ -14,7 +14,12 @@ import {
   ZoomOut,
   Maximize2,
   Minimize2,
-  Eye
+  Eye,
+  Table,
+  Zap,
+  GitBranch,
+  ArrowRight,
+  Activity
 } from 'lucide-react';
 
 export const getStateColor = (stateName: string, isLightBg: boolean = false) => {
@@ -237,6 +242,17 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
 
   const isLightCanvas = canvasTheme === 'bright-room' || canvasTheme === 'light-slate';
 
+  const tableSymbols = useMemo(() => {
+    const syms = [...dfa.alphabet];
+    const hasEps = dfa.transitions.some(t => t.symbol === 'ε' || t.symbol === 'eps' || t.symbol === 'epsilon');
+    if (hasEps && !syms.some(s => s === 'ε' || s === 'eps' || s === 'epsilon')) {
+      syms.push('ε');
+    }
+    return syms;
+  }, [dfa]);
+
+  const currentInputSymbol = (currentIndex >= 0 && currentIndex < inputString.length) ? inputString[currentIndex] : null;
+
   const renderSvgContent = (customClass = '') => (
     <svg
       className={`w-full transition-transform duration-200 ${customClass}`}
@@ -287,17 +303,23 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
           const fromCoord = stateCoordinates[gt.from] || { x: 50, y: 50 };
           const toCoord = stateCoordinates[gt.to] || { x: 150, y: 150 };
           
-          // Active if any of the grouped symbols match the current input symbol
-          const activeSymbol = gt.symbols.find(sym => currentState === gt.from && currentIndex !== -1 && inputString[currentIndex] === sym);
-          const isActiveTransition = !!activeSymbol;
+          // Active if originating from any current active state on input symbol OR epsilon transition
+          const isFromActive = activeStates.includes(gt.from);
+          const currentSym = (currentIndex >= 0 && currentIndex < inputString.length) ? inputString[currentIndex] : null;
+          const isEpsilon = gt.symbols.some(sym => sym === 'ε' || sym === 'eps' || sym === 'epsilon');
+          const isActiveTransition = isFromActive && (
+            (currentSym !== null && gt.symbols.includes(currentSym)) ||
+            (isEpsilon && currentIndex === -1) ||
+            (isEpsilon && currentSym !== null)
+          );
           
           // Color matches the origin state (gt.from)
           const fromStateColor = getStateColor(gt.from, isLightCanvas);
           const displayLabel = gt.symbols.join(',');
 
-          const strokeColor = isActiveTransition ? fromStateColor.activeStroke : fromStateColor.stroke;
-          const boxColor = isActiveTransition ? fromStateColor.activeFill : (isLightCanvas ? '#ffffff' : fromStateColor.box);
-          const textColor = isActiveTransition ? '#ffffff' : (isLightCanvas ? fromStateColor.stroke : fromStateColor.text);
+          const strokeColor = isActiveTransition ? (isEpsilon ? '#c026d3' : fromStateColor.activeStroke) : (isEpsilon ? '#a855f7' : fromStateColor.stroke);
+          const boxColor = isActiveTransition ? (isEpsilon ? '#c026d3' : fromStateColor.activeFill) : (isLightCanvas ? '#ffffff' : fromStateColor.box);
+          const textColor = isActiveTransition ? '#ffffff' : (isLightCanvas ? (isEpsilon ? '#701a75' : fromStateColor.stroke) : fromStateColor.text);
           const markerEndUrl = isActiveTransition ? `url(#arrow-active-state-${gt.from})` : `url(#arrow-state-${gt.from})`;
 
           const R_from = dfa.acceptStates.includes(gt.from) ? 50 : 44;
@@ -346,6 +368,7 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
                   fill="none"
                   stroke={strokeColor}
                   strokeWidth={isActiveTransition ? "6" : "4"}
+                  strokeDasharray={isEpsilon ? "6 4" : undefined}
                   markerEnd={markerEndUrl}
                 />
                 <rect
@@ -420,6 +443,7 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
                 fill="none"
                 stroke={strokeColor}
                 strokeWidth={isActiveTransition ? '6' : '4'}
+                strokeDasharray={isEpsilon ? "6 4" : undefined}
                 markerEnd={markerEndUrl}
               />
               <rect
@@ -463,6 +487,28 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
               <g>
                 <line x1="-80" y1="0" x2="-46" y2="0" stroke={isLightCanvas ? "#0284c7" : "#38bdf8"} strokeWidth="5" markerEnd="url(#arrow)" />
                 <text x="-75" y="-12" fill={isLightCanvas ? "#0369a1" : "#38bdf8"} fontSize="15" fontFamily="sans-serif" fontWeight="900">START</text>
+              </g>
+            )}
+
+            {/* Active State Halo Ring */}
+            {isCurrent && (
+              <circle
+                r="56"
+                fill="none"
+                stroke={isLightCanvas ? "#a855f7" : "#c026d3"}
+                strokeWidth="3"
+                strokeDasharray="4 2"
+                className="animate-spin"
+              />
+            )}
+
+            {/* Active Badge Label */}
+            {isCurrent && (
+              <g>
+                <rect x="-34" y="-62" width="68" height="18" rx="9" fill={isLightCanvas ? "#7c3aed" : "#9333ea"} />
+                <text x="0" y="-50" fill="#ffffff" fontSize="10" fontFamily="sans-serif" fontWeight="900" textAnchor="middle">
+                  ACTIVE
+                </text>
               </g>
             )}
 
@@ -638,168 +684,342 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
         </div>
       </div>
 
-      {/* Main Grid: Visual Graph & Controls */}
-      <div className="flex flex-col gap-6">
+      {/* Main Grid Layout: Visual Stage + Live Transition Function Side Panel Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* SVG State Diagram Container */}
-        <div className={`w-full rounded-2xl p-4 border flex flex-col items-center justify-center relative transition-colors duration-200 overflow-hidden ${
-          canvasTheme === 'bright-room'
-            ? 'bg-white border-slate-300 shadow-xl'
-            : canvasTheme === 'light-slate'
-            ? 'bg-slate-50 border-slate-300 shadow-lg'
-            : 'bg-slate-950/90 border-slate-800 shadow-2xl'
-        }`}>
-          {/* Top Controls Overlay: Zoom & Maximize */}
-          <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-xl border border-slate-700 shadow-lg text-white">
-            <button
-              onClick={() => setZoomLevel(prev => Math.min(prev + 0.2, 2.2))}
-              className="p-1.5 hover:bg-slate-800 rounded-lg transition-colors"
-              title="Zoom In"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </button>
-            <span className="text-xs font-mono font-bold px-1.5 text-cyan-300">{Math.round(zoomLevel * 100)}%</span>
-            <button
-              onClick={() => setZoomLevel(prev => Math.max(prev - 0.2, 0.6))}
-              className="p-1.5 hover:bg-slate-800 rounded-lg transition-colors"
-              title="Zoom Out"
-            >
-              <ZoomOut className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setZoomLevel(1.0)}
-              className="p-1.5 hover:bg-slate-800 rounded-lg text-xs font-mono font-bold"
-              title="Reset Zoom"
-            >
-              100%
-            </button>
-            <div className="w-px h-4 bg-slate-700 mx-0.5" />
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold"
-              title="Maximize / Full Screen DFA Diagram"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Enlarge DFA</span>
-            </button>
-          </div>
-
-          <div className="w-full min-h-[380px] sm:min-h-[480px] max-h-[65vh] flex items-center justify-center overflow-auto p-2">
-            {renderSvgContent("w-full h-full max-h-[60vh]")}
-          </div>
-
-          {/* Legend */}
-          <div className={`flex items-center gap-6 text-xs font-bold mt-2 ${
-            isLightCanvas ? 'text-slate-700' : 'text-slate-400'
-          }`}>
-            <span className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-full bg-indigo-600 inline-block shadow-sm"></span> Current Active State
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-full border-2 border-emerald-500 inline-block shadow-sm"></span> Accepting (Final) State
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-4 h-1 bg-cyan-500 inline-block"></span> Transition Path
-            </span>
-          </div>
-        </div>
-
-        {/* Execution & Controls Pane */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Left Column: SVG State Diagram, Tape, & Controls */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
           
-          {/* String Token Visualizer */}
-          <div className={`p-4 rounded-xl border ${
-            isLightCanvas
-              ? 'bg-white border-slate-300 shadow-sm'
-              : 'bg-slate-950/70 border-slate-800'
+          {/* SVG State Diagram Container */}
+          <div className={`w-full rounded-2xl p-4 border flex flex-col items-center justify-center relative transition-colors duration-200 overflow-hidden ${
+            canvasTheme === 'bright-room'
+              ? 'bg-white border-slate-300 shadow-xl'
+              : canvasTheme === 'light-slate'
+              ? 'bg-slate-50 border-slate-300 shadow-lg'
+              : 'bg-slate-950/90 border-slate-800 shadow-2xl'
           }`}>
-            <span className="text-xs font-extrabold uppercase tracking-wider block mb-2">Input Tape Execution:</span>
-            <div className="flex flex-wrap gap-2 items-center font-mono">
-              {inputString.length === 0 ? (
-                <span className="text-xs italic">Empty string (ε)</span>
+            {/* Top Controls Overlay: Zoom & Maximize */}
+            <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-xl border border-slate-700 shadow-lg text-white">
+              <button
+                onClick={() => setZoomLevel(prev => Math.min(prev + 0.2, 2.2))}
+                className="p-1.5 hover:bg-slate-800 rounded-lg transition-colors"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+              <span className="text-xs font-mono font-bold px-1.5 text-cyan-300">{Math.round(zoomLevel * 100)}%</span>
+              <button
+                onClick={() => setZoomLevel(prev => Math.max(prev - 0.2, 0.6))}
+                className="p-1.5 hover:bg-slate-800 rounded-lg transition-colors"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setZoomLevel(1.0)}
+                className="p-1.5 hover:bg-slate-800 rounded-lg text-xs font-mono font-bold"
+                title="Reset Zoom"
+              >
+                100%
+              </button>
+              <div className="w-px h-4 bg-slate-700 mx-0.5" />
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold"
+                title="Maximize / Full Screen DFA Diagram"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Enlarge DFA</span>
+              </button>
+            </div>
+
+            <div className="w-full min-h-[360px] sm:min-h-[440px] max-h-[60vh] flex items-center justify-center overflow-auto p-2">
+              {renderSvgContent("w-full h-full max-h-[58vh]")}
+            </div>
+
+            {/* Legend */}
+            <div className={`flex flex-wrap items-center justify-center gap-5 text-xs font-bold mt-2 ${
+              isLightCanvas ? 'text-slate-700' : 'text-slate-400'
+            }`}>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-indigo-600 inline-block shadow-xs"></span> Active State
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full border-2 border-emerald-500 inline-block shadow-xs"></span> Accept State
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3.5 h-1 bg-cyan-500 inline-block"></span> Standard Transition
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3.5 h-0.5 border-t-2 border-dashed border-fuchsia-500 inline-block"></span> ε Transition
+              </span>
+            </div>
+          </div>
+
+          {/* Active States Set Display Banner */}
+          <div className={`flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 rounded-2xl border font-mono text-xs shadow-xs ${
+            isLightCanvas
+              ? 'bg-purple-50/90 border-purple-200 text-purple-950'
+              : 'bg-purple-950/50 border-purple-800 text-purple-200'
+          }`}>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="font-extrabold text-purple-700 dark:text-purple-300 uppercase tracking-wider text-[11px]">Active State Set S:</span>
+              <span className="bg-purple-700 text-white font-extrabold px-3 py-1 rounded-xl shadow-xs text-sm">
+                {`{ ${activeStates.join(', ')} }`}
+              </span>
+              {activeStates.length > 1 && (
+                <span className="bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 px-2.5 py-1 rounded-lg font-bold text-xs border border-amber-300/80">
+                  ⚡ {activeStates.length} Active Branches
+                </span>
+              )}
+            </div>
+            <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+              <span>Condition S ∩ F ≠ ∅:</span>
+              {activeStates.some(st => dfa.acceptStates.includes(st)) ? (
+                <span className="bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded font-extrabold border border-emerald-300">
+                  ✅ Accept State Included
+                </span>
               ) : (
-                inputString.split("").map((char, idx) => {
-                  const isProcessed = idx < currentIndex;
-                  const isCurrent = idx === currentIndex;
-                  return (
-                    <div
-                      key={idx}
-                      className={`w-10 h-11 rounded-lg flex items-center justify-center font-black text-base transition-all ${
-                        isCurrent
-                          ? 'bg-indigo-600 text-white ring-2 ring-indigo-400 scale-105 shadow-md shadow-indigo-900'
-                          : isProcessed
-                          ? 'bg-slate-200 text-slate-500 border border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                          : 'bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800'
-                      }`}
-                    >
-                      {char}
-                    </div>
-                  );
-                })
+                <span className="bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-2 py-0.5 rounded font-extrabold">
+                  ❌ Non-accepting set
+                </span>
               )}
             </div>
           </div>
 
-          {/* Status Badge */}
-          <div className={`flex items-center justify-between px-4 py-3 rounded-xl border ${
+          {/* Execution & Controls Pane */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* String Token Visualizer */}
+            <div className={`p-4 rounded-xl border ${
+              isLightCanvas
+                ? 'bg-white border-slate-300 shadow-sm'
+                : 'bg-slate-950/70 border-slate-800'
+            }`}>
+              <span className="text-xs font-extrabold uppercase tracking-wider block mb-2">Input Tape Execution:</span>
+              <div className="flex flex-wrap gap-2 items-center font-mono">
+                {inputString.length === 0 ? (
+                  <span className="text-xs italic">Empty string (ε)</span>
+                ) : (
+                  inputString.split("").map((char, idx) => {
+                    const isProcessed = idx < currentIndex;
+                    const isCurrent = idx === currentIndex;
+                    return (
+                      <div
+                        key={idx}
+                        className={`w-10 h-11 rounded-lg flex items-center justify-center font-black text-base transition-all ${
+                          isCurrent
+                            ? 'bg-indigo-600 text-white ring-2 ring-indigo-400 scale-105 shadow-md shadow-indigo-900'
+                            : isProcessed
+                            ? 'bg-slate-200 text-slate-500 border border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                            : 'bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800'
+                        }`}
+                      >
+                        {char}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Status Badge */}
+            <div className={`flex items-center justify-between px-4 py-3 rounded-xl border ${
+              isLightCanvas
+                ? 'bg-white border-slate-300 shadow-sm'
+                : 'bg-slate-950/70 border-slate-800'
+            }`}>
+              <span className="text-sm font-bold">Status:</span>
+              {status === 'idle' && <span className="text-sm font-extrabold px-3 py-1 bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200 rounded-md">Ready</span>}
+              {status === 'running' && <span className="text-sm font-extrabold px-3 py-1 bg-indigo-100 text-indigo-900 dark:bg-indigo-950/80 dark:text-indigo-300 rounded-md animate-pulse border border-indigo-400">Running...</span>}
+              {status === 'accepted' && (
+                <span className="flex items-center gap-1.5 text-sm text-emerald-800 dark:text-emerald-300 font-black px-3 py-1 bg-emerald-100 dark:bg-emerald-950/80 rounded-md border border-emerald-400">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Accepted
+                </span>
+              )}
+              {status === 'rejected' && (
+                <span className="flex items-center gap-1.5 text-sm text-rose-800 dark:text-rose-300 font-black px-3 py-1 bg-rose-100 dark:bg-rose-950/80 rounded-md border border-rose-400">
+                  <XCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" /> Rejected
+                </span>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 md:col-span-2">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                disabled={status === 'accepted' || status === 'rejected'}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-extrabold text-sm transition-all ${
+                  isPlaying
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-md'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-900/50'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                <span>{isPlaying ? 'Pause' : 'Auto Play'}</span>
+              </button>
+
+              <button
+                onClick={stepForward}
+                disabled={isPlaying || status === 'accepted' || status === 'rejected'}
+                className={`px-5 py-3 rounded-xl font-extrabold text-sm transition-all border flex items-center justify-center gap-1.5 ${
+                  isLightCanvas
+                    ? 'bg-white hover:bg-slate-100 text-slate-900 border-slate-300 shadow-sm'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700 shadow-md'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                <SkipForward className="w-4 h-4" />
+                <span>Step</span>
+              </button>
+
+              <button
+                onClick={resetSimulation}
+                className={`p-3 rounded-xl font-extrabold text-sm transition-all border flex items-center justify-center ${
+                  isLightCanvas
+                    ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-sm'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700 shadow-md'
+                }`}
+                title="Reset Simulation"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Right Column: Live Transition Function Side Panel Grid */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-4 sticky top-6">
+          <div className={`p-5 rounded-2xl border flex flex-col gap-4 shadow-xl transition-all ${
             isLightCanvas
-              ? 'bg-white border-slate-300 shadow-sm'
-              : 'bg-slate-950/70 border-slate-800'
+              ? 'bg-white border-slate-300 text-slate-900 shadow-slate-200'
+              : 'bg-slate-950/90 border-slate-800 text-slate-100 shadow-black'
           }`}>
-            <span className="text-sm font-bold">Status:</span>
-            {status === 'idle' && <span className="text-sm font-extrabold px-3 py-1 bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200 rounded-md">Ready</span>}
-            {status === 'running' && <span className="text-sm font-extrabold px-3 py-1 bg-indigo-100 text-indigo-900 dark:bg-indigo-950/80 dark:text-indigo-300 rounded-md animate-pulse border border-indigo-400">Running...</span>}
-            {status === 'accepted' && (
-              <span className="flex items-center gap-1.5 text-sm text-emerald-800 dark:text-emerald-300 font-black px-3 py-1 bg-emerald-100 dark:bg-emerald-950/80 rounded-md border border-emerald-400">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Accepted (Valid String)
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-extrabold text-sm">
+                <Table className="w-4.5 h-4.5" />
+                <span>Transition Function δ Live Grid</span>
+              </div>
+              <span className="text-[11px] font-mono font-extrabold px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                {currentInputSymbol !== null ? `Symbol: '${currentInputSymbol}'` : 'Ready'}
               </span>
-            )}
-            {status === 'rejected' && (
-              <span className="flex items-center gap-1.5 text-sm text-rose-800 dark:text-rose-300 font-black px-3 py-1 bg-rose-100 dark:bg-rose-950/80 rounded-md border border-rose-400">
-                <XCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" /> Rejected (Invalid String)
+            </div>
+
+            {/* Tabular Grid */}
+            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+              <table className="w-full text-left border-collapse font-mono text-xs">
+                <thead>
+                  <tr className={`${isLightCanvas ? 'bg-slate-100 text-slate-700' : 'bg-slate-900 text-slate-300'} border-b border-slate-200 dark:border-slate-800`}>
+                    <th className="p-2.5 font-black uppercase text-[11px] tracking-wider">State</th>
+                    {tableSymbols.map((sym) => {
+                      const isColActive = currentInputSymbol === sym;
+                      return (
+                        <th
+                          key={sym}
+                          className={`p-2.5 text-center font-black transition-all ${
+                            isColActive
+                              ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-400'
+                              : ''
+                          }`}
+                        >
+                          {sym} {isColActive ? '▼' : ''}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dfa.states.map((st) => {
+                    const isRowActive = activeStates.includes(st);
+                    const isStart = st === dfa.startState;
+                    const isAccept = dfa.acceptStates.includes(st);
+
+                    return (
+                      <tr
+                        key={st}
+                        className={`border-b border-slate-100 dark:border-slate-800/60 transition-all ${
+                          isRowActive
+                            ? (isLightCanvas ? 'bg-purple-100/90 font-bold' : 'bg-purple-950/70 font-bold')
+                            : (isLightCanvas ? 'hover:bg-slate-50' : 'hover:bg-slate-900/40')
+                        }`}
+                      >
+                        <td className="p-2.5 font-extrabold">
+                          <div className="flex items-center gap-1.5">
+                            {isRowActive && <span className="w-2 h-2 rounded-full bg-purple-600 animate-ping inline-block" />}
+                            <span className={isRowActive ? 'text-purple-800 dark:text-purple-300 font-black' : 'text-slate-700 dark:text-slate-300'}>
+                              {isStart ? '→' : ''}{isAccept ? '*' : ''}{st}
+                            </span>
+                          </div>
+                        </td>
+
+                        {tableSymbols.map((sym) => {
+                          const matching = dfa.transitions.filter(t => {
+                            if (t.from !== st) return false;
+                            if (sym === 'ε') return t.symbol === 'ε' || t.symbol === 'eps' || t.symbol === 'epsilon';
+                            return t.symbol === sym;
+                          });
+
+                          const targets = Array.from(new Set(matching.map(t => t.to)));
+                          const isSymbolMatching = (currentInputSymbol !== null && sym === currentInputSymbol) || (sym === 'ε');
+                          const isCellActive = isRowActive && isSymbolMatching && targets.length > 0;
+
+                          const targetDisplay = targets.length === 0 ? '—' : targets.length === 1 ? targets[0] : `{${targets.join(', ')}}`;
+
+                          return (
+                            <td
+                              key={sym}
+                              className={`p-2.5 text-center font-mono font-black transition-all ${
+                                isCellActive
+                                  ? 'bg-purple-600 text-white ring-2 ring-purple-400 scale-105 shadow-md'
+                                  : isRowActive
+                                  ? 'text-purple-900 dark:text-purple-200'
+                                  : 'text-slate-600 dark:text-slate-400'
+                              }`}
+                            >
+                              {isCellActive && <Zap className="w-3 h-3 inline-block mr-0.5 text-yellow-300 animate-pulse" />}
+                              {targetDisplay}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Live Evaluator Formula */}
+            <div className={`p-3.5 rounded-xl border text-xs font-mono flex flex-col gap-2 ${
+              isLightCanvas
+                ? 'bg-slate-50 border-slate-200 text-slate-800'
+                : 'bg-slate-900/90 border-slate-800 text-slate-300'
+            }`}>
+              <span className="font-extrabold text-[11px] text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-indigo-500" /> Active Step Evaluation:
               </span>
-            )}
+              {currentInputSymbol ? (
+                <div className="flex flex-col gap-1.5">
+                  {activeStates.map((st) => {
+                    const matches = dfa.transitions.filter(t => t.from === st && t.symbol === currentInputSymbol);
+                    const targetList = matches.map(m => m.to);
+                    return (
+                      <div key={st} className="flex items-center gap-2 text-[11px]">
+                        <span className="text-purple-700 dark:text-purple-300 font-extrabold">δ({st}, '{currentInputSymbol}')</span>
+                        <ArrowRight className="w-3 h-3 text-slate-400" />
+                        <span className="font-black text-slate-900 dark:text-white bg-purple-100 dark:bg-purple-950 px-2 py-0.5 rounded border border-purple-300 dark:border-purple-800">
+                          {targetList.length > 0 ? `{ ${targetList.join(', ')} }` : '∅ (Trap)'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-[11px] text-slate-500 italic">
+                  Step forward or press Auto Play to watch live matrix cell evaluation.
+                </div>
+              )}
+            </div>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              disabled={status === 'accepted' || status === 'rejected'}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-extrabold text-sm transition-all ${
-                isPlaying
-                  ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-md'
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-900/50'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              <span>{isPlaying ? 'Pause' : 'Auto Play'}</span>
-            </button>
-
-            <button
-              onClick={stepForward}
-              disabled={isPlaying || status === 'accepted' || status === 'rejected'}
-              className={`flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl font-extrabold text-sm transition-colors border disabled:opacity-50 ${
-                isLightCanvas
-                  ? 'bg-slate-200 hover:bg-slate-300 text-slate-900 border-slate-300'
-                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
-              }`}
-            >
-              <SkipForward className="w-4 h-4" />
-              <span>Step</span>
-            </button>
-          </div>
-
-          {onAskAI && (
-            <button
-              onClick={() => onAskAI(currentState, inputString[currentIndex] || 'ε', inputString)}
-              className="flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white border border-purple-500 rounded-xl text-xs font-black transition-all shadow-md"
-            >
-              <Sparkles className="w-4 h-4 text-yellow-300" />
-              <span>Ask AI Professor about this step</span>
-            </button>
-          )}
-
         </div>
 
       </div>

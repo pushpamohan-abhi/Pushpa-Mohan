@@ -174,6 +174,7 @@ export default function App() {
             deck={deck}
             onOpenQuiz={() => setIsQuizOpen(true)}
             initialProjectorMode={projectorKey > 0}
+            onUpdateDeck={(updated) => setDeck(updated)}
           />
         )}
 

@@ -4,6 +4,7 @@ import { DfaAnimatorWidget } from './DfaAnimatorWidget';
 import { SubsetConstructionWidget } from './SubsetConstructionWidget';
 import { HopcroftFiguresWidget } from './HopcroftFiguresWidget';
 import { TransitionTableCard } from './TransitionTableCard';
+import { MoveSlidesModal } from './MoveSlidesModal';
 import { parseSlideBullets } from '../utils/slideParser';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -24,20 +25,24 @@ import {
   Eye,
   X,
   Play,
-  Volume2
+  Volume2,
+  Move
 } from 'lucide-react';
 
 interface PresentationViewProps {
   deck: PresentationDeck;
   onOpenQuiz: () => void;
   initialProjectorMode?: boolean;
+  onUpdateDeck?: (newDeck: PresentationDeck) => void;
 }
 
 export const PresentationView: React.FC<PresentationViewProps> = ({
   deck,
   onOpenQuiz,
   initialProjectorMode = false,
+  onUpdateDeck,
 }) => {
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const processedSlides = useMemo(() => {
     const newSlides: Slide[] = [];
     deck.slides.forEach((slide) => {
@@ -409,7 +414,7 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                     </div>
                   ) : currentSlide.interactiveType === 'subset-construction' ? (
                     <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
-                      <SubsetConstructionWidget initialPreset="decimal_numbers" />
+                      <SubsetConstructionWidget initialPreset={currentSlide.presetKey || "ends_01"} />
                     </div>
                   ) : currentSlide.interactiveType === 'hopcroft-figures' ? (
                     <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
@@ -575,6 +580,15 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
             {/* Slide Counter, Progress, & Projector Mode Button */}
             <div className="flex items-center gap-3 shrink-0">
               <button
+                onClick={() => setIsMoveModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-900/80 hover:bg-blue-800 text-cyan-300 border border-cyan-500/40 font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all hover:border-cyan-400"
+                title="Move or Reorder Slides in Deck"
+              >
+                <Move className="w-4 h-4 text-cyan-400" />
+                <span>Move / Reorder Slides</span>
+              </button>
+
+              <button
                 onClick={toggleProjectorMode}
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.5)] transition-all transform hover:scale-105"
                 title="Launch Fullscreen Projector Slide Show (F5)"
@@ -597,9 +611,13 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                 <span className="text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
                   <Layers className="w-4 h-4 text-cyan-400" /> Presentation Outline
                 </span>
-                <span className="text-xs text-blue-300 bg-blue-900/60 px-2 py-0.5 rounded-full">
-                  {processedSlides.length} slides
-                </span>
+                <button
+                  onClick={() => setIsMoveModalOpen(true)}
+                  className="text-xs text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 hover:underline"
+                  title="Reorder slides"
+                >
+                  <Move className="w-3 h-3" /> Reorder
+                </button>
               </div>
 
               {processedSlides.map((slide, idx) => (
@@ -731,7 +749,7 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                     {/* Subset Construction Interactive Widget */}
                     {currentSlide.interactiveType === 'subset-construction' && (
                       <div className="md:col-span-12 text-slate-900 mt-4">
-                        <SubsetConstructionWidget initialPreset="decimal_numbers" />
+                        <SubsetConstructionWidget initialPreset={currentSlide.presetKey || "ends_01"} />
                       </div>
                     )}
 
@@ -848,6 +866,23 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
             </button>
           </motion.div>
         </div>
+      )}
+
+      {/* Move / Reorder Slides Modal */}
+      {isMoveModalOpen && (
+        <MoveSlidesModal
+          deck={deck}
+          currentSlideIndex={currentIndex}
+          onClose={() => setIsMoveModalOpen(false)}
+          onSave={(updatedDeck, newActiveIdx) => {
+            if (onUpdateDeck) {
+              onUpdateDeck(updatedDeck);
+            }
+            if (typeof newActiveIdx === 'number') {
+              setCurrentIndex(newActiveIdx);
+            }
+          }}
+        />
       )}
     </div>
   );

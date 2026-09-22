@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PresentationDeck, Slide } from '../types';
-import { Edit3, Plus, Trash2, Save, Layers, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit3, Plus, Trash2, Save, Layers, ArrowUp, ArrowDown, Move } from 'lucide-react';
+import { MoveSlidesModal } from './MoveSlidesModal';
 
 interface SlideEditorViewProps {
   deck: PresentationDeck;
@@ -11,8 +12,33 @@ export const SlideEditorView: React.FC<SlideEditorViewProps> = ({ deck, onUpdate
   const [editableDeck, setEditableDeck] = useState<PresentationDeck>(JSON.parse(JSON.stringify(deck)));
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [successMsg, setSuccessMsg] = useState(false);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
 
   const currentSlide = editableDeck.slides[selectedIdx] || editableDeck.slides[0];
+
+  const moveSlideUp = (e: React.MouseEvent, idx: number) => {
+    e.stopPropagation();
+    if (idx <= 0) return;
+    const updatedSlides = [...editableDeck.slides];
+    const temp = updatedSlides[idx];
+    updatedSlides[idx] = updatedSlides[idx - 1];
+    updatedSlides[idx - 1] = temp;
+    setEditableDeck({ ...editableDeck, slides: updatedSlides });
+    if (selectedIdx === idx) setSelectedIdx(idx - 1);
+    else if (selectedIdx === idx - 1) setSelectedIdx(idx);
+  };
+
+  const moveSlideDown = (e: React.MouseEvent, idx: number) => {
+    e.stopPropagation();
+    if (idx >= editableDeck.slides.length - 1) return;
+    const updatedSlides = [...editableDeck.slides];
+    const temp = updatedSlides[idx];
+    updatedSlides[idx] = updatedSlides[idx + 1];
+    updatedSlides[idx + 1] = temp;
+    setEditableDeck({ ...editableDeck, slides: updatedSlides });
+    if (selectedIdx === idx) setSelectedIdx(idx + 1);
+    else if (selectedIdx === idx + 1) setSelectedIdx(idx);
+  };
 
   const handleUpdateField = (field: keyof Slide, val: any) => {
     const updatedSlides = [...editableDeck.slides];
@@ -87,6 +113,13 @@ export const SlideEditorView: React.FC<SlideEditorViewProps> = ({ deck, onUpdate
             </span>
           )}
           <button
+            onClick={() => setIsMoveModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl font-bold text-sm transition-colors shadow-xs"
+          >
+            <Move className="w-4 h-4 text-indigo-600" />
+            <span>Move & Reorder Deck</span>
+          </button>
+          <button
             onClick={addNewSlide}
             className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-sm transition-colors"
           >
@@ -108,24 +141,54 @@ export const SlideEditorView: React.FC<SlideEditorViewProps> = ({ deck, onUpdate
         
         {/* Left List of Slides */}
         <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col gap-2 max-h-[600px] overflow-y-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 px-2 mb-1">Slides List</span>
-          {editableDeck.slides.map((slide, idx) => (
+          <div className="flex items-center justify-between px-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Slides List ({editableDeck.slides.length})</span>
             <button
-              key={slide.id}
+              onClick={() => setIsMoveModalOpen(true)}
+              className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
+            >
+              <Move className="w-3 h-3" /> Reorder All
+            </button>
+          </div>
+          {editableDeck.slides.map((slide, idx) => (
+            <div
+              key={slide.id + idx}
               onClick={() => setSelectedIdx(idx)}
-              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-center justify-between ${
+              className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
                 selectedIdx === idx
                   ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-900 shadow-xs font-semibold'
                   : 'bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-700'
               }`}
             >
-              <div className="flex items-center gap-3 truncate">
+              <div className="flex items-center gap-2.5 truncate flex-1 min-w-0">
                 <span className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${selectedIdx === idx ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
                   {idx + 1}
                 </span>
-                <span className="text-xs truncate">{slide.title}</span>
+                <span className="text-xs truncate font-medium">{slide.title}</span>
               </div>
-            </button>
+
+              {/* Quick Move Up/Down Controls */}
+              <div className="flex items-center gap-1 shrink-0 ml-2">
+                <button
+                  type="button"
+                  onClick={(e) => moveSlideUp(e, idx)}
+                  disabled={idx === 0}
+                  className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-100/80 disabled:opacity-20 rounded transition-colors"
+                  title="Move Slide Up"
+                >
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => moveSlideDown(e, idx)}
+                  disabled={idx === editableDeck.slides.length - 1}
+                  className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-100/80 disabled:opacity-20 rounded transition-colors"
+                  title="Move Slide Down"
+                >
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           ))}
         </div>
 
@@ -214,6 +277,21 @@ export const SlideEditorView: React.FC<SlideEditorViewProps> = ({ deck, onUpdate
         </div>
 
       </div>
+
+      {isMoveModalOpen && (
+        <MoveSlidesModal
+          deck={editableDeck}
+          currentSlideIndex={selectedIdx}
+          onClose={() => setIsMoveModalOpen(false)}
+          onSave={(updatedDeck, newActiveIdx) => {
+            setEditableDeck(updatedDeck);
+            if (typeof newActiveIdx === 'number') {
+              setSelectedIdx(newActiveIdx);
+            }
+            onUpdateDeck(updatedDeck);
+          }}
+        />
+      )}
     </div>
   );
 };

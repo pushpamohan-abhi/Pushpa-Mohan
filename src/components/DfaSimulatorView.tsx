@@ -5,6 +5,81 @@ import { SubsetConstructionWidget } from './SubsetConstructionWidget';
 import { Cpu, Plus, Trash2, CheckCircle2, Bookmark, Sliders, Layers, GitBranch, ArrowRight, Table, Sparkles } from 'lucide-react';
 
 const presetDfas: Record<string, DfaDefinition & { category?: string; explanationNotes?: string[]; nfaDetails?: { title: string; states: string[]; transitions: { from: string; symbol: string; to: string[] }[] } }> = {
+  nfa_ends_01: {
+    category: "NFA Simulation",
+    title: "NFA: Ends with '01'",
+    description: "NFA with non-deterministic branching on symbol '0' into parallel states {q0, q1}",
+    states: ["q0", "q1", "q2"],
+    alphabet: ["0", "1"],
+    startState: "q0",
+    acceptStates: ["q2"],
+    transitions: [
+      { from: "q0", symbol: "0", to: "q0" },
+      { from: "q0", symbol: "0", to: "q1" }, // Non-deterministic branch!
+      { from: "q0", symbol: "1", to: "q0" },
+      { from: "q1", symbol: "1", to: "q2" }
+    ],
+    testString: "1001",
+    explanationNotes: [
+      "Non-deterministic Branching: Reading '0' in state q0 creates TWO parallel active states: {q0, q1}.",
+      "Branch 1 (q0) continues searching for future '01' patterns.",
+      "Branch 2 (q1) guesses this '0' is the second-to-last symbol and waits for '1' to reach accept state q2.",
+      "String Acceptance: Accepted because the active set at string completion S = {q0, q2} contains accept state q2."
+    ]
+  },
+  enfa_decimals: {
+    category: "ε-NFA Simulation",
+    title: "ε-NFA: Decimal Numbers (Hopcroft Fig 2.18)",
+    description: "NFA with spontaneous ε-transitions recognizing signed/unsigned decimal floating-point numbers",
+    states: ["q0", "q1", "q2", "q3", "q4", "q5"],
+    alphabet: ["+", "-", ".", "0", "1", "ε"],
+    startState: "q0",
+    acceptStates: ["q5"],
+    transitions: [
+      { from: "q0", symbol: "ε", to: "q1" },
+      { from: "q0", symbol: "+", to: "q1" },
+      { from: "q0", symbol: "-", to: "q1" },
+      { from: "q1", symbol: "0", to: "q1" },
+      { from: "q1", symbol: "1", to: "q1" },
+      { from: "q1", symbol: ".", to: "q2" },
+      { from: "q2", symbol: "0", to: "q3" },
+      { from: "q2", symbol: "1", to: "q3" },
+      { from: "q3", symbol: "0", to: "q3" },
+      { from: "q3", symbol: "1", to: "q3" },
+      { from: "q3", symbol: "ε", to: "q5" },
+      { from: "q1", symbol: "ε", to: "q4" },
+      { from: "q4", symbol: ".", to: "q3" }
+    ],
+    testString: "+3.14",
+    explanationNotes: [
+      "Initial ε-closure ECLOSE(q0) = {q0, q1, q4}: Spontaneous ε-transitions activate states q1 and q4 without reading any input symbol.",
+      "Handles optional sign ('+', '-' or ε), integer part, decimal point, and fractional digits.",
+      "Parallel Execution: All valid parse branches are tracked simultaneously in state set S."
+    ]
+  },
+  nfa_3rd_from_end: {
+    category: "NFA Simulation",
+    title: "NFA: 3rd Symbol from Right is '1'",
+    description: "4-state NFA demonstrating exponential state savings over 8-state DFA",
+    states: ["q0", "q1", "q2", "q3"],
+    alphabet: ["0", "1"],
+    startState: "q0",
+    acceptStates: ["q3"],
+    transitions: [
+      { from: "q0", symbol: "0", to: "q0" },
+      { from: "q0", symbol: "1", to: "q0" },
+      { from: "q0", symbol: "1", to: "q1" },
+      { from: "q1", symbol: "0", to: "q2" },
+      { from: "q1", symbol: "1", to: "q2" },
+      { from: "q2", symbol: "0", to: "q3" },
+      { from: "q2", symbol: "1", to: "q3" }
+    ],
+    testString: "01011",
+    explanationNotes: [
+      "Non-deterministic Guessing: On seeing '1' in state q0, the NFA branches into q1 (guessing this is the 3rd symbol from end).",
+      "Compactness: Uses only 4 states, whereas equivalent DFA requires 2^3 = 8 states to remember all 3-bit suffixes!"
+    ]
+  },
   ends_ab: {
     category: "Standard DFA",
     title: "Ends with 'ab'",
@@ -154,9 +229,9 @@ export const DfaSimulatorView: React.FC = () => {
             <Cpu className="w-5 h-5" />
             <span className="text-xs font-bold uppercase tracking-wider">Automata Studio & Interactive Tools</span>
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900">NFA-to-DFA Subset Converter & DFA Animator</h2>
+          <h2 className="text-2xl font-extrabold text-slate-900">NFA / ε-NFA / DFA Simulator & Subset Construction Studio</h2>
           <p className="text-sm text-slate-500 mt-1">
-            Perform step-by-step NFA to DFA Subset Construction with table inputs or analyze pre-built DFAs and Minimization machines.
+            Simulate non-deterministic branching, ε-closures, parallel active states, or perform step-by-step NFA to DFA Subset Construction.
           </p>
         </div>
 
