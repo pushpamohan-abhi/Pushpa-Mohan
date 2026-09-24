@@ -7,15 +7,52 @@ import { DfaSimulatorView } from './components/DfaSimulatorView';
 import { AiGeneratorModal } from './components/AiGeneratorModal';
 import { SlideEditorView } from './components/SlideEditorView';
 import { QuizModal } from './components/QuizModal';
+import { SaveGitExportModal } from './components/SaveGitExportModal';
 import { generateDfaDiagramImage } from './utils/exportUtils';
 import pptxgen from 'pptxgenjs';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'presentation' | 'simulator' | 'ai-generator' | 'editor'>('presentation');
-  const [deck, setDeck] = useState<PresentationDeck>(module1Deck);
+  
+  // Initial deck from localStorage if available
+  const [deck, setDeck] = useState<PresentationDeck>(() => {
+    try {
+      const saved = localStorage.getItem('toc_module1_deck');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read saved deck from localStorage:', e);
+    }
+    return module1Deck;
+  });
+
   const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [isSaveGitOpen, setIsSaveGitOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [projectorKey, setProjectorKey] = useState(0);
+
+  // Synchronize deck state to both localStorage and disk file (src/data/module1Data.ts)
+  const handleUpdateDeck = (updatedDeck: PresentationDeck) => {
+    setDeck(updatedDeck);
+    try {
+      localStorage.setItem('toc_module1_deck', JSON.stringify(updatedDeck));
+    } catch (e) {
+      console.error('Failed to write to localStorage:', e);
+    }
+
+    // Auto-sync file on disk for git tracking
+    fetch('/api/save-source-deck', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deck: updatedDeck }),
+    }).catch((err) => {
+      console.info('Disk sync notice:', err);
+    });
+  };
 
   const handleStartProjector = () => {
     setCurrentTab('presentation');
@@ -152,7 +189,7 @@ export default function App() {
   };
 
   const handleDeckGenerated = (newDeck: PresentationDeck) => {
-    setDeck(newDeck);
+    handleUpdateDeck(newDeck);
     setCurrentTab('presentation');
   };
 
@@ -164,6 +201,7 @@ export default function App() {
         onOpenQuiz={() => setIsQuizOpen(true)}
         onExport={handleExport}
         onStartProjector={handleStartProjector}
+        onOpenSaveGit={() => setIsSaveGitOpen(true)}
         slideCount={deck.slides.length}
       />
 
@@ -174,7 +212,7 @@ export default function App() {
             deck={deck}
             onOpenQuiz={() => setIsQuizOpen(true)}
             initialProjectorMode={projectorKey > 0}
-            onUpdateDeck={(updated) => setDeck(updated)}
+            onUpdateDeck={handleUpdateDeck}
           />
         )}
 
@@ -190,7 +228,7 @@ export default function App() {
         {currentTab === 'editor' && (
           <SlideEditorView
             deck={deck}
-            onUpdateDeck={(updated) => setDeck(updated)}
+            onUpdateDeck={handleUpdateDeck}
           />
         )}
       </main>
@@ -199,6 +237,14 @@ export default function App() {
         <QuizModal
           questions={module1Quiz}
           onClose={() => setIsQuizOpen(false)}
+        />
+      )}
+
+      {isSaveGitOpen && (
+        <SaveGitExportModal
+          deck={deck}
+          onClose={() => setIsSaveGitOpen(false)}
+          onDeckUpdated={handleUpdateDeck}
         />
       )}
     </div>

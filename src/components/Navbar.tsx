@@ -1,5 +1,5 @@
 import React from 'react';
-import { Presentation, Play, Sparkles, Edit3, HelpCircle, BookOpen, Download, Tv } from 'lucide-react';
+import { Presentation, Play, Sparkles, Edit3, HelpCircle, BookOpen, Download, Tv, GitBranch } from 'lucide-react';
 
 interface NavbarProps {
   currentTab: 'presentation' | 'simulator' | 'ai-generator' | 'editor';
@@ -7,6 +7,7 @@ interface NavbarProps {
   onOpenQuiz: () => void;
   onExport: () => void;
   onStartProjector: () => void;
+  onOpenSaveGit: () => void;
   slideCount: number;
 }
 
@@ -16,6 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenQuiz,
   onExport,
   onStartProjector,
+  onOpenSaveGit,
   slideCount,
 }) => {
   return (
@@ -85,7 +87,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2.5">
+            <button
+              onClick={onOpenSaveGit}
+              className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 shadow-2xs transition-all cursor-pointer"
+              title="Save & Push Updated Slide Order to GitHub"
+            >
+              <GitBranch className="w-4 h-4 text-emerald-600" />
+              <span className="hidden xl:inline">Save for Git Push</span>
+            </button>
+
             <button
               onClick={onStartProjector}
               className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-sm font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 shadow-sm transition-all animate-pulse"

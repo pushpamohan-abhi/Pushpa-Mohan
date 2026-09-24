@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
@@ -18,6 +19,47 @@ const ai = aiKey ? new GoogleGenAI({ apiKey: aiKey }) : null;
 // API Routes
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", aiEnabled: !!ai });
+});
+
+// Endpoint to save updated presentation deck directly to src/data/module1Data.ts
+app.post("/api/save-source-deck", (req, res) => {
+  try {
+    const { deck } = req.body || {};
+    if (!deck || !Array.isArray(deck.slides)) {
+      return res.status(400).json({ error: "Invalid deck payload" });
+    }
+
+    const filePath = path.join(process.cwd(), "src", "data", "module1Data.ts");
+
+    let quizSection = "";
+    if (fs.existsSync(filePath)) {
+      const existingContent = fs.readFileSync(filePath, "utf-8");
+      const quizMatch = existingContent.match(/export const module1Quiz[\s\S]*/);
+      if (quizMatch) {
+        quizSection = quizMatch[0];
+      }
+    }
+
+    if (!quizSection) {
+      quizSection = `export const module1Quiz = [];\n`;
+    }
+
+    const fileHeader = `import { PresentationDeck, QuizQuestion } from '../types';\n\n`;
+    const deckExport = `export const module1Deck: PresentationDeck = ${JSON.stringify(deck, null, 2)};\n\n`;
+    const fullContent = fileHeader + deckExport + quizSection;
+
+    fs.writeFileSync(filePath, fullContent, "utf-8");
+    console.log(`[SAVE] Updated ${filePath} with ${deck.slides.length} slides.`);
+    return res.json({
+      success: true,
+      message: "Successfully updated src/data/module1Data.ts on disk! Changes are now ready for git add/commit/push.",
+      filePath: "src/data/module1Data.ts",
+      slideCount: deck.slides.length,
+    });
+  } catch (err: any) {
+    console.error("Error saving source deck:", err);
+    return res.status(500).json({ error: err.message || "Failed to update source file." });
+  }
 });
 
 // Endpoint to generate custom PPT slides or DFA explanations using Gemini
