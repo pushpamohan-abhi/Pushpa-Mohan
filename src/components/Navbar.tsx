@@ -8,6 +8,7 @@ interface NavbarProps {
   onExport: () => void;
   onStartProjector: () => void;
   onOpenSaveGit: () => void;
+  onResetDeck?: () => void;
   slideCount: number;
 }
 
@@ -18,6 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onExport,
   onStartProjector,
   onOpenSaveGit,
+  onResetDeck,
   slideCount,
 }) => {
   return (
@@ -88,6 +90,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Actions */}
           <div className="flex items-center space-x-2.5">
+            {onResetDeck && (
+              <button
+                onClick={onResetDeck}
+                className="flex items-center space-x-1 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all cursor-pointer"
+                title="Sync / Reload Default Syllabus Deck"
+              >
+                <span>Sync Syllabus Deck</span>
+              </button>
+            )}
+
             <button
               onClick={onOpenSaveGit}
               className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 shadow-2xs transition-all cursor-pointer"

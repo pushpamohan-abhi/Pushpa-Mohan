@@ -14,14 +14,30 @@ import pptxgen from 'pptxgenjs';
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'presentation' | 'simulator' | 'ai-generator' | 'editor'>('presentation');
   
-  // Initial deck from localStorage if available
+  // Initial deck from localStorage, auto-merging any newly added source slides
   const [deck, setDeck] = useState<PresentationDeck>(() => {
     try {
       const saved = localStorage.getItem('toc_module1_deck');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && Array.isArray(parsed.slides) && parsed.slides.length > 0) {
-          return parsed;
+          const savedSlideIds = new Set(parsed.slides.map((s: any) => s.id));
+          const missingSlides = module1Deck.slides.filter(s => !savedSlideIds.has(s.id));
+
+          if (missingSlides.length === 0 && parsed.slides.length === module1Deck.slides.length) {
+            return parsed;
+          }
+
+          // Merge newly added source slides at their correct order
+          const updatedSlides = [...parsed.slides];
+          module1Deck.slides.forEach((sourceSlide, idx) => {
+            if (!savedSlideIds.has(sourceSlide.id)) {
+              updatedSlides.splice(idx, 0, sourceSlide);
+            }
+          });
+          const mergedDeck = { ...module1Deck, slides: updatedSlides };
+          localStorage.setItem('toc_module1_deck', JSON.stringify(mergedDeck));
+          return mergedDeck;
         }
       }
     } catch (e) {
@@ -29,6 +45,11 @@ export default function App() {
     }
     return module1Deck;
   });
+
+  const handleResetDeck = () => {
+    localStorage.removeItem('toc_module1_deck');
+    setDeck(module1Deck);
+  };
 
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [isSaveGitOpen, setIsSaveGitOpen] = useState(false);
@@ -202,6 +223,7 @@ export default function App() {
         onExport={handleExport}
         onStartProjector={handleStartProjector}
         onOpenSaveGit={() => setIsSaveGitOpen(true)}
+        onResetDeck={handleResetDeck}
         slideCount={deck.slides.length}
       />
 

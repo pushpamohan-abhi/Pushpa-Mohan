@@ -1914,142 +1914,48 @@ export const module1Deck: PresentationDeck = {
       "interactiveType": "dfa-runner"
     },
     {
-      "id": "slide-18",
-      "title": "DFA Minimization (Table Filling Method)",
-      "subtitle": "Module 1.8 - Optimizing State Machines",
+      "id": "dfa-disadvantages-motivation-nfa",
+      "title": "Disadvantages of DFA & Motivation for NFA",
+      "subtitle": "Why Deterministic Machines Become Complex & Why We Need NFA",
       "bullets": [
-        "Goal: Reduce the number of states in a DFA while preserving its accepted language.",
-        "Steps for Minimization:",
-        "1. Remove all states unreachable from the start state.",
-        "2. Create a table of all state pairs (p, q).",
-        "3. Mark all pairs (Final, Non-Final) as distinguishable (X).",
-        "4. For remaining pairs, check transitions on each symbol. If they lead to a marked pair, mark current pair.",
-        "5. Merge indistinguishable states into single equivalence classes."
+        "1. Deterministic Rigidity (Exactly 1 Transition Per Symbol):",
+        "   • Every DFA state MUST define an outgoing transition for EVERY alphabet symbol in Σ.",
+        "   • Missing choices require explicit, redundant 'dead / trap' states (e.g. q_dead).",
+        "2. State Explosion Problem for Pattern Matching:",
+        "   • Designing DFAs for complex pattern matching (e.g., 'k-th character from right is 1') requires 2^k states.",
+        "   • Complex parallel string patterns (e.g. 'contains 101 OR 110') lead to unwieldy transition matrices.",
+        "3. Harder to Design & Human Readability:",
+        "   • DFAs require tracking global state memory at every single step, making manual design error-prone.",
+        "4. Why We Need Non-Determinism (NFA):",
+        "   • Guesses & Parallel Branching: Allows multiple transitions or 0 transitions on the same symbol.",
+        "   • Compact Machine Sizes: NFAs require significantly fewer states (e.g., k+1 states vs 2^k states in DFA).",
+        "   • Natural Mapping to Regular Expressions: Ideal bridge for compilers, tokenizers, and search engines."
       ],
-      "explanation": "Minimized DFAs have the theoretical minimum number of states, achieving maximum hardware and software execution efficiency.",
-      "codeSnippet": "Equivalence Classes: e.g., states C and D merged into [C, D]",
-      "dfaExample": {
-        "title": "Original DFA (Unminimized)",
-        "states": [
-          "A",
-          "B",
-          "C",
-          "D",
-          "E"
-        ],
-        "alphabet": [
-          "0",
-          "1"
-        ],
-        "startState": "A",
-        "acceptStates": [
-          "C",
-          "D"
-        ],
-        "transitions": [
-          {
-            "from": "A",
-            "symbol": "0",
-            "to": "B"
-          },
-          {
-            "from": "A",
-            "symbol": "1",
-            "to": "C"
-          },
-          {
-            "from": "B",
-            "symbol": "0",
-            "to": "A"
-          },
-          {
-            "from": "B",
-            "symbol": "1",
-            "to": "D"
-          },
-          {
-            "from": "C",
-            "symbol": "0",
-            "to": "C"
-          },
-          {
-            "from": "C",
-            "symbol": "1",
-            "to": "D"
-          },
-          {
-            "from": "D",
-            "symbol": "0",
-            "to": "D"
-          },
-          {
-            "from": "D",
-            "symbol": "1",
-            "to": "C"
-          },
-          {
-            "from": "E",
-            "symbol": "0",
-            "to": "A"
-          },
-          {
-            "from": "E",
-            "symbol": "1",
-            "to": "C"
-          }
-        ],
-        "testString": "0110",
-        "convertedDfa": {
-          "title": "Minimized DFA (3 States)",
-          "states": [
-            "A",
-            "B",
-            "[C,D]"
-          ],
-          "alphabet": [
-            "0",
-            "1"
-          ],
-          "startState": "A",
-          "acceptStates": [
-            "[C,D]"
-          ],
-          "transitions": [
-            {
-              "from": "A",
-              "symbol": "0",
-              "to": "B"
-            },
-            {
-              "from": "A",
-              "symbol": "1",
-              "to": "[C,D]"
-            },
-            {
-              "from": "B",
-              "symbol": "0",
-              "to": "A"
-            },
-            {
-              "from": "B",
-              "symbol": "1",
-              "to": "[C,D]"
-            },
-            {
-              "from": "[C,D]",
-              "symbol": "0",
-              "to": "[C,D]"
-            },
-            {
-              "from": "[C,D]",
-              "symbol": "1",
-              "to": "[C,D]"
-            }
-          ],
-          "testString": "0110"
-        }
-      },
-      "interactiveType": "dfa-runner"
+      "explanation": "DFAs are rigid and computationally strict. NFAs provide an intuitive, highly compact abstraction that allows parallel path exploration without requiring dead states or exponential manual state tracking.",
+      "codeSnippet": "DFA: Rigid (Strictly 1 transition per symbol, 2^k states)  vs  NFA: Flexible (0, 1, or multiple transitions, k+1 states)",
+      "interactiveType": "none"
+    },
+    {
+      "id": "nfa-def-extended-delta",
+      "title": "NFA Formal Definition, Extended Transition Function & Language L(N)",
+      "subtitle": "Hopcroft, Motwani & Ullman (HMU) Section 2.3 - Formal 5-Tuple & String Processing",
+      "bullets": [
+        "1. Formal NFA 5-Tuple Definition: N = (Q, Σ, δ, q₀, F)",
+        "   • Q: Finite set of states | Σ: Input alphabet | q₀ ∈ Q: Start state | F ⊆ Q: Set of accepting states.",
+        "   • δ: Q × Σ → 2^Q  (Transition function maps to a SUBSET of Q, allowing ∅, single, or multiple choices).",
+        "2. Extended Transition Function δ̂ for NFA (δ̂: Q × Σ* → 2^Q):",
+        "   • BASIS: δ̂(q, ε) = {q}  (In zero steps without input, the automaton remains in state q).",
+        "   • INDUCTION: For string w = x·a (where x ∈ Σ* and a ∈ Σ):",
+        "     δ̂(q, w) = δ̂(q, x·a) = ⋃_{p ∈ δ̂(q, x)} δ(p, a)",
+        "   • Intuition: Compute the set of all states p reached from q on string x, then take the union of all transitions δ(p, a).",
+        "3. Language Accepted by an NFA (L(N)):",
+        "   • L(N) = { w ∈ Σ* | δ̂(q₀, w) ∩ F ≠ ∅ }",
+        "   • Acceptance Rule: String w is in L(N) if AT LEAST ONE computational path from q₀ on input w ends in F.",
+        "   • DFA vs NFA Comparison: DFA requires δ̂(q₀, w) ∈ F, whereas NFA requires set intersection δ̂(q₀, w) ∩ F ≠ ∅."
+      ],
+      "explanation": "The extended transition function δ̂ inductively defines string processing for non-deterministic machines by accumulating sets of reachable states. A string is accepted if any active parallel path touches an accept state.",
+      "codeSnippet": "Basis: δ̂(q, ε) = {q}  |  Induction: δ̂(q, xa) = ⋃_{p ∈ δ̂(q, x)} δ(p, a)  |  L(N) = { w | δ̂(q0, w) ∩ F ≠ ∅ }",
+      "interactiveType": "none"
     },
     {
       "id": "nfa-sol-1",
@@ -2221,70 +2127,6 @@ export const module1Deck: PresentationDeck = {
       "interactiveType": "dfa-runner"
     },
     {
-      "id": "nfa-sol-5",
-      "title": "Problem 5: Ends with 'ab' or 'ba'",
-      "subtitle": "NFA Design - Set 1",
-      "bullets": [
-        "Requirement: The string must end in either 'ab' or 'ba'.",
-        "From the looping start state (q0), we branch to two separate paths.",
-        "One path checks for 'ab', the other checks for 'ba'."
-      ],
-      "explanation": "An NFA can simultaneously explore multiple valid suffixes.",
-      "dfaExample": {
-        "title": "NFA: Ends with ab or ba",
-        "states": [
-          "q0",
-          "q1",
-          "q2",
-          "q3",
-          "q4"
-        ],
-        "alphabet": [
-          "a",
-          "b"
-        ],
-        "startState": "q0",
-        "acceptStates": [
-          "q2",
-          "q4"
-        ],
-        "transitions": [
-          {
-            "from": "q0",
-            "symbol": "a",
-            "to": "q0"
-          },
-          {
-            "from": "q0",
-            "symbol": "b",
-            "to": "q0"
-          },
-          {
-            "from": "q0",
-            "symbol": "a",
-            "to": "q1"
-          },
-          {
-            "from": "q1",
-            "symbol": "b",
-            "to": "q2"
-          },
-          {
-            "from": "q0",
-            "symbol": "b",
-            "to": "q3"
-          },
-          {
-            "from": "q3",
-            "symbol": "a",
-            "to": "q4"
-          }
-        ],
-        "testString": "aabab"
-      },
-      "interactiveType": "dfa-runner"
-    },
-    {
       "id": "nfa-sol-7",
       "title": "Problem 7: Substring '101' OR '110'",
       "subtitle": "NFA Design - Set 2",
@@ -2377,6 +2219,70 @@ export const module1Deck: PresentationDeck = {
           }
         ],
         "testString": "001100"
+      },
+      "interactiveType": "dfa-runner"
+    },
+    {
+      "id": "nfa-sol-5",
+      "title": "Problem 5: Ends with 'ab' or 'ba'",
+      "subtitle": "NFA Design - Set 1",
+      "bullets": [
+        "Requirement: The string must end in either 'ab' or 'ba'.",
+        "From the looping start state (q0), we branch to two separate paths.",
+        "One path checks for 'ab', the other checks for 'ba'."
+      ],
+      "explanation": "An NFA can simultaneously explore multiple valid suffixes.",
+      "dfaExample": {
+        "title": "NFA: Ends with ab or ba",
+        "states": [
+          "q0",
+          "q1",
+          "q2",
+          "q3",
+          "q4"
+        ],
+        "alphabet": [
+          "a",
+          "b"
+        ],
+        "startState": "q0",
+        "acceptStates": [
+          "q2",
+          "q4"
+        ],
+        "transitions": [
+          {
+            "from": "q0",
+            "symbol": "a",
+            "to": "q0"
+          },
+          {
+            "from": "q0",
+            "symbol": "b",
+            "to": "q0"
+          },
+          {
+            "from": "q0",
+            "symbol": "a",
+            "to": "q1"
+          },
+          {
+            "from": "q1",
+            "symbol": "b",
+            "to": "q2"
+          },
+          {
+            "from": "q0",
+            "symbol": "b",
+            "to": "q3"
+          },
+          {
+            "from": "q3",
+            "symbol": "a",
+            "to": "q4"
+          }
+        ],
+        "testString": "aabab"
       },
       "interactiveType": "dfa-runner"
     },
@@ -2711,237 +2617,6 @@ export const module1Deck: PresentationDeck = {
       "interactiveType": "dfa-runner"
     },
     {
-      "id": "enfa-closure-delta",
-      "title": "ε-NFA: Formal Definition, ε-Closure & Extended Transition Function",
-      "subtitle": "Section 2.4 - Inductive Basis & Conversion to DFA (Ullman Textbook)",
-      "bullets": [
-        "Formal ε-NFA Definition: E = (Q, Σ, δ, q₀, F) where δ: Q × (Σ ∪ {ε}) → 2^Q.",
-        "ε-Closure Definition (ECLOSE(q)): The set of all states reachable from q taking ZERO or more ε-transitions.",
-        "• BASIS: q ∈ ECLOSE(q)  (Every state is in its own ε-closure).",
-        "• INDUCTION STEP: If p ∈ ECLOSE(q) and r ∈ δ(p, ε), then r ∈ ECLOSE(q).",
-        "Extended Transition Function δ̂ for ε-NFA:",
-        "• BASIS: δ̂(q, ε) = ECLOSE(q)",
-        "• INDUCTION STEP: For w = xa (x ∈ Σ*, a ∈ Σ):",
-        "  δ̂(q, xa) = ECLOSE( ⋃_{p ∈ δ̂(q, x)} δ(p, a) )",
-        "Converting ε-NFA to DFA:",
-        "1. DFA Start state: q₀_D = ECLOSE(q₀_N).",
-        "2. For composite state S and a ∈ Σ: δ_D(S, a) = ECLOSE( ⋃_{p ∈ S} δ_N(p, a) ).",
-        "3. Final States F_D: Any composite state S where S ∩ F_N ≠ ∅."
-      ],
-      "explanation": "Epsilon closures group states that are reachable instantaneously without consuming input symbols.",
-      "codeSnippet": "ECLOSE(q): Basis q ∈ ECLOSE(q)  |  Induction: p ∈ ECLOSE(q), r ∈ δ(p, ε) ⇒ r ∈ ECLOSE(q)",
-      "interactiveType": "none"
-    },
-    {
-      "id": "enfa-to-dfa-worked-example",
-      "title": "Step-by-Step Worked Example: ε-NFA to DFA Conversion",
-      "subtitle": "Section 2.5.5 - Decimal Numbers Automaton (Hopcroft Fig 2.18 to Fig 2.22)",
-      "bullets": [
-        "Problem: Convert decimal numbers ε-NFA E = ({q0, q1, q2, q3, q4, q5}, {+/-, digit, .}, δ, q0, {q5}) to DFA D.",
-        "Step 1: Compute DFA Start State A = ECLOSE(q0) = {q0, q1}.",
-        "Step 2: Calculate Transitions δ_D(S, a) = ECLOSE( ⋃_{q ∈ S} δ_N(q, a) ):",
-        "• State A = {q0, q1}:",
-        "  - On '+/-': ECLOSE(δ(q0, +/-) ∪ δ(q1, +/-)) = ECLOSE({q1}) = {q1}  ⇒  State B",
-        "  - On 'digit': ECLOSE(δ(q0, d) ∪ δ(q1, d)) = ECLOSE({q1, q4}) = {q1, q4}  ⇒  State C",
-        "  - On '.': ECLOSE(δ(q0, .) ∪ δ(q1, .)) = ECLOSE({q2}) = {q2}  ⇒  State D",
-        "• State B = {q1}: On 'digit' → State C ({q1, q4}); On '.' → State D ({q2})",
-        "• State C = {q1, q4}: On 'digit' → State C; On '.' → ECLOSE({q2} ∪ {q3}) = {q2, q3, q5}  ⇒  State E (*Accepting)",
-        "• State D = {q2}: On 'digit' → ECLOSE({q3}) = {q3, q5}  ⇒  State F (*Accepting)",
-        "• State E = {q2, q3, q5} (*Accepting): On 'digit' → {q3, q5}  ⇒  State F",
-        "• State F = {q3, q5} (*Accepting): On 'digit' → {q3, q5}  ⇒  State F",
-        "Step 3: String Evaluation Example for w = '5.6':",
-        "• δ̂(q0, ε) = ECLOSE(q0) = {q0, q1}",
-        "• δ̂(q0, '5') = ECLOSE(δ(q0, 5) ∪ δ(q1, 5)) = ECLOSE({q1, q4}) = {q1, q4}",
-        "• δ̂(q0, '5.') = ECLOSE(δ(q1, .) ∪ δ(q4, .)) = ECLOSE({q2, q3}) = {q2, q3, q5}",
-        "• δ̂(q0, '5.6') = ECLOSE(δ(q2, 6) ∪ δ(q3, 6) ∪ δ(q5, 6)) = ECLOSE({q3}) = {q3, q5} ∈ F_D  ⇒  ACCEPTED!"
-      ],
-      "explanation": "Each symbol processing step computes direct NFA transitions first, followed immediately by taking the ECLOSE of all reached states.",
-      "codeSnippet": "δ̂(q0, 5.6): {q0,q1} --'5'--> {q1,q4} --'.'--> {q2,q3,q5} --'6'--> {q3,q5} ∈ F_D",
-      "interactiveType": "subset-construction"
-    },
-    {
-      "id": "hopcroft-fig-2-18",
-      "title": "Figure 2.18: The ε-NFA for Decimal Numbers",
-      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.5 Automaton Diagram",
-      "bullets": [
-        "Structure: 6 states {q₀, q₁, q₂, q₃, q₄, q₅} accepting valid signed or unsigned floating-point decimal numbers.",
-        "Optional Sign Branch: State q₀ transitions on '+', '-', or ε to state q₁.",
-        "Integer Part: Loop on q₁ for digits 0..9, with non-deterministic fork to q₄ for integer numbers.",
-        "Fractional Part: Transitions on decimal point '.' to q₂ or q₃, requiring trailing digits.",
-        "Acceptance: Instantaneous completion from q₃ to final state q₅ via ε-transition."
-      ],
-      "explanation": "Figure 2.18 demonstrates how ε-transitions simplify specifying optional components like signs and decimal points.",
-      "codeSnippet": "Hopcroft Fig 2.18: q0 --(ε,+,-)--> q1 --(digit)--> {q1,q4} --(.)--> {q2,q3} --(ε)--> q5*",
-      "interactiveType": "hopcroft-figures",
-      "figureKey": "2.18"
-    },
-    {
-      "id": "hopcroft-fig-2-19",
-      "title": "Figure 2.19: Using ε-Transitions to Recognize Keywords",
-      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.1 Keyword Searching Automaton",
-      "bullets": [
-        "Keyword Recognition Concept: ε-transitions allow branching to multiple word-matching pathways simultaneously without consuming characters.",
-        "Start Loop: State 0 loops on all alphabet symbols Σ to scan continuous unformatted text stream.",
-        "Pathway 1 ('web'): Branches on ε to state 1, matching 'w' → 'e' → 'b' to reach accepting state 4.",
-        "Pathway 2 ('ebay'): Branches on ε to state 5, matching 'e' → 'b' → 'a' → 'y' to reach accepting state 9.",
-        "Simultaneous Search: The ε-NFA stays in all active prefix states concurrently!"
-      ],
-      "explanation": "Figure 2.19 illustrates the foundation of fast multi-pattern text searching algorithms like Aho-Corasick.",
-      "codeSnippet": "Hopcroft Fig 2.19: State 0 --(ε)--> Pathway 'web' (State 4*) & Pathway 'ebay' (State 9*)",
-      "interactiveType": "hopcroft-figures",
-      "figureKey": "2.19"
-    },
-    {
-      "id": "hopcroft-fig-2-20",
-      "title": "Figure 2.20: Transition Table for Fig 2.18 ε-NFA",
-      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.5 δ Representation",
-      "bullets": [
-        "Tabular Representation: Explicitly lists target state sets for every state across ε, +/-, '.', and digits 0..9.",
-        "Column ε: δ(q₀, ε) = {q₁} and δ(q₃, ε) = {q₅}. All other states have δ(q, ε) = ∅.",
-        "Non-Determinism: Cell (q₁, digit) = {q₁, q₄} contains multiple target states.",
-        "Systematic Input: Provides the formal transition matrix required for subset construction algorithms."
-      ],
-      "explanation": "The transition table converts informal state diagrams into precise mathematical lookup matrices for compiler construction.",
-      "codeSnippet": "Hopcroft Fig 2.20 Table: δ(q0, ε)={q1}, δ(q1, digit)={q1,q4}, δ(q3, ε)={q5}",
-      "interactiveType": "hopcroft-figures",
-      "figureKey": "2.20"
-    },
-    {
-      "id": "hopcroft-fig-2-21",
-      "title": "Figure 2.21: Step-by-Step ECLOSE(1) Computation",
-      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.2 Epsilon-Closure Example",
-      "bullets": [
-        "Basis Step: ECLOSE(1) starts with state 1 itself: {1}.",
-        "Induction Step 1: Follow ε-arcs from 1 → Reach states 2 and 4. Set is now {1, 2, 4}.",
-        "Induction Step 2: Follow ε-arc from 2 → Reach state 3. Set is now {1, 2, 3, 4}.",
-        "Induction Step 3: Follow ε-arc from 3 → Reach state 6. Set is now {1, 2, 3, 4, 6}.",
-        "Boundary Check: State 4 has an arc to 5 labeled 'a' (NOT ε). State 5 is NOT added! Result = {1, 2, 3, 4, 6}."
-      ],
-      "explanation": "ECLOSE(q) includes all states reachable by traversing zero or more ε-labeled edges.",
-      "codeSnippet": "Hopcroft Fig 2.21: 1 --(ε)--> 2 --(ε)--> 3 --(ε)--> 6 & 1 --(ε)--> 4 ⇒ ECLOSE(1) = {1,2,3,4,6}",
-      "interactiveType": "hopcroft-figures",
-      "figureKey": "2.21"
-    },
-    {
-      "id": "slide-16",
-      "title": "ε-NFA (Epsilon Transition) Example",
-      "subtitle": "Module 1.6 - NFAs with ε-Transitions",
-      "bullets": [
-        "ε-NFA Definition: Allows state transitions on empty input ε without consuming any characters from the input string.",
-        "• State q0 transitions to q1 on ε (spontaneous move).",
-        "• State q1 recognizes binary strings ending in '1'.",
-        "• Transition Function: δ: Q × (Σ ∪ {ε}) → 2^Q.",
-        "• Test this ε-NFA with sample strings below!"
-      ],
-      "explanation": "Epsilon transitions enable machines to switch states instantly without reading input symbols, simplifying regex-to-NFA (Thompson's Construction) designs.",
-      "codeSnippet": "δ(q0, ε) = {q1}  |  δ(q1, 1) = {q1}",
-      "dfaExample": {
-        "title": "ε-NFA: Optional Prefix ending with '1'",
-        "states": [
-          "q0",
-          "q1",
-          "q2"
-        ],
-        "alphabet": [
-          "0",
-          "1",
-          "ε"
-        ],
-        "startState": "q0",
-        "acceptStates": [
-          "q2"
-        ],
-        "transitions": [
-          {
-            "from": "q0",
-            "symbol": "ε",
-            "to": "q1"
-          },
-          {
-            "from": "q0",
-            "symbol": "0",
-            "to": "q0"
-          },
-          {
-            "from": "q1",
-            "symbol": "0",
-            "to": "q1"
-          },
-          {
-            "from": "q1",
-            "symbol": "1",
-            "to": "q1"
-          },
-          {
-            "from": "q1",
-            "symbol": "1",
-            "to": "q2"
-          }
-        ],
-        "testString": "01"
-      },
-      "interactiveType": "dfa-runner"
-    },
-    {
-      "id": "hopcroft-fig-2-22",
-      "title": "Figure 2.22: DFA D Eliminating ε-Transitions",
-      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.5 Final Converted DFA",
-      "bullets": [
-        "DFA Start State: State A = ECLOSE(q₀) = {q₀, q₁}.",
-        "Non-Accepting DFA States: State B = {q₁}, State C = {q₁, q₄}, State D = {q₂}.",
-        "Accepting DFA States: State E = {q₂, q₃, q₅} and State F = {q₃, q₅} (since both contain q₅ ∈ F_E).",
-        "Deterministic Guarantee: Every state has exactly 1 target state per input symbol with zero ε-transitions."
-      ],
-      "explanation": "Figure 2.22 is the direct output of subset construction applied to Figure 2.18.",
-      "codeSnippet": "Hopcroft Fig 2.22: DFA D states A={q0,q1}, B={q1}, C={q1,q4}, D={q2}, E*={q2,q3,q5}, F*={q3,q5}",
-      "interactiveType": "hopcroft-figures",
-      "figureKey": "2.22"
-    },
-    {
-      "id": "dfa-disadvantages-motivation-nfa",
-      "title": "Disadvantages of DFA & Motivation for NFA",
-      "subtitle": "Why Deterministic Machines Become Complex & Why We Need NFA",
-      "bullets": [
-        "1. Deterministic Rigidity (Exactly 1 Transition Per Symbol):",
-        "   • Every DFA state MUST define an outgoing transition for EVERY alphabet symbol in Σ.",
-        "   • Missing choices require explicit, redundant 'dead / trap' states (e.g. q_dead).",
-        "2. State Explosion Problem for Pattern Matching:",
-        "   • Designing DFAs for complex pattern matching (e.g., 'k-th character from right is 1') requires 2^k states.",
-        "   • Complex parallel string patterns (e.g. 'contains 101 OR 110') lead to unwieldy transition matrices.",
-        "3. Harder to Design & Human Readability:",
-        "   • DFAs require tracking global state memory at every single step, making manual design error-prone.",
-        "4. Why We Need Non-Determinism (NFA):",
-        "   • Guesses & Parallel Branching: Allows multiple transitions or 0 transitions on the same symbol.",
-        "   • Compact Machine Sizes: NFAs require significantly fewer states (e.g., k+1 states vs 2^k states in DFA).",
-        "   • Natural Mapping to Regular Expressions: Ideal bridge for compilers, tokenizers, and search engines."
-      ],
-      "explanation": "DFAs are rigid and computationally strict. NFAs provide an intuitive, highly compact abstraction that allows parallel path exploration without requiring dead states or exponential manual state tracking.",
-      "codeSnippet": "DFA: Rigid (Strictly 1 transition per symbol, 2^k states)  vs  NFA: Flexible (0, 1, or multiple transitions, k+1 states)",
-      "interactiveType": "none"
-    },
-    {
-      "id": "nfa-def-extended-delta",
-      "title": "NFA Formal Definition, Extended Transition Function & Language L(N)",
-      "subtitle": "Hopcroft, Motwani & Ullman (HMU) Section 2.3 - Formal 5-Tuple & String Processing",
-      "bullets": [
-        "1. Formal NFA 5-Tuple Definition: N = (Q, Σ, δ, q₀, F)",
-        "   • Q: Finite set of states | Σ: Input alphabet | q₀ ∈ Q: Start state | F ⊆ Q: Set of accepting states.",
-        "   • δ: Q × Σ → 2^Q  (Transition function maps to a SUBSET of Q, allowing ∅, single, or multiple choices).",
-        "2. Extended Transition Function δ̂ for NFA (δ̂: Q × Σ* → 2^Q):",
-        "   • BASIS: δ̂(q, ε) = {q}  (In zero steps without input, the automaton remains in state q).",
-        "   • INDUCTION: For string w = x·a (where x ∈ Σ* and a ∈ Σ):",
-        "     δ̂(q, w) = δ̂(q, x·a) = ⋃_{p ∈ δ̂(q, x)} δ(p, a)",
-        "   • Intuition: Compute the set of all states p reached from q on string x, then take the union of all transitions δ(p, a).",
-        "3. Language Accepted by an NFA (L(N)):",
-        "   • L(N) = { w ∈ Σ* | δ̂(q₀, w) ∩ F ≠ ∅ }",
-        "   • Acceptance Rule: String w is in L(N) if AT LEAST ONE computational path from q₀ on input w ends in F.",
-        "   • DFA vs NFA Comparison: DFA requires δ̂(q₀, w) ∈ F, whereas NFA requires set intersection δ̂(q₀, w) ∩ F ≠ ∅."
-      ],
-      "explanation": "The extended transition function δ̂ inductively defines string processing for non-deterministic machines by accumulating sets of reachable states. A string is accepted if any active parallel path touches an accept state.",
-      "codeSnippet": "Basis: δ̂(q, ε) = {q}  |  Induction: δ̂(q, xa) = ⋃_{p ∈ δ̂(q, x)} δ(p, a)  |  L(N) = { w | δ̂(q0, w) ∩ F ≠ ∅ }",
-      "interactiveType": "none"
-    },
-    {
       "id": "nfa-dfa-subset-construction",
       "title": "Equivalence of DFA & NFA: Subset Construction Algorithm (Simulator)",
       "subtitle": "Hopcroft, Motwani & Ullman Section 2.3.1 - Step-by-Step Conversion for {w | w ends with '01'}",
@@ -3122,6 +2797,323 @@ export const module1Deck: PresentationDeck = {
       "interactiveType": "none"
     },
     {
+      "id": "enfa-closure-delta",
+      "title": "ε-NFA: Formal Definition, ε-Closure & Extended Transition Function",
+      "subtitle": "Section 2.4 - Inductive Basis & Conversion to DFA (Ullman Textbook)",
+      "bullets": [
+        "Formal ε-NFA Definition: E = (Q, Σ, δ, q₀, F) where δ: Q × (Σ ∪ {ε}) → 2^Q.",
+        "ε-Closure Definition (ECLOSE(q)): The set of all states reachable from q taking ZERO or more ε-transitions.",
+        "• BASIS: q ∈ ECLOSE(q)  (Every state is in its own ε-closure).",
+        "• INDUCTION STEP: If p ∈ ECLOSE(q) and r ∈ δ(p, ε), then r ∈ ECLOSE(q).",
+        "Extended Transition Function δ̂ for ε-NFA:",
+        "• BASIS: δ̂(q, ε) = ECLOSE(q)",
+        "• INDUCTION STEP: For w = xa (x ∈ Σ*, a ∈ Σ):",
+        "  δ̂(q, xa) = ECLOSE( ⋃_{p ∈ δ̂(q, x)} δ(p, a) )",
+        "Converting ε-NFA to DFA:",
+        "1. DFA Start state: q₀_D = ECLOSE(q₀_N).",
+        "2. For composite state S and a ∈ Σ: δ_D(S, a) = ECLOSE( ⋃_{p ∈ S} δ_N(p, a) ).",
+        "3. Final States F_D: Any composite state S where S ∩ F_N ≠ ∅."
+      ],
+      "explanation": "Epsilon closures group states that are reachable instantaneously without consuming input symbols.",
+      "codeSnippet": "ECLOSE(q): Basis q ∈ ECLOSE(q)  |  Induction: p ∈ ECLOSE(q), r ∈ δ(p, ε) ⇒ r ∈ ECLOSE(q)",
+      "interactiveType": "none"
+    },
+    {
+      "id": "dfa-nfa-enfa-differences",
+      "title": "Differences Between DFA, NFA, and ε-NFA",
+      "subtitle": "Comparison of Formal Definitions, Transition Functions (δ), and Machine Expressiveness",
+      "bullets": [
+        "1. Formal 5-Tuple Definition M = (Q, Σ, δ, q₀, F):",
+        "   • DFA: δ : Q × Σ → Q  (Transition map yields exactly ONE state).",
+        "   • NFA: δ : Q × Σ → 2^Q  (Transition map yields a SUBSET of states).",
+        "   • ε-NFA: δ : Q × (Σ ∪ {ε}) → 2^Q  (Transition map permits ε-moves without input).",
+        "2. Number of Transitions per Input Symbol:",
+        "   • DFA: Exactly zero or one transition from a state on an input symbol.",
+        "   • NFA: Zero, one, or multiple transitions from a state on an input symbol.",
+        "   • ε-NFA: Zero, one, or multiple transitions with or without consuming an input symbol.",
+        "3. Total Number of Transitions in Machine:",
+        "   • DFA: More number of explicit transitions required (must specify every symbol for every state).",
+        "   • NFA: Less number of transitions required (can omit dead moves).",
+        "   • ε-NFA: Relatively more transitions when compared with NFA due to spontaneous ε-arcs.",
+        "4. Ease of Construction:",
+        "   • DFA: Difficult to construct directly for complex languages.",
+        "   • NFA: Easy to construct directly from specifications.",
+        "   • ε-NFA: Easiest to construct systematically using Regular Expressions (Thompson's Algorithm).",
+        "5. Power & State Tracking:",
+        "   • DFA: Machine is in exactly ONE active state at any point in time.",
+        "   • NFA: Machine can track MULTIPLE active states simultaneously across branching paths.",
+        "   • ε-NFA: Machine can track MULTIPLE active states simultaneously with or without input.",
+        "Equivalence Note: Despite structural differences, all three automata accept the EXACT same class of Regular Languages (DFA ≡ NFA ≡ ε-NFA)!"
+      ],
+      "explanation": "Strictly speaking, the core difference lies entirely in the definition of δ. All other practical differences in state complexity and ease of design stem directly from δ.",
+      "codeSnippet": "DFA: δ: Q×Σ → Q  |  NFA: δ: Q×Σ → 2^Q  |  ε-NFA: δ: Q×(Σ∪{ε}) → 2^Q  (DFA ≡ NFA ≡ ε-NFA)",
+      "interactiveType": "none"
+    },
+    {
+      "id": "hopcroft-fig-2-18",
+      "title": "Figure 2.18: The ε-NFA for Decimal Numbers",
+      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.5 Automaton Diagram",
+      "bullets": [
+        "Structure: 6 states {q₀, q₁, q₂, q₃, q₄, q₅} accepting valid signed or unsigned floating-point decimal numbers.",
+        "Optional Sign Branch: State q₀ transitions on '+', '-', or ε to state q₁.",
+        "Integer Part: Loop on q₁ for digits 0..9, with non-deterministic fork to q₄ for integer numbers.",
+        "Fractional Part: Transitions on decimal point '.' to q₂ or q₃, requiring trailing digits.",
+        "Acceptance: Instantaneous completion from q₃ to final state q₅ via ε-transition."
+      ],
+      "explanation": "Figure 2.18 demonstrates how ε-transitions simplify specifying optional components like signs and decimal points.",
+      "codeSnippet": "Hopcroft Fig 2.18: q0 --(ε,+,-)--> q1 --(digit)--> {q1,q4} --(.)--> {q2,q3} --(ε)--> q5*",
+      "interactiveType": "hopcroft-figures",
+      "figureKey": "2.18"
+    },
+    {
+      "id": "enfa-to-dfa-intro-worked-example",
+      "title": "Worked Example 1: ε-NFA to DFA Conversion (L = a*b*c*)",
+      "subtitle": "Introductory Example - Converting 3-State Sequential ε-NFA to DFA",
+      "bullets": [
+        "Problem: Convert ε-NFA E = ({q0, q1, q2}, {a, b, c}, δ, q0, {q2}) for Language L(a*b*c*) into DFA D.",
+        "• Transitions: δ(q0, a)={q0}, δ(q0, ε)={q1}, δ(q1, b)={q1}, δ(q1, ε)={q2}, δ(q2, c)={q2}.",
+        "Step 1: Compute ε-closures for all states:",
+        "  • ECLOSE(q0) = {q0, q1, q2}  (via q0 →ε q1 →ε q2)",
+        "  • ECLOSE(q1) = {q1, q2}     (via q1 →ε q2)",
+        "  • ECLOSE(q2) = {q2}",
+        "Step 2: Start State of Converted DFA D:",
+        "  • State A = ECLOSE(q0) = {q0, q1, q2} (*Accepting state since q2 ∈ A)",
+        "Step 3: Calculate Transitions δ_D(S, symbol) = ECLOSE( ⋃_{q ∈ S} δ_N(q, symbol) ):",
+        "  • State A = {q0, q1, q2} (*Accepting):",
+        "    - On 'a': ECLOSE(δ(q0,a) ∪ δ(q1,a) ∪ δ(q2,a)) = ECLOSE({q0}) = {q0, q1, q2}  ⇒  State A",
+        "    - On 'b': ECLOSE(δ(q0,b) ∪ δ(q1,b) ∪ δ(q2,b)) = ECLOSE({q1}) = {q1, q2}  ⇒  State B (*Accepting)",
+        "    - On 'c': ECLOSE(δ(q0,c) ∪ δ(q1,c) ∪ δ(q2,c)) = ECLOSE({q2}) = {q2}  ⇒  State C (*Accepting)",
+        "  • State B = {q1, q2} (*Accepting):",
+        "    - On 'a': ECLOSE(∅) = ∅  ⇒  Trap State ∅",
+        "    - On 'b': ECLOSE({q1}) = {q1, q2}  ⇒  State B",
+        "    - On 'c': ECLOSE({q2}) = {q2}  ⇒  State C (*Accepting)",
+        "  • State C = {q2} (*Accepting):",
+        "    - On 'a': ∅, On 'b': ∅, On 'c': ECLOSE({q2}) = {q2}  ⇒  State C",
+        "Step 4: String Evaluation Examples:",
+        "  • For w = 'aabbc': A --'a'--> A --'a'--> A --'b'--> B --'b'--> B --'c'--> C ∈ F_D  ⇒  ACCEPTED! ✅",
+        "  • For w = 'ba': A --'b'--> B --'a'--> ∅ ∉ F_D  ⇒  REJECTED! ❌"
+      ],
+      "explanation": "This foundational example shows how spontaneous ε-transitions merge reachable states into composite DFA states without reading characters.",
+      "codeSnippet": "ε-NFA L(a*b*c*): ECLOSE(q0)={q0,q1,q2} ⇒ State A; ECLOSE(q1)={q1,q2} ⇒ State B; ECLOSE(q2)={q2} ⇒ State C",
+      "interactiveType": "subset-construction",
+      "presetKey": "abc_language"
+    },
+    {
+      "id": "enfa-to-dfa-shortcuts-worked-example",
+      "title": "Worked Example 2: ε-NFA with Direct Shortcut Arcs (L = a*b*c*)",
+      "subtitle": "Advanced Example - Multi-label Transitions with Direct ε/Symbol Arcs",
+      "bullets": [
+        "Problem: Convert ε-NFA E = ({q0, q1, q2}, {a, b, c}, δ, q0, {q2}) with direct shortcuts (q0 →ε,a q1, q1 →ε,b q2, q0 →ε,b q2) into DFA D.",
+        "• Transitions:",
+        "  - q0: loop on 'a'; arcs to q1 on 'ε' and 'a'; direct arc to q2 on 'ε' and 'b'.",
+        "  - q1: loop on 'b'; arc to q2 on 'ε' and 'b'.",
+        "  - q2: loop on 'c'.",
+        "Step 1: Compute ε-closures:",
+        "  • ECLOSE(q0) = {q0, q1, q2}  (spontaneous moves q0 →ε q1 and q0 →ε q2)",
+        "  • ECLOSE(q1) = {q1, q2}     (spontaneous move q1 →ε q2)",
+        "  • ECLOSE(q2) = {q2}",
+        "Step 2: Start State of Converted DFA D:",
+        "  • State A = ECLOSE(q0) = {q0, q1, q2} (*Accepting state since q2 ∈ A)",
+        "Step 3: Calculate DFA Transitions δ_D(S, symbol):",
+        "  • State A = {q0, q1, q2} (*Accepting):",
+        "    - On 'a': ECLOSE(δ(q0,a) ∪ δ(q1,a) ∪ δ(q2,a)) = ECLOSE({q0, q1}) = {q0, q1, q2}  ⇒  State A",
+        "    - On 'b': ECLOSE(δ(q0,b) ∪ δ(q1,b) ∪ δ(q2,b)) = ECLOSE({q1, q2}) = {q1, q2}  ⇒  State B (*Accepting)",
+        "    - On 'c': ECLOSE(δ(q0,c) ∪ δ(q1,c) ∪ δ(q2,c)) = ECLOSE({q2}) = {q2}  ⇒  State C (*Accepting)",
+        "  • State B = {q1, q2} (*Accepting): On 'a' → ∅, On 'b' → State B, On 'c' → State C",
+        "  • State C = {q2} (*Accepting): On 'a' → ∅, On 'b' → ∅, On 'c' → State C",
+        "Step 4: Interactive Verification:",
+        "  • Test strings in the interactive subset construction widget below!"
+      ],
+      "explanation": "Shortcut arcs provide redundant pathways in the NFA, but the subset construction algorithm merges them cleanly into the exact same 3-state minimal DFA.",
+      "codeSnippet": "Shortcut ε-NFA: q0 --(a,ε)--> q1 --(b,ε)--> q2 & q0 --(b,ε)--> q2 ⇒ DFA States A, B, C",
+      "interactiveType": "subset-construction",
+      "presetKey": "abc_shortcuts"
+    },
+    {
+      "id": "enfa-to-dfa-a-star-b-star-a-worked-example",
+      "title": "Worked Example 3: ε-NFA Conversion (L = a*b*a(a|b)*)",
+      "subtitle": "Practice Example - Converting ε-NFA with Trailing Loop (q0 -a-> q0, q0 -ε-> q1, q1 -b-> q1, q1 -a-> q2, q2 -a,b-> q2)",
+      "bullets": [
+        "Problem: Convert ε-NFA E = ({q0, q1, q2}, {a, b}, δ, q0, {q2}) into an equivalent DFA D.",
+        "• Transitions: δ(q0,a)={q0}, δ(q0,ε)={q1}, δ(q1,b)={q1}, δ(q1,a)={q2}, δ(q2,a)={q2}, δ(q2,b)={q2}.",
+        "Step 1: Compute ε-closures:",
+        "  • ECLOSE(q0) = {q0, q1}  (via q0 →ε q1)",
+        "  • ECLOSE(q1) = {q1}",
+        "  • ECLOSE(q2) = {q2}",
+        "Step 2: Start State of DFA D:",
+        "  • State A = ECLOSE(q0) = {q0, q1} (Non-accepting)",
+        "Step 3: Calculate DFA Transitions δ_D(S, x):",
+        "  • State A = {q0, q1}:",
+        "    - On 'a': ECLOSE(δ(q0,a) ∪ δ(q1,a)) = ECLOSE({q0, q2}) = {q0, q1, q2}  ⇒  State B (*Accepting)",
+        "    - On 'b': ECLOSE(δ(q0,b) ∪ δ(q1,b)) = ECLOSE({q1}) = {q1}  ⇒  State C",
+        "  • State B = {q0, q1, q2} (*Accepting):",
+        "    - On 'a': ECLOSE({q0, q2}) = {q0, q1, q2}  ⇒  State B",
+        "    - On 'b': ECLOSE({q1, q2}) = {q1, q2}  ⇒  State D (*Accepting)",
+        "  • State C = {q1}:",
+        "    - On 'a': ECLOSE({q2}) = {q2}  ⇒  State E (*Accepting)",
+        "    - On 'b': ECLOSE({q1}) = {q1}  ⇒  State C",
+        "  • State D = {q1, q2} (*Accepting): On 'a' → State E ({q2}), On 'b' → State D ({q1, q2})",
+        "  • State E = {q2} (*Accepting): On 'a' → State E ({q2}), On 'b' → State E ({q2})",
+        "Step 4: String Evaluation Examples:",
+        "  • For w = 'aaba': A --'a'--> B --'a'--> B --'b'--> D --'a'--> E ∈ F_D  ⇒  ACCEPTED! ✅",
+        "  • For w = 'abb': A --'a'--> B --'b'--> D --'b'--> D ∈ F_D  ⇒  ACCEPTED! ✅",
+        "  • For w = 'b': A --'b'--> C ∉ F_D  ⇒  REJECTED! ❌"
+      ],
+      "explanation": "State q2 acts as an accepting sink state once reached via an 'a' transition from q1 or q0.",
+      "codeSnippet": "ε-NFA L=a*b*a(a|b)*: ECLOSE(q0)={q0,q1} ⇒ State A; δ_D(A,a)={q0,q1,q2} ⇒ State B*",
+      "interactiveType": "subset-construction",
+      "presetKey": "a_star_b_star_a"
+    },
+    {
+      "id": "enfa-to-dfa-worked-example",
+      "title": "Step-by-Step Worked Example: ε-NFA to DFA Conversion",
+      "subtitle": "Section 2.5.5 - Decimal Numbers Automaton (Hopcroft Fig 2.18 to Fig 2.22)",
+      "bullets": [
+        "Problem: Convert decimal numbers ε-NFA E = ({q0, q1, q2, q3, q4, q5}, {+/-, digit, .}, δ, q0, {q5}) to DFA D.",
+        "Step 1: Compute DFA Start State A = ECLOSE(q0) = {q0, q1, q4}.",
+        "Step 2: Calculate Transitions δ_D(S, a) = ECLOSE( ⋃_{q ∈ S} δ_N(q, a) ):",
+        "• State A = {q0, q1, q4}:",
+        "  - On '+/-': ECLOSE(δ(q0, +/-) ∪ δ(q1, +/-) ∪ δ(q4, +/-)) = ECLOSE({q1}) = {q1, q4}  ⇒  State B",
+        "  - On 'digit': ECLOSE(δ(q0, d) ∪ δ(q1, d) ∪ δ(q4, d)) = ECLOSE({q1}) = {q1, q4}  ⇒  State C",
+        "  - On '.': ECLOSE(δ(q0, .) ∪ δ(q1, .) ∪ δ(q4, .)) = ECLOSE({q2, q3}) = {q2, q3, q5}  ⇒  State E (*Accepting)",
+        "• State B = {q1, q4}: On 'digit' → State C ({q1, q4}); On '.' → State E ({q2, q3, q5})",
+        "• State C = {q1, q4}: On 'digit' → State C; On '.' → ECLOSE({q2, q3}) = {q2, q3, q5}  ⇒  State E (*Accepting)",
+        "• State D = {q2}: On 'digit' → ECLOSE({q3}) = {q3, q5}  ⇒  State F (*Accepting)",
+        "• State E = {q2, q3, q5} (*Accepting): On 'digit' → {q3, q5}  ⇒  State F",
+        "• State F = {q3, q5} (*Accepting): On 'digit' → {q3, q5}  ⇒  State F",
+        "Step 3: String Evaluation Example for w = '5.6':",
+        "• δ̂(q0, ε) = ECLOSE(q0) = {q0, q1, q4}",
+        "• δ̂(q0, '5') = ECLOSE(δ(q1, 5)) = ECLOSE({q1}) = {q1, q4}",
+        "• δ̂(q0, '5.') = ECLOSE(δ(q1, .) ∪ δ(q4, .)) = ECLOSE({q2, q3}) = {q2, q3, q5}",
+        "• δ̂(q0, '5.6') = ECLOSE(δ(q2, 6) ∪ δ(q3, 6) ∪ δ(q5, 6)) = ECLOSE({q3}) = {q3, q5} ∈ F_D  ⇒  ACCEPTED!"
+      ],
+      "explanation": "Each symbol processing step computes direct NFA transitions first, followed immediately by taking the ECLOSE of all reached states.",
+      "codeSnippet": "δ̂(q0, 5.6): {q0,q1,q4} --'5'--> {q1,q4} --'.'--> {q2,q3,q5} --'6'--> {q3,q5} ∈ F_D",
+      "interactiveType": "subset-construction"
+    },
+    {
+      "id": "hopcroft-fig-2-19",
+      "title": "Figure 2.19: Using ε-Transitions to Recognize Keywords",
+      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.1 Keyword Searching Automaton",
+      "bullets": [
+        "Keyword Recognition Concept: ε-transitions allow branching to multiple word-matching pathways simultaneously without consuming characters.",
+        "Start Loop: State 0 loops on all alphabet symbols Σ to scan continuous unformatted text stream.",
+        "Pathway 1 ('web'): Branches on ε to state 1, matching 'w' → 'e' → 'b' to reach accepting state 4.",
+        "Pathway 2 ('ebay'): Branches on ε to state 5, matching 'e' → 'b' → 'a' → 'y' to reach accepting state 9.",
+        "Simultaneous Search: The ε-NFA stays in all active prefix states concurrently!"
+      ],
+      "explanation": "Figure 2.19 illustrates the foundation of fast multi-pattern text searching algorithms like Aho-Corasick.",
+      "codeSnippet": "Hopcroft Fig 2.19: State 0 --(ε)--> Pathway 'web' (State 4*) & Pathway 'ebay' (State 9*)",
+      "interactiveType": "hopcroft-figures",
+      "figureKey": "2.19"
+    },
+    {
+      "id": "hopcroft-fig-2-20",
+      "title": "Figure 2.20: Transition Table for Fig 2.18 ε-NFA",
+      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.5 δ Representation",
+      "bullets": [
+        "Tabular Representation: Explicitly lists target state sets for every state across ε, +/-, '.', and digits 0..9.",
+        "Column ε: δ(q₀, ε) = {q₁} and δ(q₃, ε) = {q₅}. All other states have δ(q, ε) = ∅.",
+        "Non-Determinism: Cell (q₁, digit) = {q₁, q₄} contains multiple target states.",
+        "Systematic Input: Provides the formal transition matrix required for subset construction algorithms."
+      ],
+      "explanation": "The transition table converts informal state diagrams into precise mathematical lookup matrices for compiler construction.",
+      "codeSnippet": "Hopcroft Fig 2.20 Table: δ(q0, ε)={q1}, δ(q1, digit)={q1,q4}, δ(q3, ε)={q5}",
+      "interactiveType": "hopcroft-figures",
+      "figureKey": "2.20"
+    },
+    {
+      "id": "hopcroft-fig-2-21",
+      "title": "Figure 2.21: Step-by-Step ECLOSE(1) Computation",
+      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.2 Epsilon-Closure Example",
+      "bullets": [
+        "Basis Step: ECLOSE(1) starts with state 1 itself: {1}.",
+        "Induction Step 1: Follow ε-arcs from 1 → Reach states 2 and 4. Set is now {1, 2, 4}.",
+        "Induction Step 2: Follow ε-arc from 2 → Reach state 3. Set is now {1, 2, 3, 4}.",
+        "Induction Step 3: Follow ε-arc from 3 → Reach state 6. Set is now {1, 2, 3, 4, 6}.",
+        "Boundary Check: State 4 has an arc to 5 labeled 'a' (NOT ε). State 5 is NOT added! Result = {1, 2, 3, 4, 6}."
+      ],
+      "explanation": "ECLOSE(q) includes all states reachable by traversing zero or more ε-labeled edges.",
+      "codeSnippet": "Hopcroft Fig 2.21: 1 --(ε)--> 2 --(ε)--> 3 --(ε)--> 6 & 1 --(ε)--> 4 ⇒ ECLOSE(1) = {1,2,3,4,6}",
+      "interactiveType": "hopcroft-figures",
+      "figureKey": "2.21"
+    },
+    {
+      "id": "slide-16",
+      "title": "ε-NFA (Epsilon Transition) Example",
+      "subtitle": "Module 1.6 - NFAs with ε-Transitions",
+      "bullets": [
+        "ε-NFA Definition: Allows state transitions on empty input ε without consuming any characters from the input string.",
+        "• State q0 transitions to q1 on ε (spontaneous move).",
+        "• State q1 recognizes binary strings ending in '1'.",
+        "• Transition Function: δ: Q × (Σ ∪ {ε}) → 2^Q.",
+        "• Test this ε-NFA with sample strings below!"
+      ],
+      "explanation": "Epsilon transitions enable machines to switch states instantly without reading input symbols, simplifying regex-to-NFA (Thompson's Construction) designs.",
+      "codeSnippet": "δ(q0, ε) = {q1}  |  δ(q1, 1) = {q1}",
+      "dfaExample": {
+        "title": "ε-NFA: Optional Prefix ending with '1'",
+        "states": [
+          "q0",
+          "q1",
+          "q2"
+        ],
+        "alphabet": [
+          "0",
+          "1",
+          "ε"
+        ],
+        "startState": "q0",
+        "acceptStates": [
+          "q2"
+        ],
+        "transitions": [
+          {
+            "from": "q0",
+            "symbol": "ε",
+            "to": "q1"
+          },
+          {
+            "from": "q0",
+            "symbol": "0",
+            "to": "q0"
+          },
+          {
+            "from": "q1",
+            "symbol": "0",
+            "to": "q1"
+          },
+          {
+            "from": "q1",
+            "symbol": "1",
+            "to": "q1"
+          },
+          {
+            "from": "q1",
+            "symbol": "1",
+            "to": "q2"
+          }
+        ],
+        "testString": "01"
+      },
+      "interactiveType": "dfa-runner"
+    },
+    {
+      "id": "hopcroft-fig-2-22",
+      "title": "Figure 2.22: DFA D Eliminating ε-Transitions",
+      "subtitle": "Hopcroft, Motwani & Ullman - Section 2.5.5 Final Converted DFA",
+      "bullets": [
+        "DFA Start State: State A = ECLOSE(q₀) = {q₀, q₁}.",
+        "Non-Accepting DFA States: State B = {q₁}, State C = {q₁, q₄}, State D = {q₂}.",
+        "Accepting DFA States: State E = {q₂, q₃, q₅} and State F = {q₃, q₅} (since both contain q₅ ∈ F_E).",
+        "Deterministic Guarantee: Every state has exactly 1 target state per input symbol with zero ε-transitions."
+      ],
+      "explanation": "Figure 2.22 is the direct output of subset construction applied to Figure 2.18.",
+      "codeSnippet": "Hopcroft Fig 2.22: DFA D states A={q0,q1}, B={q1}, C={q1,q4}, D={q2}, E*={q2,q3,q5}, F*={q3,q5}",
+      "interactiveType": "hopcroft-figures",
+      "figureKey": "2.22"
+    },
+    {
       "id": "fa-app-text-search",
       "title": "Applications of FA: Section 2.5.1 Text Searching",
       "subtitle": "Keyword Matching, Pattern Recognition & Aho-Corasick Algorithm",
@@ -3221,6 +3213,144 @@ export const module1Deck: PresentationDeck = {
       "explanation": "Regular expressions are widely used in text editors, compilers, and search engines for pattern recognition.",
       "codeSnippet": "RE for binary strings ending in 1: (0 + 1)*1",
       "interactiveType": "none"
+    },
+    {
+      "id": "slide-18",
+      "title": "DFA Minimization (Table Filling Method)",
+      "subtitle": "Module 1.8 - Optimizing State Machines",
+      "bullets": [
+        "Goal: Reduce the number of states in a DFA while preserving its accepted language.",
+        "Steps for Minimization:",
+        "1. Remove all states unreachable from the start state.",
+        "2. Create a table of all state pairs (p, q).",
+        "3. Mark all pairs (Final, Non-Final) as distinguishable (X).",
+        "4. For remaining pairs, check transitions on each symbol. If they lead to a marked pair, mark current pair.",
+        "5. Merge indistinguishable states into single equivalence classes."
+      ],
+      "explanation": "Minimized DFAs have the theoretical minimum number of states, achieving maximum hardware and software execution efficiency.",
+      "codeSnippet": "Equivalence Classes: e.g., states C and D merged into [C, D]",
+      "dfaExample": {
+        "title": "Original DFA (Unminimized)",
+        "states": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "alphabet": [
+          "0",
+          "1"
+        ],
+        "startState": "A",
+        "acceptStates": [
+          "C",
+          "D"
+        ],
+        "transitions": [
+          {
+            "from": "A",
+            "symbol": "0",
+            "to": "B"
+          },
+          {
+            "from": "A",
+            "symbol": "1",
+            "to": "C"
+          },
+          {
+            "from": "B",
+            "symbol": "0",
+            "to": "A"
+          },
+          {
+            "from": "B",
+            "symbol": "1",
+            "to": "D"
+          },
+          {
+            "from": "C",
+            "symbol": "0",
+            "to": "C"
+          },
+          {
+            "from": "C",
+            "symbol": "1",
+            "to": "D"
+          },
+          {
+            "from": "D",
+            "symbol": "0",
+            "to": "D"
+          },
+          {
+            "from": "D",
+            "symbol": "1",
+            "to": "C"
+          },
+          {
+            "from": "E",
+            "symbol": "0",
+            "to": "A"
+          },
+          {
+            "from": "E",
+            "symbol": "1",
+            "to": "C"
+          }
+        ],
+        "testString": "0110",
+        "convertedDfa": {
+          "title": "Minimized DFA (3 States)",
+          "states": [
+            "A",
+            "B",
+            "[C,D]"
+          ],
+          "alphabet": [
+            "0",
+            "1"
+          ],
+          "startState": "A",
+          "acceptStates": [
+            "[C,D]"
+          ],
+          "transitions": [
+            {
+              "from": "A",
+              "symbol": "0",
+              "to": "B"
+            },
+            {
+              "from": "A",
+              "symbol": "1",
+              "to": "[C,D]"
+            },
+            {
+              "from": "B",
+              "symbol": "0",
+              "to": "A"
+            },
+            {
+              "from": "B",
+              "symbol": "1",
+              "to": "[C,D]"
+            },
+            {
+              "from": "[C,D]",
+              "symbol": "0",
+              "to": "[C,D]"
+            },
+            {
+              "from": "[C,D]",
+              "symbol": "1",
+              "to": "[C,D]"
+            }
+          ],
+          "testString": "0110"
+        }
+      },
+      "interactiveType": "dfa-runner"
     },
     {
       "id": "slide-20",

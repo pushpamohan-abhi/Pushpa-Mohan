@@ -22,6 +22,72 @@ import {
   Activity
 } from 'lucide-react';
 
+export const symbolsMatch = (transSymbol: string, inputSymbol: string): boolean => {
+  if (!transSymbol || !inputSymbol) return false;
+  const cleanTrans = transSymbol.trim();
+  const cleanInput = inputSymbol.trim();
+  if (cleanTrans === cleanInput) return true;
+
+  // Digit matching
+  const isDigit = /[0-9]/.test(cleanInput);
+  if (isDigit) {
+    const s = cleanTrans.toLowerCase();
+    
+    // Explicit digit class keywords / textbook labels / ellipses
+    if (
+      s === 'digit' ||
+      s === 'digits' ||
+      s === 'd' ||
+      s === '0-9' ||
+      s === '0..9' ||
+      s === '0,1,...,9' ||
+      s === '0, 1, ..., 9' ||
+      s === '0,1..9' ||
+      s === '0, 1..9' ||
+      s.includes('digit') ||
+      s.includes('...') ||
+      s.includes('0-9')
+    ) {
+      return true;
+    }
+
+    // Range like "0-9", "0-5", "1..4"
+    const rangeMatch = s.match(/^([0-9])\s*(-|\.\.)\s*([0-9])$/);
+    if (rangeMatch) {
+      const min = parseInt(rangeMatch[1], 10);
+      const max = parseInt(rangeMatch[3], 10);
+      const val = parseInt(cleanInput, 10);
+      if (val >= min && val <= max) return true;
+    }
+  }
+
+  // Sign matching
+  const isSign = cleanInput === '+' || cleanInput === '-';
+  if (isSign) {
+    const s = cleanTrans.toLowerCase();
+    if (
+      s === '+/-' ||
+      s === '+,-' ||
+      s === '+,-' ||
+      s === '+-' ||
+      s === 'sign' ||
+      s === '±' ||
+      s.includes('+') ||
+      s.includes('-')
+    ) {
+      return true;
+    }
+  }
+
+  // Grouped symbol lists like "0,1,2,3,4,5,6,7,8,9" or "a,b"
+  if (cleanTrans.includes(',')) {
+    const parts = cleanTrans.split(',').map(s => s.trim());
+    return parts.some(p => symbolsMatch(p, cleanInput));
+  }
+
+  return false;
+};
+
 export const getStateColor = (stateName: string, isLightBg: boolean = false) => {
   let hash = 0;
   for (let i = 0; i < stateName.length; i++) {
@@ -140,7 +206,7 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
 
       activeStates.forEach(st => {
         dfa.transitions
-          .filter(t => t.from === st && t.symbol === symbol)
+          .filter(t => t.from === st && symbolsMatch(t.symbol, symbol))
           .forEach(t => nextStatesSet.add(t.to));
       });
 
@@ -308,7 +374,7 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
           const currentSym = (currentIndex >= 0 && currentIndex < inputString.length) ? inputString[currentIndex] : null;
           const isEpsilon = gt.symbols.some(sym => sym === 'ε' || sym === 'eps' || sym === 'epsilon');
           const isActiveTransition = isFromActive && (
-            (currentSym !== null && gt.symbols.includes(currentSym)) ||
+            (currentSym !== null && gt.symbols.some(sym => symbolsMatch(sym, currentSym))) ||
             (isEpsilon && currentIndex === -1) ||
             (isEpsilon && currentSym !== null)
           );
@@ -960,7 +1026,7 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
                           });
 
                           const targets = Array.from(new Set(matching.map(t => t.to)));
-                          const isSymbolMatching = (currentInputSymbol !== null && sym === currentInputSymbol) || (sym === 'ε');
+                          const isSymbolMatching = (currentInputSymbol !== null && (sym === currentInputSymbol || symbolsMatch(sym, currentInputSymbol))) || (sym === 'ε');
                           const isCellActive = isRowActive && isSymbolMatching && targets.length > 0;
 
                           const targetDisplay = targets.length === 0 ? '—' : targets.length === 1 ? targets[0] : `{${targets.join(', ')}}`;
@@ -1000,7 +1066,7 @@ export const DfaAnimatorWidget: React.FC<DfaAnimatorWidgetProps> = ({ dfa: initi
               {currentInputSymbol ? (
                 <div className="flex flex-col gap-1.5">
                   {activeStates.map((st) => {
-                    const matches = dfa.transitions.filter(t => t.from === st && t.symbol === currentInputSymbol);
+                    const matches = dfa.transitions.filter(t => t.from === st && symbolsMatch(t.symbol, currentInputSymbol));
                     const targetList = matches.map(m => m.to);
                     return (
                       <div key={st} className="flex items-center gap-2 text-[11px]">

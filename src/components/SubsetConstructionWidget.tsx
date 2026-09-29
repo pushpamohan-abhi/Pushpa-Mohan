@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DfaAnimatorWidget } from './DfaAnimatorWidget';
-import { ArrowRight, Play, RotateCcw, Check, Sparkles, Layers, RefreshCw, Cpu, HelpCircle, Table } from 'lucide-react';
+import { ArrowRight, Play, RotateCcw, Check, Sparkles, Layers, RefreshCw, Cpu, HelpCircle, Table, GitBranch } from 'lucide-react';
 
 export interface NfaDefinition {
   title: string;
@@ -13,6 +13,68 @@ export interface NfaDefinition {
 }
 
 const defaultNfaPresets: Record<string, NfaDefinition> = {
+  a_star_b_star_a: {
+    title: "ε-NFA: L = a*b*a(a|b)*",
+    states: ["q0", "q1", "q2"],
+    alphabet: ["a", "b"],
+    startState: "q0",
+    acceptStates: ["q2"],
+    epsilonTransitions: [
+      { from: "q0", to: ["q1"] }
+    ],
+    transitions: [
+      { from: "q0", symbol: "a", to: ["q0"] },
+      { from: "q0", symbol: "b", to: [] },
+      { from: "q1", symbol: "a", to: ["q2"] },
+      { from: "q1", symbol: "b", to: ["q1"] },
+      { from: "q2", symbol: "a", to: ["q2"] },
+      { from: "q2", symbol: "b", to: ["q2"] }
+    ]
+  },
+  abc_shortcuts: {
+    title: "ε-NFA: L = a*b*c* (With Shortcuts)",
+    states: ["q0", "q1", "q2"],
+    alphabet: ["a", "b", "c"],
+    startState: "q0",
+    acceptStates: ["q2"],
+    epsilonTransitions: [
+      { from: "q0", to: ["q1", "q2"] },
+      { from: "q1", to: ["q2"] }
+    ],
+    transitions: [
+      { from: "q0", symbol: "a", to: ["q0", "q1"] },
+      { from: "q0", symbol: "b", to: ["q2"] },
+      { from: "q0", symbol: "c", to: [] },
+      { from: "q1", symbol: "a", to: [] },
+      { from: "q1", symbol: "b", to: ["q1", "q2"] },
+      { from: "q1", symbol: "c", to: [] },
+      { from: "q2", symbol: "a", to: [] },
+      { from: "q2", symbol: "b", to: [] },
+      { from: "q2", symbol: "c", to: ["q2"] }
+    ]
+  },
+  abc_language: {
+    title: "ε-NFA: Language L = a*b*c*",
+    states: ["q0", "q1", "q2"],
+    alphabet: ["a", "b", "c"],
+    startState: "q0",
+    acceptStates: ["q2"],
+    epsilonTransitions: [
+      { from: "q0", to: ["q1"] },
+      { from: "q1", to: ["q2"] }
+    ],
+    transitions: [
+      { from: "q0", symbol: "a", to: ["q0"] },
+      { from: "q0", symbol: "b", to: [] },
+      { from: "q0", symbol: "c", to: [] },
+      { from: "q1", symbol: "a", to: [] },
+      { from: "q1", symbol: "b", to: ["q1"] },
+      { from: "q1", symbol: "c", to: [] },
+      { from: "q2", symbol: "a", to: [] },
+      { from: "q2", symbol: "b", to: [] },
+      { from: "q2", symbol: "c", to: ["q2"] }
+    ]
+  },
   ends_01: {
     title: "NFA 1: Ends with '01'",
     states: ["q0", "q1", "q2"],
@@ -66,6 +128,7 @@ const defaultNfaPresets: Record<string, NfaDefinition> = {
     acceptStates: ["q5"],
     epsilonTransitions: [
       { from: "q0", to: ["q1"] },
+      { from: "q1", to: ["q4"] },
       { from: "q3", to: ["q5"] }
     ],
     transitions: [
@@ -73,7 +136,7 @@ const defaultNfaPresets: Record<string, NfaDefinition> = {
       { from: "q0", symbol: "digit", to: [] },
       { from: "q0", symbol: ".", to: [] },
       { from: "q1", symbol: "+/-", to: [] },
-      { from: "q1", symbol: "digit", to: ["q1", "q4"] },
+      { from: "q1", symbol: "digit", to: ["q1"] },
       { from: "q1", symbol: ".", to: ["q2"] },
       { from: "q2", symbol: "+/-", to: [] },
       { from: "q2", symbol: "digit", to: ["q3"] },
@@ -89,6 +152,275 @@ const defaultNfaPresets: Record<string, NfaDefinition> = {
       { from: "q5", symbol: ".", to: [] }
     ]
   }
+};
+
+// Component to render the visual SVG state machine diagram of the source NFA
+const NfaDiagramRenderer: React.FC<{ nfa: NfaDefinition }> = ({ nfa }) => {
+  const positions: Record<string, { x: number; y: number }> = {};
+  const numStates = nfa.states.length;
+
+  const hasDirectQ0Q2 = nfa.transitions.some(t => t.from === "q0" && t.to.includes("q2")) ||
+    nfa.epsilonTransitions?.some(t => t.from === "q0" && t.to.includes("q2"));
+
+  if (nfa.states.length === 3 && nfa.states.includes("q0") && nfa.states.includes("q1") && nfa.states.includes("q2")) {
+    if (hasDirectQ0Q2) {
+      positions["q0"] = { x: 120, y: 140 };
+      positions["q1"] = { x: 340, y: 55 };
+      positions["q2"] = { x: 560, y: 140 };
+    } else {
+      positions["q0"] = { x: 120, y: 110 };
+      positions["q1"] = { x: 340, y: 110 };
+      positions["q2"] = { x: 560, y: 110 };
+    }
+  } else if (nfa.states.length === 6 && nfa.states.includes("q0") && nfa.states.includes("q5")) {
+    positions["q0"] = { x: 70, y: 110 };
+    positions["q1"] = { x: 210, y: 110 };
+    positions["q2"] = { x: 350, y: 65 };
+    positions["q3"] = { x: 490, y: 110 };
+    positions["q4"] = { x: 350, y: 160 };
+    positions["q5"] = { x: 630, y: 110 };
+  } else {
+    nfa.states.forEach((st, idx) => {
+      positions[st] = {
+        x: 100 + idx * Math.max(150, 500 / numStates),
+        y: 110
+      };
+    });
+  }
+
+  interface Edge {
+    from: string;
+    to: string;
+    symbols: string[];
+    isEpsilon: boolean;
+  }
+  const edgesMap = new Map<string, Edge>();
+
+  if (nfa.epsilonTransitions) {
+    nfa.epsilonTransitions.forEach(et => {
+      et.to.forEach(target => {
+        const key = `${et.from}->${target}`;
+        if (!edgesMap.has(key)) {
+          edgesMap.set(key, { from: et.from, to: target, symbols: ['ε'], isEpsilon: true });
+        } else {
+          const edge = edgesMap.get(key)!;
+          if (!edge.symbols.includes('ε')) edge.symbols.push('ε');
+        }
+      });
+    });
+  }
+
+  nfa.transitions.forEach(t => {
+    t.to.forEach(target => {
+      const key = `${t.from}->${target}`;
+      if (!edgesMap.has(key)) {
+        edgesMap.set(key, { from: t.from, to: target, symbols: [t.symbol], isEpsilon: false });
+      } else {
+        const edge = edgesMap.get(key)!;
+        if (!edge.symbols.includes(t.symbol)) edge.symbols.push(t.symbol);
+      }
+    });
+  });
+
+  const edges = Array.from(edgesMap.values());
+  const svgWidth = Math.max(650, nfa.states.length * 140 + 100);
+  const viewBox = `0 0 ${svgWidth} 210`;
+
+  return (
+    <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 shadow-lg overflow-x-auto">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-black text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+          <GitBranch className="w-4 h-4 text-cyan-400" />
+          <span>Source ε-NFA Visual Diagram</span>
+        </span>
+        <span className="text-[11px] text-slate-400 font-mono">
+          Σ = &#123;{nfa.alphabet.join(', ')}&#125;
+        </span>
+      </div>
+
+      <svg viewBox={viewBox} className="w-full h-auto font-sans min-w-[500px]">
+        <defs>
+          <marker id="nfa-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+          </marker>
+          <marker id="nfa-arrow-eps" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#e0e7ff" />
+          </marker>
+        </defs>
+
+        {/* Start State Indicator Arrow */}
+        {positions[nfa.startState] && (
+          <g>
+            <line
+              x1={positions[nfa.startState].x - 60}
+              y1={positions[nfa.startState].y}
+              x2={positions[nfa.startState].x - 28}
+              y2={positions[nfa.startState].y}
+              stroke="#38bdf8"
+              strokeWidth="2.5"
+              markerEnd="url(#nfa-arrow)"
+            />
+            <text
+              x={positions[nfa.startState].x - 50}
+              y={positions[nfa.startState].y - 8}
+              fill="#38bdf8"
+              fontSize="11"
+              fontWeight="900"
+            >
+              Start
+            </text>
+          </g>
+        )}
+
+        {/* Edges */}
+        {edges.map((edge, idx) => {
+          const fromPos = positions[edge.from];
+          const toPos = positions[edge.to];
+          if (!fromPos || !toPos) return null;
+
+          // Self-loop
+          if (edge.from === edge.to) {
+            return (
+              <g key={`edge-${idx}`}>
+                <path
+                  d={`M ${fromPos.x - 14} ${fromPos.y - 22} C ${fromPos.x - 32} ${fromPos.y - 62}, ${fromPos.x + 32} ${fromPos.y - 62}, ${fromPos.x + 14} ${fromPos.y - 22}`}
+                  stroke={edge.isEpsilon ? "#e0e7ff" : "#38bdf8"}
+                  strokeWidth="2"
+                  fill="none"
+                  markerEnd={edge.isEpsilon ? "url(#nfa-arrow-eps)" : "url(#nfa-arrow)"}
+                />
+                <rect
+                  x={fromPos.x - 14}
+                  y={fromPos.y - 62}
+                  width="28"
+                  height="18"
+                  rx="4"
+                  fill="#0f172a"
+                  stroke={edge.isEpsilon ? "#818cf8" : "#0284c7"}
+                  strokeWidth="1"
+                />
+                <text
+                  x={fromPos.x}
+                  y={fromPos.y - 49}
+                  fill={edge.isEpsilon ? "#c7d2fe" : "#38bdf8"}
+                  fontSize="12"
+                  fontWeight="bold"
+                  textAnchor="middle"
+                >
+                  {edge.symbols.join(', ')}
+                </text>
+              </g>
+            );
+          }
+
+          // Transition between different states
+          const dx = toPos.x - fromPos.x;
+          const dy = toPos.y - fromPos.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist === 0) return null;
+
+          const normX = dx / dist;
+          const normY = dy / dist;
+
+          const r = 26;
+          const startX = fromPos.x + normX * r;
+          const startY = fromPos.y + normY * r;
+          const endX = toPos.x - normX * (r + 4);
+          const endY = toPos.y - normY * (r + 4);
+
+          const midX = (startX + endX) / 2;
+          const midY = (startY + endY) / 2;
+
+          const isOpposite = edges.some(e => e.from === edge.to && e.to === edge.from);
+          const curveOffset = isOpposite ? -22 : 0;
+
+          let pathD = `M ${startX} ${startY} L ${endX} ${endY}`;
+          if (curveOffset !== 0) {
+            const perpX = -normY * curveOffset;
+            const perpY = normX * curveOffset;
+            pathD = `M ${startX} ${startY} Q ${midX + perpX} ${midY + perpY} ${endX} ${endY}`;
+          }
+
+          return (
+            <g key={`edge-${idx}`}>
+              <path
+                d={pathD}
+                stroke={edge.isEpsilon ? "#a855f7" : "#38bdf8"}
+                strokeWidth={edge.isEpsilon ? "2.5" : "2"}
+                fill="none"
+                markerEnd={edge.isEpsilon ? "url(#nfa-arrow-eps)" : "url(#nfa-arrow)"}
+              />
+              <g transform={`translate(${midX}, ${midY})`}>
+                {edge.symbols.map((sym, sIdx) => {
+                  const boxY = (sIdx - (edge.symbols.length - 1) / 2) * 22;
+                  const isEps = sym === 'ε' || sym === 'eps' || sym === 'epsilon';
+                  return (
+                    <g key={sIdx} transform={`translate(0, ${boxY})`}>
+                      <rect
+                        x="-14"
+                        y="-10"
+                        width="28"
+                        height="20"
+                        rx="5"
+                        fill={isEps ? "#581c87" : "#0f172a"}
+                        stroke={isEps ? "#c026d3" : "#0284c7"}
+                        strokeWidth="1.5"
+                      />
+                      <text
+                        x="0"
+                        y="4"
+                        fill={isEps ? "#f5d0fe" : "#38bdf8"}
+                        fontSize="12"
+                        fontWeight="900"
+                        textAnchor="middle"
+                      >
+                        {sym}
+                      </text>
+                    </g>
+                  );
+                })}
+              </g>
+            </g>
+          );
+        })}
+
+        {/* Nodes */}
+        {nfa.states.map(st => {
+          const pos = positions[st] || { x: 100, y: 110 };
+          const isAccept = nfa.acceptStates.includes(st);
+          const isStart = st === nfa.startState;
+
+          return (
+            <g key={`node-${st}`} transform={`translate(${pos.x}, ${pos.y})`}>
+              <circle
+                r="26"
+                fill={isStart ? "#1e1b4b" : isAccept ? "#064e3b" : "#0f172a"}
+                stroke={isAccept ? "#10b981" : isStart ? "#818cf8" : "#38bdf8"}
+                strokeWidth="2.5"
+              />
+              {isAccept && (
+                <circle
+                  r="21"
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="2"
+                />
+              )}
+              <text
+                fill="#ffffff"
+                fontSize="13"
+                fontWeight="900"
+                textAnchor="middle"
+                dy="4"
+              >
+                {st}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
 };
 
 export interface SubsetConstructionWidgetProps {
@@ -306,7 +638,7 @@ export const SubsetConstructionWidget: React.FC<SubsetConstructionWidgetProps> =
       startState: startLabel,
       acceptStates,
       transitions,
-      testString: "01"
+      testString: nfa.title.includes("Decimal") ? "5.6" : nfa.alphabet.includes("a") ? "aabbc" : "01"
     };
   };
 
@@ -399,6 +731,9 @@ export const SubsetConstructionWidget: React.FC<SubsetConstructionWidgetProps> =
           <p className="text-xs text-slate-600 leading-relaxed">
             Modify state transitions below by entering comma-separated target states (e.g., <code className="bg-slate-200 px-1 py-0.5 rounded text-indigo-900 font-bold">q0,q1</code>) or <code className="bg-slate-200 px-1 py-0.5 rounded text-slate-700 font-bold">-</code> for empty set <code className="font-bold">∅</code>.
           </p>
+
+          {/* Visual NFA State Machine Diagram */}
+          <NfaDiagramRenderer nfa={nfa} />
 
           <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-xs bg-white">
             <table className="w-full text-sm text-left">

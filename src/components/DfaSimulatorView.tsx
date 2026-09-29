@@ -27,30 +27,72 @@ const presetDfas: Record<string, DfaDefinition & { category?: string; explanatio
       "String Acceptance: Accepted because the active set at string completion S = {q0, q2} contains accept state q2."
     ]
   },
+  enfa_a_star_b_star_a: {
+    category: "ε-NFA Simulation",
+    title: "ε-NFA: L = a*b*a(a|b)*",
+    description: "3-state ε-NFA with transitions q0 -a-> q0, q0 -ε-> q1, q1 -b-> q1, q1 -a-> q2, q2 -a,b-> q2",
+    states: ["q0", "q1", "q2"],
+    alphabet: ["a", "b", "ε"],
+    startState: "q0",
+    acceptStates: ["q2"],
+    transitions: [
+      { from: "q0", symbol: "a", to: "q0" },
+      { from: "q0", symbol: "ε", to: "q1" },
+      { from: "q1", symbol: "b", to: "q1" },
+      { from: "q1", symbol: "a", to: "q2" },
+      { from: "q2", symbol: "a", to: "q2" },
+      { from: "q2", symbol: "b", to: "q2" }
+    ],
+    testString: "aabaa",
+    explanationNotes: [
+      "Initial ε-closure ECLOSE(q0) = {q0, q1}: Spontaneous ε-transition activates state q1 automatically.",
+      "Reads optional 'a's, switches spontaneously to 'b's, requires an 'a' to reach accept state q2.",
+      "Converts to a 5-state DFA D."
+    ]
+  },
+  enfa_abc: {
+    category: "ε-NFA Simulation",
+    title: "ε-NFA: Language L = a*b*c*",
+    description: "3-state ε-NFA with transitions q0 -a-> q0, q0 -ε-> q1, q1 -b-> q1, q1 -ε-> q2, q2 -c-> q2",
+    states: ["q0", "q1", "q2"],
+    alphabet: ["a", "b", "c", "ε"],
+    startState: "q0",
+    acceptStates: ["q2"],
+    transitions: [
+      { from: "q0", symbol: "a", to: "q0" },
+      { from: "q0", symbol: "ε", to: "q1" },
+      { from: "q1", symbol: "b", to: "q1" },
+      { from: "q1", symbol: "ε", to: "q2" },
+      { from: "q2", symbol: "c", to: "q2" }
+    ],
+    testString: "aabbc",
+    explanationNotes: [
+      "Initial ε-closure ECLOSE(q0) = {q0, q1, q2}: Spontaneous ε-transitions activate states q1 and q2 automatically without reading symbols.",
+      "Recognizes strings matching regular expression a*b*c*.",
+      "Converts to a compact 3-state DFA with states A={q0,q1,q2}, B={q1,q2}, and C={q2}."
+    ]
+  },
   enfa_decimals: {
     category: "ε-NFA Simulation",
     title: "ε-NFA: Decimal Numbers (Hopcroft Fig 2.18)",
     description: "NFA with spontaneous ε-transitions recognizing signed/unsigned decimal floating-point numbers",
     states: ["q0", "q1", "q2", "q3", "q4", "q5"],
-    alphabet: ["+", "-", ".", "0", "1", "ε"],
+    alphabet: ["+", "-", ".", "0..9", "ε"],
     startState: "q0",
     acceptStates: ["q5"],
     transitions: [
       { from: "q0", symbol: "ε", to: "q1" },
       { from: "q0", symbol: "+", to: "q1" },
       { from: "q0", symbol: "-", to: "q1" },
-      { from: "q1", symbol: "0", to: "q1" },
-      { from: "q1", symbol: "1", to: "q1" },
+      { from: "q1", symbol: "0..9", to: "q1" },
       { from: "q1", symbol: ".", to: "q2" },
-      { from: "q2", symbol: "0", to: "q3" },
-      { from: "q2", symbol: "1", to: "q3" },
-      { from: "q3", symbol: "0", to: "q3" },
-      { from: "q3", symbol: "1", to: "q3" },
+      { from: "q2", symbol: "0..9", to: "q3" },
+      { from: "q3", symbol: "0..9", to: "q3" },
       { from: "q3", symbol: "ε", to: "q5" },
       { from: "q1", symbol: "ε", to: "q4" },
       { from: "q4", symbol: ".", to: "q3" }
     ],
-    testString: "+3.14",
+    testString: "5.6",
     explanationNotes: [
       "Initial ε-closure ECLOSE(q0) = {q0, q1, q4}: Spontaneous ε-transitions activate states q1 and q4 without reading any input symbol.",
       "Handles optional sign ('+', '-' or ε), integer part, decimal point, and fractional digits.",
