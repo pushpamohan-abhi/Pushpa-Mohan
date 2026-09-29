@@ -13,6 +13,25 @@ export interface NfaDefinition {
 }
 
 const defaultNfaPresets: Record<string, NfaDefinition> = {
+  cyclic_enfa: {
+    title: "ε-NFA: Cyclic Graph (L = (a|b)*)",
+    states: ["q0", "q1", "q2"],
+    alphabet: ["a", "b"],
+    startState: "q0",
+    acceptStates: ["q2"],
+    epsilonTransitions: [
+      { from: "q0", to: ["q2"] },
+      { from: "q2", to: ["q0", "q1"] }
+    ],
+    transitions: [
+      { from: "q0", symbol: "a", to: ["q1"] },
+      { from: "q0", symbol: "b", to: ["q0", "q2"] },
+      { from: "q1", symbol: "a", to: ["q0"] },
+      { from: "q1", symbol: "b", to: [] },
+      { from: "q2", symbol: "a", to: [] },
+      { from: "q2", symbol: "b", to: ["q0"] }
+    ]
+  },
   a_star_b_star_a: {
     title: "ε-NFA: L = a*b*a(a|b)*",
     states: ["q0", "q1", "q2"],

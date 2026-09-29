@@ -2847,7 +2847,7 @@ export const module1Deck: PresentationDeck = {
       ],
       "explanation": "Strictly speaking, the core difference lies entirely in the definition of δ. All other practical differences in state complexity and ease of design stem directly from δ.",
       "codeSnippet": "DFA: δ: Q×Σ → Q  |  NFA: δ: Q×Σ → 2^Q  |  ε-NFA: δ: Q×(Σ∪{ε}) → 2^Q  (DFA ≡ NFA ≡ ε-NFA)",
-      "interactiveType": "none"
+      "interactiveType": "automata-comparison"
     },
     {
       "id": "hopcroft-fig-2-18",
@@ -2963,6 +2963,38 @@ export const module1Deck: PresentationDeck = {
       "codeSnippet": "ε-NFA L=a*b*a(a|b)*: ECLOSE(q0)={q0,q1} ⇒ State A; δ_D(A,a)={q0,q1,q2} ⇒ State B*",
       "interactiveType": "subset-construction",
       "presetKey": "a_star_b_star_a"
+    },
+    {
+      "id": "enfa-to-dfa-cyclic-worked-example",
+      "title": "Worked Example 4: Cyclic ε-NFA Conversion (L = (a|b)*)",
+      "subtitle": "Advanced Example - Graph with Mutual ε-Closures & Feedback Loops",
+      "bullets": [
+        "Problem Statement: Convert cyclic ε-NFA E = ({q0, q1, q2}, {a, b}, δ, q0, {q2}) into an equivalent DFA D.",
+        "Transition Table: Source ε-NFA Transition Function δ(q, x)",
+        "State | a | b | ε",
+        "-> q0 | {q1} | {q0, q2} | {q2}",
+        "q1 | {q0} | ∅ | ∅",
+        "*q2 | ∅ | {q0, q2} | {q0, q1}",
+        "Step 1: Compute ε-closures for all states:",
+        "  • ECLOSE(q0) = {q0, q1, q2}  (via q0 →ε q2 →ε q1)",
+        "  • ECLOSE(q1) = {q1}         (No outgoing ε-transitions)",
+        "  • ECLOSE(q2) = {q0, q1, q2}  (via q2 →ε q0 →ε q2 and q2 →ε q1)",
+        "Step 2: DFA Start State:",
+        "  • State A = ECLOSE(q0) = {q0, q1, q2} (*Accepting state since q2 ∈ A)",
+        "Step 3: Calculate DFA Transitions δ_D(A, symbol):",
+        "  • On symbol 'a': ECLOSE(δ(q0,a) ∪ δ(q1,a) ∪ δ(q2,a)) = ECLOSE({q0, q1}) = {q0, q1, q2}  ⇒  State A",
+        "  • On symbol 'b': ECLOSE(δ(q0,b) ∪ δ(q1,b) ∪ δ(q2,b)) = ECLOSE({q0, q2}) = {q0, q1, q2}  ⇒  State A",
+        "Transition Table: Converted DFA Transition Function δ_D(S, x)",
+        "DFA State S | a | b",
+        "-> *A = {q0, q1, q2} | State A | State A",
+        "Step 4: Final DFA Solution:",
+        "  • The resulting DFA D collapses into a single minimal accepting state A = {q0, q1, q2} with self-loops on 'a' and 'b'!",
+        "  • Accepted Language: L(D) = (a | b)* (All strings over alphabet {a, b})."
+      ],
+      "explanation": "Because all states are mutually reachable via ε-transitions, the entire state space merges into a single universal accepting DFA state.",
+      "codeSnippet": "Cyclic ε-NFA: ECLOSE(q0) = {q0, q1, q2} ⇒ 1-State DFA A* with loops on 'a' and 'b' (L = (a|b)*)",
+      "interactiveType": "subset-construction",
+      "presetKey": "cyclic_enfa"
     },
     {
       "id": "enfa-to-dfa-worked-example",

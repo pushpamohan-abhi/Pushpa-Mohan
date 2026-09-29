@@ -25,7 +25,7 @@ export interface Slide {
   codeSnippet?: string;
   dfaExample?: DfaDefinition;
   presetKey?: string;
-  interactiveType?: 'dfa-runner' | 'alphabet-explorer' | 'transition-table' | 'quiz' | 'subset-construction' | 'hopcroft-figures' | 'none';
+  interactiveType?: 'dfa-runner' | 'alphabet-explorer' | 'transition-table' | 'quiz' | 'subset-construction' | 'hopcroft-figures' | 'automata-comparison' | 'none';
   figureKey?: '2.18' | '2.19' | '2.20' | '2.21' | '2.22';
 }
 

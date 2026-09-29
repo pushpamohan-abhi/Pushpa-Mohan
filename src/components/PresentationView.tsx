@@ -3,6 +3,7 @@ import { PresentationDeck, Slide } from '../types';
 import { DfaAnimatorWidget } from './DfaAnimatorWidget';
 import { SubsetConstructionWidget } from './SubsetConstructionWidget';
 import { HopcroftFiguresWidget } from './HopcroftFiguresWidget';
+import { AutomataComparisonWidget } from './AutomataComparisonWidget';
 import { TransitionTableCard } from './TransitionTableCard';
 import { MoveSlidesModal } from './MoveSlidesModal';
 import { parseSlideBullets } from '../utils/slideParser';
@@ -419,6 +420,10 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                   ) : currentSlide.interactiveType === 'hopcroft-figures' ? (
                     <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
                       <HopcroftFiguresWidget initialFigure={currentSlide.figureKey || '2.18'} />
+                    </div>
+                  ) : currentSlide.interactiveType === 'automata-comparison' ? (
+                    <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
+                      <AutomataComparisonWidget />
                     </div>
                   ) : (
                     <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
