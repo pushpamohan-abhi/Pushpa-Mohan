@@ -3552,5 +3552,125 @@ export const module1Quiz: QuizQuestion[] = [
     ],
     "correctAnswer": 0,
     "explanation": "By the Subset Construction theorem (Theorem 2.11), DFAs and NFAs are equivalent in power and both accept exactly the class of Regular Languages."
+  },
+  {
+    "id": "q11",
+    "question": "What is an Alphabet (Σ) in formal language theory?",
+    "options": [
+      "A finite, non-empty set of symbols",
+      "An infinite set of character strings",
+      "A set of finite control states Q",
+      "A sequence of state transitions"
+    ],
+    "correctAnswer": 0,
+    "explanation": "An alphabet Σ is formally defined as a finite, non-empty set of symbols (e.g. Σ = {0, 1} or Σ = {a, b})."
+  },
+  {
+    "id": "q12",
+    "question": "What is the length of the empty string ε, denoted as |ε|?",
+    "options": [
+      "0",
+      "1",
+      "Undefined",
+      "Infinity"
+    ],
+    "correctAnswer": 0,
+    "explanation": "The empty string ε contains zero symbols, so its length |ε| = 0."
+  },
+  {
+    "id": "q13",
+    "question": "In an ε-NFA M = (Q, Σ, δ, q0, F), what is the formal domain and codomain signature of transition function δ?",
+    "options": [
+      "δ: Q × (Σ ∪ {ε}) → 2^Q",
+      "δ: Q × Σ → Q",
+      "δ: Q × Σ → 2^Q",
+      "δ: Q × Q → (Σ ∪ {ε})"
+    ],
+    "correctAnswer": 0,
+    "explanation": "An ε-NFA transition function permits input symbols from Σ as well as spontaneous ε-moves, mapping a state to a subset of states in 2^Q."
+  },
+  {
+    "id": "q14",
+    "question": "Which of the following correctly identifies the core mathematical difference between DFA, NFA, and ε-NFA?",
+    "options": [
+      "The difference lies strictly in the signature of the transition function δ",
+      "DFAs can accept Context-Free Languages while NFAs cannot",
+      "ε-NFAs have more states than DFAs",
+      "NFAs do not require a start state q0"
+    ],
+    "correctAnswer": 0,
+    "explanation": "All three automata share the same 5-tuple structure; the sole mathematical difference is whether δ yields single states (Q), powersets (2^Q), or permits ε-moves."
+  },
+  {
+    "id": "q15",
+    "question": "What is the key structural difference between a Moore machine and a Mealy machine?",
+    "options": [
+      "In a Moore machine, output depends solely on current state; in a Mealy machine, output depends on both current state and input symbol",
+      "Mealy machines do not produce outputs",
+      "Moore machines have infinite state sets",
+      "Mealy machines process strings of length 0 only"
+    ],
+    "correctAnswer": 0,
+    "explanation": "In a Moore machine, output λ(q) ∈ Γ is associated with the state, whereas in a Mealy machine, output λ(q, a) ∈ Γ is bound to transition edges."
+  },
+  {
+    "id": "q16",
+    "question": "Why is DFA-based pattern matching (e.g. Aho-Corasick algorithm) used in Unix grep and antivirus scanners?",
+    "options": [
+      "It scans text of length M in O(M) linear time, processing exactly 1 character per step regardless of keyword length",
+      "It eliminates the need for search patterns",
+      "It reduces document file size to zero",
+      "It guarantees O(1) space complexity for all patterns"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Pattern DFAs compile keywords into state tables, achieving optimal O(M) single-pass text scanning."
+  },
+  {
+    "id": "q17",
+    "question": "According to the Myhill-Nerode Theorem, a language L is regular if and only if:",
+    "options": [
+      "The equivalence relation ≡_L has a finite number of equivalence classes",
+      "L contains an infinite number of final states",
+      "Every state in the automaton is an accepting state",
+      "The alphabet Σ is empty"
+    ],
+    "correctAnswer": 0,
+    "explanation": "The Myhill-Nerode Theorem proves L is regular iff ≡_L has a finite index (number of equivalence classes), which equals the state count of the minimal DFA."
+  },
+  {
+    "id": "q18",
+    "question": "In the inductive definition of extended transition function δ̂ for an ε-NFA, what is the basis step for string ε?",
+    "options": [
+      "δ̂(q, ε) = ECLOSE(q)",
+      "δ̂(q, ε) = {q}",
+      "δ̂(q, ε) = ∅",
+      "δ̂(q, ε) = Q"
+    ],
+    "correctAnswer": 0,
+    "explanation": "For an ε-NFA, processing string ε from state q yields all states reachable via zero or more ε-moves, which is ECLOSE(q)."
+  },
+  {
+    "id": "q19",
+    "question": "What is a major practical benefit of using ε-NFAs in compiler construction (e.g. Thompson's algorithm)?",
+    "options": [
+      "They allow building modular components from Regular Expressions and connecting them easily with ε-transitions",
+      "They execute faster than DFAs at runtime",
+      "They require zero memory",
+      "They eliminate the need for parsing algorithms"
+    ],
+    "correctAnswer": 0,
+    "explanation": "ε-NFAs allow modular composition of regular expressions (unions, concatenations, Kleene stars) using spontaneous ε-transitions."
+  },
+  {
+    "id": "q20",
+    "question": "Given a DFA D = (Q, Σ, δ, q0, F) accepting language L, how can we construct a DFA D' that accepts the complement language L̄ = Σ* \\ L?",
+    "options": [
+      "Swap accepting and non-accepting states: F' = Q \\ F",
+      "Reverse all transition arrows in δ",
+      "Set F' = ∅",
+      "Remove the start state q0"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Because a DFA is deterministic and complete, swapping final and non-final states (F' = Q \\ F) yields a DFA accepting the exact complement language L̄."
   }
 ];
