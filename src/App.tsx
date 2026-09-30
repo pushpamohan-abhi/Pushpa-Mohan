@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PresentationDeck } from './types';
 import { module1Deck, module1Quiz } from './data/module1Data';
+import { module2Deck, module2Quiz } from './data/module2Data';
 import { Navbar } from './components/Navbar';
 import { PresentationView } from './components/PresentationView';
 import { DfaSimulatorView } from './components/DfaSimulatorView';
@@ -13,42 +14,53 @@ import pptxgen from 'pptxgenjs';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'presentation' | 'simulator' | 'ai-generator' | 'editor'>('presentation');
-  
-  // Initial deck from localStorage, auto-merging any newly added source slides
-  const [deck, setDeck] = useState<PresentationDeck>(() => {
+  const [activeModule, setActiveModule] = useState<'module1' | 'module2'>('module1');
+
+  // Load deck for the active module from localStorage with source auto-merge
+  const loadModuleDeck = (mod: 'module1' | 'module2'): PresentationDeck => {
+    const sourceDeck = mod === 'module1' ? module1Deck : module2Deck;
+    const storageKey = mod === 'module1' ? 'toc_module1_deck' : 'toc_module2_deck';
     try {
-      const saved = localStorage.getItem('toc_module1_deck');
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && Array.isArray(parsed.slides) && parsed.slides.length > 0) {
           const savedSlideIds = new Set(parsed.slides.map((s: any) => s.id));
-          const missingSlides = module1Deck.slides.filter(s => !savedSlideIds.has(s.id));
+          const missingSlides = sourceDeck.slides.filter(s => !savedSlideIds.has(s.id));
 
-          if (missingSlides.length === 0 && parsed.slides.length === module1Deck.slides.length) {
+          if (missingSlides.length === 0 && parsed.slides.length === sourceDeck.slides.length) {
             return parsed;
           }
 
-          // Merge newly added source slides at their correct order
           const updatedSlides = [...parsed.slides];
-          module1Deck.slides.forEach((sourceSlide, idx) => {
+          sourceDeck.slides.forEach((sourceSlide, idx) => {
             if (!savedSlideIds.has(sourceSlide.id)) {
               updatedSlides.splice(idx, 0, sourceSlide);
             }
           });
-          const mergedDeck = { ...module1Deck, slides: updatedSlides };
-          localStorage.setItem('toc_module1_deck', JSON.stringify(mergedDeck));
+          const mergedDeck = { ...sourceDeck, slides: updatedSlides };
+          localStorage.setItem(storageKey, JSON.stringify(mergedDeck));
           return mergedDeck;
         }
       }
     } catch (e) {
       console.warn('Could not read saved deck from localStorage:', e);
     }
-    return module1Deck;
-  });
+    return sourceDeck;
+  };
+
+  const [deck, setDeck] = useState<PresentationDeck>(() => loadModuleDeck('module1'));
+
+  // Switch deck state whenever activeModule changes
+  useEffect(() => {
+    setDeck(loadModuleDeck(activeModule));
+  }, [activeModule]);
 
   const handleResetDeck = () => {
-    localStorage.removeItem('toc_module1_deck');
-    setDeck(module1Deck);
+    const storageKey = activeModule === 'module1' ? 'toc_module1_deck' : 'toc_module2_deck';
+    const sourceDeck = activeModule === 'module1' ? module1Deck : module2Deck;
+    localStorage.removeItem(storageKey);
+    setDeck(sourceDeck);
   };
 
   const [isQuizOpen, setIsQuizOpen] = useState(false);
@@ -56,23 +68,15 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [projectorKey, setProjectorKey] = useState(0);
 
-  // Synchronize deck state to both localStorage and disk file (src/data/module1Data.ts)
+  // Synchronize deck state to localStorage
   const handleUpdateDeck = (updatedDeck: PresentationDeck) => {
     setDeck(updatedDeck);
+    const storageKey = activeModule === 'module1' ? 'toc_module1_deck' : 'toc_module2_deck';
     try {
-      localStorage.setItem('toc_module1_deck', JSON.stringify(updatedDeck));
+      localStorage.setItem(storageKey, JSON.stringify(updatedDeck));
     } catch (e) {
       console.error('Failed to write to localStorage:', e);
     }
-
-    // Auto-sync file on disk for git tracking
-    fetch('/api/save-source-deck', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deck: updatedDeck }),
-    }).catch((err) => {
-      console.info('Disk sync notice:', err);
-    });
   };
 
   const handleStartProjector = () => {
@@ -219,6 +223,8 @@ export default function App() {
       <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
+        activeModule={activeModule}
+        setActiveModule={setActiveModule}
         onOpenQuiz={() => setIsQuizOpen(true)}
         onExport={handleExport}
         onStartProjector={handleStartProjector}
@@ -257,7 +263,7 @@ export default function App() {
 
       {isQuizOpen && (
         <QuizModal
-          questions={module1Quiz}
+          questions={activeModule === 'module1' ? module1Quiz : module2Quiz}
           onClose={() => setIsQuizOpen(false)}
         />
       )}

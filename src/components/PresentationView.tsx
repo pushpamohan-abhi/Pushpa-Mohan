@@ -4,6 +4,9 @@ import { DfaAnimatorWidget } from './DfaAnimatorWidget';
 import { SubsetConstructionWidget } from './SubsetConstructionWidget';
 import { HopcroftFiguresWidget } from './HopcroftFiguresWidget';
 import { AutomataComparisonWidget } from './AutomataComparisonWidget';
+import { RegexSimulatorWidget } from './RegexSimulatorWidget';
+import { PumpingLemmaWidget } from './PumpingLemmaWidget';
+import { TableFillingWidget } from './TableFillingWidget';
 import { TransitionTableCard } from './TransitionTableCard';
 import { MoveSlidesModal } from './MoveSlidesModal';
 import { parseSlideBullets } from '../utils/slideParser';
@@ -425,6 +428,18 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                     <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
                       <AutomataComparisonWidget />
                     </div>
+                  ) : currentSlide.interactiveType === 'regex-simulator' ? (
+                    <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
+                      <RegexSimulatorWidget />
+                    </div>
+                  ) : currentSlide.interactiveType === 'pumping-lemma-game' ? (
+                    <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
+                      <PumpingLemmaWidget />
+                    </div>
+                  ) : currentSlide.interactiveType === 'table-filling-minimization' ? (
+                    <div className="w-full text-slate-900 overflow-y-auto max-h-[70vh]">
+                      <TableFillingWidget />
+                    </div>
                   ) : (
                     <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
                       {parsedContent.map((item, idx) => {
@@ -762,6 +777,13 @@ export const PresentationView: React.FC<PresentationViewProps> = ({
                     {currentSlide.interactiveType === 'hopcroft-figures' && (
                       <div className="md:col-span-12 text-slate-900 mt-4">
                         <HopcroftFiguresWidget initialFigure={currentSlide.figureKey || '2.18'} />
+                      </div>
+                    )}
+
+                    {/* Regex Simulator & Thompson Construction Interactive Widget */}
+                    {currentSlide.interactiveType === 'regex-simulator' && (
+                      <div className="md:col-span-12 text-slate-900 mt-4">
+                        <RegexSimulatorWidget />
                       </div>
                     )}
                   </div>

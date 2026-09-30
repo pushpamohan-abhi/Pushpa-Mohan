@@ -28,13 +28,42 @@ export type ParsedSlideContent = ParsedBullet | ParsedTableBlock;
 function isPipeRow(str: string): boolean {
   if (!str) return false;
   const trimmed = str.trim();
-  // Avoid matching mathematical code comments like "Basis: ... | Induction: ..."
-  if (trimmed.toLowerCase().includes('basis:') || trimmed.toLowerCase().includes('induction:')) {
+
+  // Exclude lines starting with numbered list items like "1. ", "2. ", etc.
+  if (/^\d+\.\s/.test(trimmed)) return false;
+
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.includes('basis:') ||
+    lower.includes('induction:') ||
+    lower.includes('union') ||
+    lower.includes('concatenation') ||
+    lower.includes('identities:') ||
+    lower.includes('problem:') ||
+    lower.includes('step ') ||
+    lower.includes('{ uv |') ||
+    lower.includes('(a|b)') ||
+    lower.includes('(0|1)') ||
+    lower.includes('(a | b)')
+  ) {
     return false;
   }
+
   if (!trimmed.includes('|')) return false;
+
   const parts = trimmed.split('|').map((s) => s.trim());
-  return parts.length >= 2;
+  if (parts.length < 2) return false;
+
+  // Header row check: e.g. "State | a | b" or "DFA State S | 0 | 1"
+  const firstCol = parts[0].toLowerCase();
+  const isHeader = firstCol.includes('state') || firstCol === 'q' || firstCol === 's';
+
+  // Data row check: first column looks like a state label (e.g. -> q0, *q1, q0, A, *A, [A,B], ∅)
+  const isDataRow =
+    /^[→\->\*★]*\s*([qQ]\d+|[a-zA-Z]\d*|\[.*?\]|∅|\{.*?\}|[a-zA-Z]+)/.test(parts[0]) &&
+    parts.slice(1).every((cell) => cell.length < 40);
+
+  return isHeader || isDataRow;
 }
 
 /**

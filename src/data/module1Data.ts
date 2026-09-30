@@ -2798,8 +2798,8 @@ export const module1Deck: PresentationDeck = {
     },
     {
       "id": "enfa-closure-delta",
-      "title": "ε-NFA: Formal Definition, ε-Closure & Extended Transition Function",
-      "subtitle": "Section 2.4 - Inductive Basis, Extended Transition Function & Worked Examples (Ullman Textbook)",
+      "title": "Padma Reddy Section 2.5: Automata with ε-Transitions (ε-NFA)",
+      "subtitle": "Padma Reddy Section 2.5 / Hopcroft Section 2.5 - ε-Closure, Extended δ̂ & Worked Conversion Examples",
       "bullets": [
         "1. Formal 5-Tuple Definition M = (Q, Σ, δ, q₀, F):",
         "   • Statement: E = (Q, Σ, δ, q₀, F) where δ: Q × (Σ ∪ {ε}) → 2^Q.",

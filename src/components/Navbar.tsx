@@ -4,6 +4,8 @@ import { Presentation, Play, Sparkles, Edit3, HelpCircle, BookOpen, Download, Tv
 interface NavbarProps {
   currentTab: 'presentation' | 'simulator' | 'ai-generator' | 'editor';
   setCurrentTab: (tab: 'presentation' | 'simulator' | 'ai-generator' | 'editor') => void;
+  activeModule: 'module1' | 'module2';
+  setActiveModule: (mod: 'module1' | 'module2') => void;
   onOpenQuiz: () => void;
   onExport: () => void;
   onStartProjector: () => void;
@@ -15,6 +17,8 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   currentTab,
   setCurrentTab,
+  activeModule,
+  setActiveModule,
   onOpenQuiz,
   onExport,
   onStartProjector,
@@ -26,14 +30,23 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Logo & Title */}
+          {/* Logo & Module Switcher */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100 shrink-0">
               <Presentation className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-900 tracking-tight">DFA Module 1 Studio</h1>
-              <p className="text-xs text-slate-500 font-medium">Automata PPT & Animated State Machine</p>
+              <div className="flex items-center gap-2">
+                <select
+                  value={activeModule}
+                  onChange={(e) => setActiveModule(e.target.value as 'module1' | 'module2')}
+                  className="text-base font-extrabold text-slate-900 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-lg border border-slate-300 outline-none cursor-pointer"
+                >
+                  <option value="module1">Module 1: Finite Automata & Formal Languages</option>
+                  <option value="module2">Module 2: Regular Expressions, Pumping Lemma & Minimization</option>
+                </select>
+              </div>
+              <p className="text-xs text-slate-500 font-medium">Hopcroft, Motwani & Ullman Textbook Courseware</p>
             </div>
           </div>
 
