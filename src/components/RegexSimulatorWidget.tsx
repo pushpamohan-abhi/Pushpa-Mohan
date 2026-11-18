@@ -299,6 +299,7 @@ export const RegexSimulatorWidget: React.FC = () => {
   const [customRegex, setCustomRegex] = useState<string>("(a|b)*ab");
   const [activeStep, setActiveStep] = useState<number>(1);
   const [showEpsilon, setShowEpsilon] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<'preset' | 'building_blocks'>('preset');
 
   const preset = regexPresets[selectedPresetKey] || regexPresets.thompson_a_or_b_star_ab;
   const currentNodes = (showEpsilon || !preset.dfaNodes) ? preset.thompsonNodes : preset.dfaNodes;
@@ -359,9 +360,272 @@ export const RegexSimulatorWidget: React.FC = () => {
         </div>
       </div>
 
-      {/* Graphical SVG Transition Diagram - LARGE & HIGH VISIBILITY WITH / WITHOUT EPSILON TOGGLE */}
-      <div className="w-full bg-slate-950 p-6 rounded-3xl border-2 border-cyan-500/40 shadow-[0_0_30px_rgba(34,211,238,0.15)] space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
+      {/* Main Mode Tabs */}
+      <div className="flex items-center gap-3 bg-slate-950 p-2 rounded-2xl border border-slate-800">
+        <button
+          onClick={() => setActiveTab('preset')}
+          className={`px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 ${
+            activeTab === 'preset'
+              ? 'bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.5)]'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Interactive Automaton Presets & Simulator</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('building_blocks')}
+          className={`px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 ${
+            activeTab === 'building_blocks'
+              ? 'bg-amber-400 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.5)]'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Thompson Construction Building Blocks (Hopcroft & Padma Reddy)</span>
+        </button>
+      </div>
+
+      {activeTab === 'building_blocks' ? (
+        /* Thompson Construction Structural Building Blocks View (Matching Textbook Figures) */
+        <div className="space-y-6">
+          <div className="bg-slate-950 p-6 rounded-3xl border-2 border-amber-500/40 shadow-[0_0_30px_rgba(251,191,36,0.15)] space-y-6">
+            <div className="border-b border-slate-800 pb-4">
+              <h4 className="text-xl font-black text-amber-400 uppercase tracking-tight flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-400" />
+                Base Thompson Atomic ε-NFAs (Hopcroft Section 3.2.3)
+              </h4>
+              <p className="text-xs text-slate-400 mt-1">
+                Atomic basis steps for constructing finite automata from regular expressions: ε, empty set ∅, and single symbol 'a'.
+              </p>
+            </div>
+
+            {/* Grid of 3 Base Cases */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* (a) RE ε */}
+              <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3 flex flex-col items-center">
+                <span className="text-xs font-black uppercase text-cyan-300 tracking-wider">
+                  (a) ε-NFA for Expression r = ε
+                </span>
+                <svg viewBox="0 0 300 120" className="w-full h-auto select-none bg-slate-950 rounded-xl p-2 border border-slate-800">
+                  <defs>
+                    <marker id="arrowhead-tb" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
+                    </marker>
+                  </defs>
+                  {/* Start arrow */}
+                  <line x1="20" y1="60" x2="60" y2="60" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="35" y="50" fill="#94a3b8" fontSize="10" fontWeight="bold">START</text>
+
+                  {/* Transition line q0 -> q1 */}
+                  <line x1="80" y1="60" x2="220" y2="60" stroke="#38bdf8" strokeWidth="3.5" markerEnd="url(#arrowhead-tb)" />
+                  <rect x="135" y="42" width="30" height="20" rx="5" fill="#0284c7" stroke="#38bdf8" strokeWidth="1.5" />
+                  <text x="150" y="56" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="900">ε</text>
+
+                  {/* State q0 */}
+                  <circle cx="80" cy="60" r="22" fill="#0f172a" stroke="#38bdf8" strokeWidth="3" />
+                  <text x="80" y="65" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900">q0</text>
+
+                  {/* Accept State q1 */}
+                  <circle cx="220" cy="60" r="22" fill="#0f172a" stroke="#34d399" strokeWidth="3" />
+                  <circle cx="220" cy="60" r="16" fill="none" stroke="#34d399" strokeWidth="2" />
+                  <text x="220" y="65" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900">q1</text>
+                </svg>
+                <span className="text-[11px] text-slate-400 text-center font-mono">
+                  Single ε-transition from start to final state.
+                </span>
+              </div>
+
+              {/* (b) RE ∅ */}
+              <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3 flex flex-col items-center">
+                <span className="text-xs font-black uppercase text-cyan-300 tracking-wider">
+                  (b) ε-NFA for Expression r = ∅
+                </span>
+                <svg viewBox="0 0 300 120" className="w-full h-auto select-none bg-slate-950 rounded-xl p-2 border border-slate-800">
+                  {/* Start arrow */}
+                  <line x1="20" y1="60" x2="60" y2="60" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="35" y="50" fill="#94a3b8" fontSize="10" fontWeight="bold">START</text>
+
+                  {/* State q0 */}
+                  <circle cx="80" cy="60" r="22" fill="#0f172a" stroke="#38bdf8" strokeWidth="3" />
+                  <text x="80" y="65" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900">q0</text>
+
+                  {/* Accept State q1 (Disconnected) */}
+                  <circle cx="220" cy="60" r="22" fill="#0f172a" stroke="#34d399" strokeWidth="3" />
+                  <circle cx="220" cy="60" r="16" fill="none" stroke="#34d399" strokeWidth="2" />
+                  <text x="220" y="65" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900">q1</text>
+                </svg>
+                <span className="text-[11px] text-slate-400 text-center font-mono">
+                  No transition path between start and accept.
+                </span>
+              </div>
+
+              {/* (c) Symbol a */}
+              <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3 flex flex-col items-center">
+                <span className="text-xs font-black uppercase text-cyan-300 tracking-wider">
+                  (c) ε-NFA for Symbol r = a
+                </span>
+                <svg viewBox="0 0 300 120" className="w-full h-auto select-none bg-slate-950 rounded-xl p-2 border border-slate-800">
+                  {/* Start arrow */}
+                  <line x1="20" y1="60" x2="60" y2="60" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="35" y="50" fill="#94a3b8" fontSize="10" fontWeight="bold">START</text>
+
+                  {/* Transition line q0 -> q1 */}
+                  <line x1="80" y1="60" x2="220" y2="60" stroke="#34d399" strokeWidth="3.5" markerEnd="url(#arrowhead-tb)" />
+                  <rect x="135" y="42" width="30" height="20" rx="5" fill="#059669" stroke="#34d399" strokeWidth="1.5" />
+                  <text x="150" y="56" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="900">a</text>
+
+                  {/* State q0 */}
+                  <circle cx="80" cy="60" r="22" fill="#0f172a" stroke="#38bdf8" strokeWidth="3" />
+                  <text x="80" y="65" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900">q0</text>
+
+                  {/* Accept State q1 */}
+                  <circle cx="220" cy="60" r="22" fill="#0f172a" stroke="#34d399" strokeWidth="3" />
+                  <circle cx="220" cy="60" r="16" fill="none" stroke="#34d399" strokeWidth="2" />
+                  <text x="220" y="65" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900">q1</text>
+                </svg>
+                <span className="text-[11px] text-slate-400 text-center font-mono">
+                  Direct transition on input symbol 'a'.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Inductive Structural Building Blocks */}
+          <div className="bg-slate-950 p-6 rounded-3xl border-2 border-cyan-500/40 shadow-[0_0_30px_rgba(34,211,238,0.15)] space-y-6">
+            <div className="border-b border-slate-800 pb-4">
+              <h4 className="text-xl font-black text-cyan-400 uppercase tracking-tight flex items-center gap-2">
+                <Layers className="w-5 h-5 text-cyan-400" />
+                Inductive Thompson Structural Rules (Union, Concat, Kleene Star)
+              </h4>
+              <p className="text-xs text-slate-400 mt-1">
+                Inductive rules for combining sub-automata R and S into Union (R+S), Concatenation (R·S), and Kleene Star (R*).
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* (a) Union R + S */}
+              <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3 flex flex-col items-center">
+                <span className="text-xs font-black uppercase text-amber-300 tracking-wider">
+                  (a) Union Construction r = R + S
+                </span>
+                <svg viewBox="0 0 320 220" className="w-full h-auto select-none bg-slate-950 rounded-xl p-2 border border-slate-800">
+                  {/* Start arrow */}
+                  <line x1="10" y1="110" x2="40" y2="110" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+
+                  {/* Fork top and bottom */}
+                  <path d="M 50 110 L 100 45" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <path d="M 50 110 L 100 175" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="65" y="70" fill="#38bdf8" fontSize="12" fontWeight="bold">ε</text>
+                  <text x="65" y="155" fill="#38bdf8" fontSize="12" fontWeight="bold">ε</text>
+
+                  {/* Sub-automaton R Box */}
+                  <rect x="100" y="25" width="120" height="45" rx="10" fill="#1e293b" stroke="#38bdf8" strokeWidth="2" />
+                  <text x="160" y="52" textAnchor="middle" fill="#38bdf8" fontSize="14" fontWeight="900">Sub-NFA R</text>
+
+                  {/* Sub-automaton S Box */}
+                  <rect x="100" y="150" width="120" height="45" rx="10" fill="#1e293b" stroke="#38bdf8" strokeWidth="2" />
+                  <text x="160" y="177" textAnchor="middle" fill="#38bdf8" fontSize="14" fontWeight="900">Sub-NFA S</text>
+
+                  {/* Join to Final State */}
+                  <path d="M 220 45 L 270 110" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <path d="M 220 175 L 270 110" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="250" y="70" fill="#38bdf8" fontSize="12" fontWeight="bold">ε</text>
+                  <text x="250" y="155" fill="#38bdf8" fontSize="12" fontWeight="bold">ε</text>
+
+                  {/* Start State q0 */}
+                  <circle cx="50" cy="110" r="18" fill="#0f172a" stroke="#38bdf8" strokeWidth="3" />
+                  <text x="50" y="114" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900">q0</text>
+
+                  {/* Accept State q_f */}
+                  <circle cx="270" cy="110" r="18" fill="#0f172a" stroke="#34d399" strokeWidth="3" />
+                  <circle cx="270" cy="110" r="13" fill="none" stroke="#34d399" strokeWidth="2" />
+                  <text x="270" y="114" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900">q_f</text>
+                </svg>
+                <span className="text-[11px] text-slate-400 text-center font-mono">
+                  Parallel fork and join via ε-transitions.
+                </span>
+              </div>
+
+              {/* (b) Concatenation R · S */}
+              <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3 flex flex-col items-center">
+                <span className="text-xs font-black uppercase text-amber-300 tracking-wider">
+                  (b) Concatenation r = R · S
+                </span>
+                <svg viewBox="0 0 320 220" className="w-full h-auto select-none bg-slate-950 rounded-xl p-2 border border-slate-800">
+                  {/* Start arrow */}
+                  <line x1="10" y1="110" x2="35" y2="110" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+
+                  {/* Sub-automaton R Box */}
+                  <rect x="35" y="85" width="105" height="50" rx="10" fill="#1e293b" stroke="#38bdf8" strokeWidth="2" />
+                  <text x="87" y="115" textAnchor="middle" fill="#38bdf8" fontSize="13" fontWeight="900">Sub-NFA R</text>
+
+                  {/* Serial ε link */}
+                  <line x1="140" y1="110" x2="180" y2="110" stroke="#38bdf8" strokeWidth="3.5" markerEnd="url(#arrowhead-tb)" />
+                  <text x="160" y="100" textAnchor="middle" fill="#38bdf8" fontSize="13" fontWeight="900">ε</text>
+
+                  {/* Sub-automaton S Box */}
+                  <rect x="180" y="85" width="105" height="50" rx="10" fill="#1e293b" stroke="#38bdf8" strokeWidth="2" />
+                  <text x="232" y="115" textAnchor="middle" fill="#38bdf8" fontSize="13" fontWeight="900">Sub-NFA S</text>
+
+                  {/* Accept Circle inside S */}
+                  <circle cx="270" cy="110" r="10" fill="none" stroke="#34d399" strokeWidth="2" />
+                </svg>
+                <span className="text-[11px] text-slate-400 text-center font-mono">
+                  Serial connection from R to S via ε-transition.
+                </span>
+              </div>
+
+              {/* (c) Kleene Star R* */}
+              <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3 flex flex-col items-center">
+                <span className="text-xs font-black uppercase text-amber-300 tracking-wider">
+                  (c) Kleene Star Construction r = R*
+                </span>
+                <svg viewBox="0 0 320 220" className="w-full h-auto select-none bg-slate-950 rounded-xl p-2 border border-slate-800">
+                  {/* Start arrow */}
+                  <line x1="10" y1="110" x2="40" y2="110" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+
+                  {/* Forward ε to R */}
+                  <line x1="58" y1="110" x2="100" y2="110" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="78" y="102" textAnchor="middle" fill="#38bdf8" fontSize="11" fontWeight="bold">ε</text>
+
+                  {/* Sub-automaton R Box */}
+                  <rect x="100" y="85" width="120" height="50" rx="10" fill="#1e293b" stroke="#38bdf8" strokeWidth="2" />
+                  <text x="160" y="115" textAnchor="middle" fill="#38bdf8" fontSize="13" fontWeight="900">Sub-NFA R</text>
+
+                  {/* Forward ε to q_f */}
+                  <line x1="220" y1="110" x2="262" y2="110" stroke="#38bdf8" strokeWidth="3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="242" y="102" textAnchor="middle" fill="#38bdf8" fontSize="11" fontWeight="bold">ε</text>
+
+                  {/* Loopback Curved Arc (top) */}
+                  <path d="M 210 85 Q 160 30 110 85" fill="none" stroke="#fbbf24" strokeWidth="3" strokeDasharray="5 3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="160" y="42" textAnchor="middle" fill="#fbbf24" fontSize="12" fontWeight="900">ε (Loopback)</text>
+
+                  {/* Bypass Curved Arc (bottom) */}
+                  <path d="M 40 128 Q 160 200 280 128" fill="none" stroke="#38bdf8" strokeWidth="3" strokeDasharray="5 3" markerEnd="url(#arrowhead-tb)" />
+                  <text x="160" y="185" textAnchor="middle" fill="#38bdf8" fontSize="12" fontWeight="900">ε (Bypass Arc)</text>
+
+                  {/* Start State q0 */}
+                  <circle cx="40" cy="110" r="18" fill="#0f172a" stroke="#38bdf8" strokeWidth="3" />
+                  <text x="40" y="114" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900">q0</text>
+
+                  {/* Accept State q_f */}
+                  <circle cx="280" cy="110" r="18" fill="#0f172a" stroke="#34d399" strokeWidth="3" />
+                  <circle cx="280" cy="110" r="13" fill="none" stroke="#34d399" strokeWidth="2" />
+                  <text x="280" y="114" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900">q_f</text>
+                </svg>
+                <span className="text-[11px] text-slate-400 text-center font-mono">
+                  Feedback loop & bypass arc for zero or more repetitions.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Regular Automaton Preset View */
+        <div className="space-y-6">
+          <div className="w-full bg-slate-950 p-6 rounded-3xl border-2 border-cyan-500/40 shadow-[0_0_30px_rgba(34,211,238,0.15)] space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-cyan-950 border border-cyan-500/50 rounded-xl text-cyan-400">
               <Layers className="w-6 h-6" />
@@ -753,6 +1017,8 @@ export const RegexSimulatorWidget: React.FC = () => {
           </div>
         </div>
       </div>
+        </div>
+      )}
     </div>
   );
 };
