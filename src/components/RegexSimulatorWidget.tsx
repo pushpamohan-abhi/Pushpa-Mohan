@@ -70,25 +70,25 @@ const regexPresets: Record<string, RegexPreset> = {
     stateEliminationSteps: [
       {
         step: 1,
-        title: "Step 1: Atomic Machines for 'a' and 'b'",
+        title: "Step 1: Base atomic machines: N_a (q₁ --a--> q₂), N_b (q₃ --b--> q₄)",
         diagram: "N_a: q1 --'a'--> q2;   N_b: q3 --'b'--> q4",
         equation: "Construct base transition arcs for single symbols 'a' and 'b'"
       },
       {
         step: 2,
-        title: "Step 2: Union Machine (a + b)",
+        title: "Step 2: Union machine: q₀ --ε--> {q₁, q₃} | {q₂, q₄} --ε--> q₅",
         diagram: "q0 --ε--> {q1, q3};  {q2, q4} --ε--> q5",
         equation: "Parallel branching with initial fork state q0 and join state q5"
       },
       {
         step: 3,
-        title: "Step 3: Kleene Star Machine (a + b)*",
+        title: "Step 3: Star Arcs: q₅ --ε--> q₀ (Feedback Loop) | q₆ --ε--> q₇ (Bypass Arc)",
         diagram: "q6 --ε--> {q0, q7};  q5 --ε--> {q0, q7}",
         equation: "Add feedback loop q5 --ε--> q0 and bypass arc q6 --ε--> q7"
       },
       {
         step: 4,
-        title: "Step 4: Concatenation with 'ab'",
+        title: "Step 4: Final Path: q₅ --ε--> q₇ --a--> q₈ --b--> [*q₉] (Accepting State)",
         diagram: "q7 --'a'--> q8 --'b'--> q9*",
         equation: "Complete 10-state Thompson ε-NFA for (a + b)*ab ✅"
       }
@@ -140,25 +140,25 @@ const regexPresets: Record<string, RegexPreset> = {
     stateEliminationSteps: [
       {
         step: 1,
-        title: "DFA Equations (Padma Reddy Method)",
+        title: "Step 1: Base atomic machines & DFA Equations",
         diagram: "A --'0'--> B --(0,1)--> B --'1'--> C*",
         equation: "A = start;  B = A.0 + B.0 + B.1;  C = B.1"
       },
       {
         step: 2,
-        title: "Factor B equation",
+        title: "Step 2: Factor B equation using Arden's Law",
         diagram: "B = A.0 + B.(0 + 1)",
         equation: "Apply Arden's Law: R = Q + RP  ⇒  R = QP*"
       },
       {
         step: 3,
-        title: "Solve for B using Arden's Law",
+        title: "Step 3: Solve for B and substitute into C",
         diagram: "B = A.0.(0 + 1)*",
         equation: "Substitute B into C equation: C = A.0.(0 + 1)*.1"
       },
       {
         step: 4,
-        title: "Final Regular Expression",
+        title: "Step 4: Final Regular Expression",
         diagram: "L = 0(0|1)*1",
         equation: "R = 0(0 + 1)*1  ✅"
       }
@@ -209,25 +209,25 @@ const regexPresets: Record<string, RegexPreset> = {
     stateEliminationSteps: [
       {
         step: 1,
-        title: "2-State Parity Automaton for EVEN Number of 0s",
+        title: "Step 1: 2-State Parity Automaton for EVEN Number of 0s",
         diagram: "q_even* --0--> q_odd --0--> q_even*;  self-loops on 1",
         equation: "q_even = ε + q_even.1 + q_odd.0;  q_odd = q_even.0 + q_odd.1"
       },
       {
         step: 2,
-        title: "Solve for q_odd using Arden's Law",
+        title: "Step 2: Solve for q_odd using Arden's Law",
         diagram: "q_odd = q_even.0 + q_odd.1  ⇒  q_odd = q_even.0.1*",
         equation: "Substitute q_odd into q_even equation"
       },
       {
         step: 3,
-        title: "Substitute q_odd into q_even",
+        title: "Step 3: Substitute q_odd into q_even",
         diagram: "q_even = ε + q_even.1 + (q_even.0.1*).0 = ε + q_even.(1 + 0.1*.0)",
         equation: "q_even = ε + q_even.(1 + 0.1*0)"
       },
       {
         step: 4,
-        title: "Apply Arden's Law for Final RE",
+        title: "Step 4: Apply Arden's Law for Final RE",
         diagram: "R = ε + R.P  ⇒  R = P*",
         equation: "q_even = (1 + 0.1*0)*  ✅"
       }
@@ -279,13 +279,13 @@ const regexPresets: Record<string, RegexPreset> = {
     stateEliminationSteps: [
       {
         step: 1,
-        title: "2-State Parity Automaton for ODD Number of 0s",
+        title: "Step 1: 2-State Parity Automaton for ODD Number of 0s",
         diagram: "q_even --0--> q_odd* --0--> q_even;  self-loops on 1",
         equation: "q_even = start state;  q_odd = q_even.0.1*"
       },
       {
         step: 2,
-        title: "Solve for q_odd using Arden's Law",
+        title: "Step 2: Solve for q_odd using Arden's Law",
         diagram: "q_odd = 1*0 (1 + 01*0)*",
         equation: "RE for Odd 0s = 1*0(1 + 01*0)*  ✅"
       }
